@@ -26,13 +26,13 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T3 | S1, S7, S8, S9 | inline | done | SKILL.md router, reference template, tiers, reduced-motion, motion tokens, tier snippet |
 | T4 | S2 | delegated (parallel unit) | done | foundations: UX, UI patterns, motion, devices — `5708261` |
 | T5 | S5 | delegated (parallel unit) | done | brand intake + emotion-to-style + token template — `d160f94` |
-| T6 | S3, S7 | delegated (parallel unit) | partial | micro-interactions `7967e0d`; cursor/text/page-transitions/ambient in flight |
-| T7 | S3, S7 | delegated (parallel unit) | partial | parallax, scroll-driven, depth `7967e0d`; 2D/WebGL in flight |
+| T6 | S3, S7 | delegated (parallel unit) | done | micro-interactions `7967e0d`; cursor, text, page transitions, ambient `a184c60` |
+| T7 | S3, S7 | delegated (parallel unit) | done | parallax, scroll, depth `7967e0d`; 2D, WebGL, loader `983efe0` |
 | T8 | S3 | delegated (parallel unit) | done | eight styles, 1363 lines — `3523a42` |
-| T9 | S4, S7 | delegated (parallel unit) | partial | buttons, cards, forms, navigation `882b285`; overlays/feedback/selection/carousels/hero/lists in flight |
+| T9 | S4, S7 | delegated (parallel unit) | done | buttons, cards, forms, nav `882b285`; overlays, feedback, selection `cb833df`; carousels, hero, lists `1f259a6` |
 | T10 | S1 | delegated (parallel unit) | done | web frameworks, Flutter, SwiftUI, Compose — `1bd7631` |
 | T11 | S6 | inline | done | library catalog from verified research — `a1bee06` |
-| T12 | S9, S8 | inline | pending | final INDEX, README, opencode-config link, full validation |
+| T12 | S9, S8 | inline | done | INDEX `5055af2`, README `d09cf0d`, skill link + registry refresh, 47 files validate, 14/14 tests |
 
 Route evidence: T4–T10 meet the Writer trigger (a) — independent units with disjoint edit surfaces, each several files and well over 100 lines, launched together after the T3 contract exists. `SKILL.md`, `references/INDEX.md` and the shared contract files are parent-owned.
 
@@ -51,3 +51,7 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L10 (2026-10-22, user correction, verbatim):** "Hermano continua, pero con otros modelos porque ya se me acabaron los creditos". Anthropic credits are exhausted. The four remaining units were relaunched on free providers (`opencode/deepseek-v4.1-flash-free`, `opencode/glm-5.3-flash-free`) with the same prompts, surfaces, and verification commands.
 - **L11:** The parent committed the units that were already complete: `7967e0d` effects (micro-interactions, parallax, scroll-driven, depth + `assets/effects/scroll-driven.css`), `882b285` components (buttons, cards, forms, navigation), `1bd7631` platforms (all four). `assets/effects/webgl-3d.js` stays uncommitted with its incomplete unit T7.
 - **L12:** Remaining work: 6 effect files and 6 component files in flight, then `INDEX.md`, README, the OpenCode skills link, and full validation.
+- **L13 (T6, T7, T9 on free models):** The remaining 12 files landed: effects `a184c60` (cursor, text, page transitions, ambient) and `983efe0` (2D, WebGL, loader), components `cb833df` (overlays, feedback, selection) and `1f259a6` (carousels, hero, lists). All 12 pass the template sections, headers, and link checks. 56 fenced JS blocks across the skill parse with `node --input-type=module --check`.
+- **L14 (T12):** `INDEX.md` regenerated (`5055af2`), validator reports `OK: 47 files checked`, tests 14/14. The skill is symlinked at `~/.config/opencode/skills/kinetic-ui`, OpenCode detects it, and the registry lists 15 skills including it.
+- **L15 (defect found while closing, fixed):** `npm test` ran **zero** tests because npm resolves to the Windows binary, which cannot operate on a WSL UNC path and falls back to `C:\Windows`. A portable `scripts/test.mjs` resolves the files in Node and now runs all 14 tests; the README documents the direct `node` commands. Same class of gotcha as L6.
+- **Next:** full-suite verification is green. Remaining: the user's decision on committing the pending Impeccable files, and pushing this repo (there is no remote yet).
