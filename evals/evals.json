@@ -183,7 +183,7 @@
         },
         {
           "id": "image-dimensions",
-          "text": "Finds the image without intrinsic dimensions or CLS risk",
+          "text": "Finds the image without width/height attributes or CLS risk",
           "check": {
             "type": "regex",
             "pattern": "(width|dimensions|intrinsic size|CLS)"

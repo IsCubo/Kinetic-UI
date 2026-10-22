@@ -17,7 +17,7 @@ review.
 `evals/fixtures/flawed-pricing/index.html` is intentionally broken. Do not copy
 it as a template. It contains an infinite pulse with no reduced-motion variant,
 low-contrast muted text, an icon button with no accessible name, removed focus
-outlines, an image without intrinsic dimensions, `cursor: none`, and a permanent
+outlines, an image without width/height attributes, `cursor: none`, and a permanent
 `will-change`.
 
 ## Quick start
