@@ -233,7 +233,7 @@ T0 behavior, exactly:
 ## Performance budget
 
 - Toast: one `setTimeout` per visible toast, capped at 3. Never poll with `setInterval`; pausing must clear the timer.
-- Skeleton: blocks paint from `background` only, one keyframe per page. Stagger with `--kui-stagger`, capped at ~200 ms total. Empty-state art is inline SVG under ~10 KB or lazy imagery with reserved dimensions.
+- Skeleton: blocks paint from `background` only, one keyframe per page. Stagger with `--kui-stagger`, capped at ~200 ms total. The sweep repeats while loading and stops at T0, when the tab is hidden, and when data arrives. Empty-state art is inline SVG under ~10 KB or lazy imagery with reserved dimensions.
 - Progress: write `scaleX` on a composited layer, batch updates to at most 4 per second, and update ARIA in 10 % steps or coarser.
 - Inline messages: `grid-template-rows` costs layout. Animate one row for one field, never a list of rows. Keep the validation check under ~1 ms per keystroke and debounce async checks (~400 ms).
 

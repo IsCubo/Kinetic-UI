@@ -258,7 +258,7 @@ T0 behavior, exactly. With the gate and tokens above this needs no extra CSS:
 - Paint feedback in the first frame after input. Set the state attribute first; defer heavy work until after the next paint so INP stays ≤200 ms.
 - Animate `transform` (including `scale`, `translate`, `rotate`) and `opacity`. Stated exceptions: `stroke-dashoffset` on a 20px icon, `background-size` on one underline, `background-color` on small controls.
 - Never `transition: all`; never transition `box-shadow` (fade a pseudo-element).
-- Skeletons: stop the shimmer after a few sweeps; many placeholders share one sweep rather than one loop each.
+- Skeletons: the sweep repeats only while loading and stops at T0, when the tab is hidden, and when data arrives; many placeholders share one loop rather than one per block.
 - No permanent `will-change` on lists of buttons.
 
 ## Accessibility
