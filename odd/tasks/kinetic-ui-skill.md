@@ -52,8 +52,8 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T18 | S16 | inline | done | 4 cases / 29 assertions; runner+grader; 30 tests pass; init prepared 8 runs — `ae86d0d` |
 | T19 | S17 | inline | done | `references/workflow/tooling.md`, linked from verify/router/loop; 53 files validated, 30 tests pass — `bec1a57` |
 | T20 | S18 | inline | done | `scripts/eval-isolate.mjs` + per-run input copies; 36 tests pass; docs — `671f675` |
-| T21 | S19 | inline | done | `3d-fallback` widened; regrade 29/29 vs 14/29, baseline unchanged for that assertion |
-| T22 | S20 | inline | done | `blind`/`unblind`, `evals/rubric.md`, 5 tests; suite 41/41 |
+| T21 | S19 | inline | done | `3d-fallback` widened; regrade 29/29 vs 14/29, baseline unchanged for that assertion — `cc21aab` |
+| T22 | S20 | inline | done | `blind`/`unblind`, `evals/rubric.md`, 5 tests; suite 41/41 — `cc21aab` |
 
 Risk: T18–T22 none — maintainer tooling, local skill-copy moves with a manifest and rollback, and documentation; no stored product data, credentials, public API, CLI, or published contract changed.
 
