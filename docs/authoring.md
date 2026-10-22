@@ -102,5 +102,6 @@ Free structure, but keep the header, tables over prose, and link the effect/comp
 ```bash
 npm run index      # regenerate INDEX.md from headers
 npm run validate   # spec, headers, mandatory sections, paths, JS syntax, index freshness
-npm test           # validator test suite
+npm test           # validator and installer test suites
+npm run skill:install -- --agent opencode   # optional: install the skill into an agent
 ```

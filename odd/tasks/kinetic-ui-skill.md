@@ -18,7 +18,8 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 - **S11 Direction.** The skill must decide before building: surface mode, visual world, and motion thesis, and emit a short brief the agent can follow. Acceptance: a workflow reference with inputs, steps, an output template, and anti-generic rules.
 - **S12 Critique.** The skill must evaluate a rendered interface, not code alone, with a scored and evidence-based protocol. Acceptance: a scorecard with anchored dimensions, severity levels, a findings format, and a re-check loop.
 - **S13 Verification.** The skill must prove the result works: functional states, keyboard and screen-reader access, contrast, reduced motion, motion tiers, and performance budgets, each with a how-to-test and a pass criterion. Acceptance: a verification matrix plus a runnable in-browser audit snippet.
-- **S14 Loop.** The four stages must compose into one end-to-end workflow the agent can follow, with the artifacts each stage produces.
+- **S14 Loop.** The four stages must compose into one end-to-end workflow the agent can follow, with the artifacts each stage produces.- **S15 Portable install.** The skill must install on any machine and any skills-compatible agent without a committed symlink or an absolute maintainer path. Acceptance: a cross-platform installer that resolves the target from the current user's home or project, copies by default, supports `--link` for development (junction on Windows), `--force`, `--dry-run`, and a generic `--dest`; tests cover copy, replace, link, dry-run, and target resolution; README documents it.
+
 
 - **Assumptions (not yet confirmed by the user):** A1 the skill content is in English; A2 license Apache-2.0; A3 `metadata.author` is `IsCubo`.
 
@@ -42,6 +43,7 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T14 | S12 | delegated (parallel unit) | done | critique protocol, 10-dimension scorecard — `35b6a7a` |
 | T15 | S13 | delegated (parallel unit) | done | 15-row matrix, DevTools passes, console audit — `2af3a84` |
 | T16 | S11–S14 | inline | done | router, description 242 chars, README, index 73 entries — `4af1ac7` |
+| T17 | S15 | inline | pending | portable installer, tests, README |
 
 Route evidence: T4–T10 meet the Writer trigger (a) — independent units with disjoint edit surfaces, each several files and well over 100 lines, launched together after the T3 contract exists. `SKILL.md`, `references/INDEX.md` and the shared contract files are parent-owned.
 
@@ -68,3 +70,4 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L17 (T13–T16):** The skill now covers the full loop. Direction (`b1f8bf1`) fixes mode, visual world, motion thesis, and constraints in a 14-field brief. Verification (`2af3a84`) adds a 15-row matrix with numeric criteria and `assets/snippets/verify-motion.js`, a dependency-free audit for tiers, loops, reduced motion, autoplay, CLS, and naming. Critique (`35b6a7a`) scores ten dimensions with 0/2/4 anchors and severity by user impact. The router and description now advertise the loop (`4af1ac7`). Validator: `OK: 52 files`; index has 73 entries; tests 14/14.
 - **L18:** Two cross-unit defects were caught at integration: `direction.md` was missing its `## Inputs` heading, and `verify.md` claimed its companion stages did not exist yet. Both fixed before the final commit. The critique unit also reported that the audit snippet is module-only, so it cannot be pasted directly into the DevTools console; the file documents `await import()` instead.
 - **L19:** The validator now enforces the workflow contract too: every file under `references/workflow/` must contain `## When to use` and `## Handoff`. Added the matching test (15 total) and documented the workflow template, the manifest row, and the audit snippet in `docs/authoring.md`.
+- **L20 (2026-10-22, user request, verbatim):** "peor debemos colocar el tema de la symlink para que funcione en cualquier pc o agente, entonces no deberia apuntar a mi maquina, sino a la de la persona que instale la skill, que me recomiendas?". Decision: a symlink is a local development shortcut, not a distribution mechanism. Ship an installer that computes the target from `os.homedir()` or the project, copies by default, and documents `--link` as maintainer-only.

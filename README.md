@@ -16,15 +16,38 @@ Most UI work fails in the same three places: motion that ignores `prefers-reduce
 
 ## Install
 
-Copy or link the skill directory into the skills folder your agent reads.
+The skill is the folder `skills/kinetic-ui/`; it is self-contained and needs no runtime. The repository ships an installer for convenience (Node 18+), but copying the folder by hand works too.
 
 ```bash
-# OpenCode / Claude Code style (user scope)
-ln -s "$PWD/skills/kinetic-ui" ~/.config/opencode/skills/kinetic-ui
-ln -s "$PWD/skills/kinetic-ui" ~/.claude/skills/kinetic-ui
+git clone <repository-url>
+cd kinetic-ui
+
+node scripts/install.mjs --agent opencode   # ~/.config/opencode/skills/kinetic-ui
+node scripts/install.mjs --agent claude     # ~/.claude/skills/kinetic-ui
+node scripts/install.mjs --agent agents     # ~/.agents/skills/kinetic-ui
 ```
 
-Project scope: copy `skills/kinetic-ui` into `<project>/.agents/skills/` or `<project>/.claude/skills/`. The skill is self-contained; the maintainer folders (`scripts/`, `tests/`, `docs/`, `odd/`) are not needed at runtime.
+Project scope and other agents:
+
+```bash
+node scripts/install.mjs --agent opencode --scope project --project ../my-app
+node scripts/install.mjs --agent claude --scope project --project ../my-app
+node scripts/install.mjs --dest /opt/company-skills          # any agent with a skills directory
+```
+
+The installer **copies** by default, so the installed skill keeps working if you move or delete the clone. Add `--link` only if you maintain the skill and want live edits; on Windows it creates a junction, which needs no administrator rights. It refuses to overwrite an existing install unless you pass `--force`, and `--dry-run` prints the target without writing.
+
+Manual install: copy `skills/kinetic-ui/` into the skills folder your agent reads. The maintainer folders (`scripts/`, `tests/`, `docs/`, `odd/`) are not needed at runtime.
+
+OpenCode can also read the clone in place, with no copy and no symlink:
+
+```jsonc
+{
+  "skills": ["~/projects/kinetic-ui/skills"]
+}
+```
+
+`~/` resolves against the home directory of whoever runs OpenCode, so the path is portable and nothing points at the maintainer's machine.
 
 ## Use
 
