@@ -1,7 +1,7 @@
 # kinetic-ui skill
 
 Objective: a universal Agent Skill (agentskills.io format) for distinctive, accessible, device-aware frontend UX/UI with micro-interactions and advanced effects.
-Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo repo, no remote yet; push/PR are the user's decision) · Test runner: `node --test tests/` + `node scripts/validate.mjs skills/kinetic-ui`
+Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo repo, no remote yet; push/PR are the user's decision) · Test runner: `node --test tests/*.test.mjs` + `node scripts/validate.mjs skills/kinetic-ui`
 
 ## Specs
 
@@ -21,8 +21,8 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 
 | ID | Specs | Route | Status | Evidence |
 | --- | --- | --- | --- | --- |
-| T1 | S8, S10 | inline | pending | repo scaffold: README, LICENSE, .gitignore |
-| T2 | S7, S8, S9 | inline | pending | validator + index builder with node:test RED→GREEN |
+| T1 | S8, S10 | inline | done | repo scaffold: README, LICENSE, .gitignore — `0c2aac5` |
+| T2 | S7, S8, S9 | inline | done | validator + index builder: RED 14/14 fail → GREEN 14/14 pass |
 | T3 | S1, S7, S8, S9 | inline | pending | SKILL.md router, reference template, tiers, reduced-motion, motion tokens, tier snippet |
 | T4 | S2 | delegated (parallel unit) | pending | foundations: UX principles, UI patterns, motion principles, devices |
 | T5 | S5 | delegated (parallel unit) | pending | brand intake + emotion-to-style |
@@ -42,4 +42,6 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L2 (2026-10-22, verbatim):** "Pues ya sabes como quiero la agent skill así que hagamosla, si quieres hacerme preguntas o aportar algunas ideas durante este proyecto de construcción de la agent skill eres bienbenido, y apliquemos lo que me mencionaste tambien eso de prefers-reduced-motion y el fallback para moviles de gama baja y el tema de la estructura y demás, ademas dentro de la agent skill coloquemos como si fuera tipo rag ese decir que haya una referencia para que el agente sepa de una donde buscar sin necesidad de buscar en toda la estructura"
 - **L3 (2026-10-22):** The user picked "Repo propio (Recommended)" for the name `kinetic-ui`. Decision: it is a skill (agentskills.io), not a runtime plugin, because only the skill format is portable across agents. The repo layout keeps the installable skill in `skills/kinetic-ui/` and the maintainer tooling (`scripts/`, `tests/`, `odd/`) outside it.
 - **L4:** Library research was delegated (read-only, background) to verify versions, licenses, and Baseline status before T7/T10/T11.
-- **Next:** T1 → T2 → T3 inline, then launch T4–T10 in parallel.
+- **L5:** Research returned (npm/pub.dev registries, web-features 3.43.0, BCD 8.1.7, 2026-10-22). GitHub was unreachable, so repo activity is unverified. Key facts: GSAP 3.15 is free but not OSI-licensed; atropos/vanilla-tilt/lottie-web/flutter_animate are stale (17+ months); deviceMemory and saveData are Chromium-only; postprocessing needs three <0.187; scroll-driven animations are Baseline Limited (Firefox 159 due 2026-10-27).
+- **L6 (T2):** Gotcha — in Node 22, `node --check file.js` silently passes ESM syntax errors. The validator now parses JS via stdin with `--input-type=module --check`. Node 22 also rejects a directory argument in `node --test`; use a glob.
+- **Next:** T3 inline (SKILL.md and core contract), then launch T4–T10 in parallel.
