@@ -72,10 +72,12 @@ skills/kinetic-ui/
 Requires Node 18+ (developed on Node 22).
 
 ```bash
-npm run index      # regenerate INDEX.md from file headers
-npm run validate   # frontmatter, headers, mandatory sections, paths, JS syntax, index freshness
-npm test           # validator test suite
+node scripts/build-index.mjs skills/kinetic-ui   # regenerate INDEX.md from file headers
+node scripts/validate.mjs skills/kinetic-ui      # frontmatter, headers, sections, paths, JS syntax
+node scripts/test.mjs                            # validator test suite
 ```
+
+The `npm run index|validate|test` aliases do the same. Use the plain `node` commands when npm runs from a different platform than the repository (for example Windows npm on a WSL UNC path, which falls back to `C:\Windows`).
 
 Every reference file starts with `> Keywords:` and `> Summary:` lines; the index is generated from them, and validation fails when it is stale.
 

@@ -4,9 +4,11 @@
   "type": "module",
   "description": "Maintainer tooling for the kinetic-ui Agent Skill (no runtime dependencies).",
   "license": "Apache-2.0",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "test": "node --test tests/*.test.mjs",
+    "test": "node scripts/test.mjs",
     "index": "node scripts/build-index.mjs skills/kinetic-ui",
     "validate": "node scripts/validate.mjs skills/kinetic-ui"
   }
