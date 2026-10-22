@@ -173,6 +173,13 @@ dimension. Results go to `review-<reviewer>.json` and to a `human_review` sectio
 in `benchmark.json`. Use two independent reviewers when you will quote the
 result; each fills a separate copy of `scores.json`.
 
+When a reviewer cannot score every dimension, `unblind --preferences FILE` takes
+one winner per case (`A`, `B`, or `tie`) with an optional `basis` of `design`
+(default) or `default` and a `note`. Use `default` when the other answer could
+not be evaluated, for example a `.tsx` that does not open without a build; the
+summary counts those separately so they are not read as design wins. Preferences
+carry no scores, so they say which answer a person preferred, not by how much.
+
 Blinding is imperfect. Answers made with the skill use its vocabulary and vendor
 its snippets, so a reviewer can often tell which is which. `rubric.md` says to
 score the page, not the vocabulary, and to note when you recognized an answer.

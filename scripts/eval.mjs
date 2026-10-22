@@ -38,7 +38,7 @@ Usage:
   node scripts/eval.mjs list
   node scripts/eval.mjs grade [--iteration N] [--workspace DIR]
   node scripts/eval.mjs blind [--iteration N] [--workspace DIR] [--seed N] [--force]
-  node scripts/eval.mjs unblind [--iteration N] [--workspace DIR] [--scores FILE]
+  node scripts/eval.mjs unblind [--iteration N] [--workspace DIR] [--scores FILE | --preferences FILE]
 
 Commands:
   init    Create <workspace>/iteration-N with a skill snapshot, one
@@ -56,6 +56,7 @@ Options:
   --iteration N   Iteration number (default 1).
   --seed N        Make the A/B assignment reproducible (blind only).
   --scores FILE   Scores file (default review/scores.json; unblind only).
+  --preferences FILE  Per-case winner (A, B, or tie) instead of 0-4 scores.
   --workspace DIR Workspace root (default evals/workspace).
   --force         Replace an existing iteration on init.
 `;
@@ -69,7 +70,11 @@ function parseArgs(argv) {
   const opts = { iteration: 1, workspace: DEFAULT_WORKSPACE, force: false };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    if (arg === '--scores') {
+    if (arg === '--preferences') {
+      const value = argv[++i];
+      if (!value || value.startsWith('--')) throw new Error('--preferences requires a value');
+      opts.preferences = path.resolve(value);
+    } else if (arg === '--scores') {
       const value = argv[++i];
       if (!value || value.startsWith('--')) throw new Error('--scores requires a value');
       opts.scores = path.resolve(value);
@@ -469,11 +474,70 @@ function cmdBlind(opts) {
   console.log(`When done: node scripts/eval.mjs unblind --iteration ${opts.iteration} --scores <file>`);
 }
 
+function unblindPreferences(opts, iter, key) {
+  if (!fs.existsSync(opts.preferences)) fail(`no preferences at ${opts.preferences}`);
+  const input = JSON.parse(fs.readFileSync(opts.preferences, 'utf8'));
+  const errors = [];
+  if (typeof input.reviewer !== 'string' || input.reviewer.trim() === '') errors.push('reviewer is empty');
+  const perCase = {};
+  const tally = { with_skill: 0, without_skill: 0, tie: 0, decided_by_default: 0 };
+  for (const [caseId, assignment] of Object.entries(key.cases)) {
+    const entry = input.cases?.[caseId];
+    if (!entry) {
+      errors.push(`missing case ${caseId}`);
+      continue;
+    }
+    if (!['A', 'B', 'tie'].includes(entry.winner)) {
+      errors.push(`${caseId}: winner must be "A", "B", or "tie"`);
+      continue;
+    }
+    const basis = entry.basis ?? 'design';
+    if (!['design', 'default'].includes(basis)) {
+      errors.push(`${caseId}: basis must be "design" or "default"`);
+      continue;
+    }
+    const winner = entry.winner === 'tie' ? 'tie' : assignment[entry.winner];
+    tally[winner] += 1;
+    if (basis === 'default') tally.decided_by_default += 1;
+    perCase[caseId] = { winner, basis, note: entry.note ?? '' };
+  }
+  for (const caseId of Object.keys(input.cases ?? {})) {
+    if (!key.cases[caseId]) errors.push(`unknown case ${caseId}`);
+  }
+  if (errors.length > 0) fail(`preferences are not valid:\n- ${errors.join('\n- ')}`);
+
+  const result = { reviewer: input.reviewer.trim(), mode: 'preference', per_case: perCase, summary: tally };
+  const slug = result.reviewer.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'reviewer';
+  fs.writeFileSync(path.join(iter, `review-${slug}.json`), `${JSON.stringify(result, null, 2)}\n`);
+  const benchmarkFile = path.join(iter, 'benchmark.json');
+  if (fs.existsSync(benchmarkFile)) {
+    const benchmark = JSON.parse(fs.readFileSync(benchmarkFile, 'utf8'));
+    benchmark.human_review = {
+      ...(benchmark.human_review ?? {}),
+      [result.reviewer]: { mode: 'preference', per_case: perCase, summary: tally },
+    };
+    fs.writeFileSync(benchmarkFile, `${JSON.stringify(benchmark, null, 2)}\n`);
+  }
+  const width = Math.max(4, ...Object.keys(perCase).map((id) => id.length));
+  console.log(`Reviewer: ${result.reviewer} (preference per case)`);
+  console.log('');
+  for (const [caseId, entry] of Object.entries(perCase)) {
+    const flag = entry.basis === 'default' ? '  [by default, not on design]' : '';
+    console.log(`${caseId.padEnd(width)}  ${entry.winner}${flag}`);
+  }
+  console.log('');
+  console.log(
+    `with_skill ${tally.with_skill}  without_skill ${tally.without_skill}  tie ${tally.tie}  (decided by default: ${tally.decided_by_default})`,
+  );
+  console.log(`Wrote review-${slug}.json${fs.existsSync(benchmarkFile) ? ' and benchmark.json human_review' : ''}`);
+}
+
 function cmdUnblind(opts) {
   const iter = iterationDir(opts);
   const keyFile = path.join(iter, 'blind-key.json');
   if (!fs.existsSync(keyFile)) fail(`no blind key at ${keyFile}\nRun blind first.`);
   const key = JSON.parse(fs.readFileSync(keyFile, 'utf8'));
+  if (opts.preferences) return unblindPreferences(opts, iter, key);
   const scoresFile = opts.scores ?? path.join(iter, 'review', 'scores.json');
   if (!fs.existsSync(scoresFile)) fail(`no scores at ${scoresFile}`);
   const scores = JSON.parse(fs.readFileSync(scoresFile, 'utf8'));

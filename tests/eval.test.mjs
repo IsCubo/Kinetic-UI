@@ -248,3 +248,49 @@ test('eval rubric: documents every dimension the scorer accepts', () => {
   const rubric = fs.readFileSync(path.join(ROOT, 'evals', 'rubric.md'), 'utf8');
   for (const dimension of DIMENSIONS) assert.match(rubric, new RegExp(`\`${dimension}\``));
 });
+
+test('eval unblind --preferences: maps winners to variants and flags default wins', () => {
+  withTemp((base) => {
+    const iter = seedRuns(base);
+    assert.equal(run('blind', '--workspace', base, '--iteration', '1', '--seed', '3').code, 0);
+    const key = JSON.parse(fs.readFileSync(path.join(iter, 'blind-key.json'), 'utf8'));
+    const file = path.join(base, 'prefs.json');
+    fs.writeFileSync(
+      file,
+      JSON.stringify({
+        reviewer: 'Pref Reviewer',
+        cases: { 'vague-landing': { winner: 'A', basis: 'default', note: 'B did not render' } },
+      }),
+    );
+    const result = run('unblind', '--workspace', base, '--iteration', '1', '--preferences', file);
+    assert.equal(result.code, 0, result.out);
+    const review = JSON.parse(fs.readFileSync(path.join(iter, 'review-pref-reviewer.json'), 'utf8'));
+    assert.equal(review.per_case['vague-landing'].winner, key.cases['vague-landing'].A);
+    assert.equal(review.summary.decided_by_default, 1);
+    assert.equal(review.summary[key.cases['vague-landing'].A], 1);
+  });
+});
+
+test('eval unblind --preferences: rejects a bad winner, a bad basis, an unknown case, and no reviewer', () => {
+  withTemp((base) => {
+    seedRuns(base);
+    assert.equal(run('blind', '--workspace', base, '--iteration', '1', '--seed', '3').code, 0);
+    const file = path.join(base, 'prefs.json');
+    fs.writeFileSync(
+      file,
+      JSON.stringify({ reviewer: '', cases: { 'vague-landing': { winner: 'C' }, nope: { winner: 'A' } } }),
+    );
+    const result = run('unblind', '--workspace', base, '--iteration', '1', '--preferences', file);
+    assert.equal(result.code, 1);
+    assert.match(result.out, /reviewer is empty/);
+    assert.match(result.out, /winner must be/);
+    assert.match(result.out, /unknown case nope/);
+    fs.writeFileSync(
+      file,
+      JSON.stringify({ reviewer: 'x', cases: { 'vague-landing': { winner: 'A', basis: 'vibes' } } }),
+    );
+    const basis = run('unblind', '--workspace', base, '--iteration', '1', '--preferences', file);
+    assert.equal(basis.code, 1);
+    assert.match(basis.out, /basis must be/);
+  });
+});

@@ -54,8 +54,9 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T20 | S18 | inline | done | `scripts/eval-isolate.mjs` + per-run input copies; 36 tests pass; docs — `671f675` |
 | T21 | S19 | inline | done | `3d-fallback` widened; regrade 29/29 vs 14/29, baseline unchanged for that assertion — `cc21aab` |
 | T22 | S20 | inline | done | `blind`/`unblind`, `evals/rubric.md`, 5 tests; suite 41/41 — `cc21aab` |
+| T23 | S20 | inline | done | `unblind --preferences` (winner per case, `basis` design/default), 2 tests; suite 43/43 |
 
-Risk: T18–T22 none — maintainer tooling, local skill-copy moves with a manifest and rollback, and documentation; no stored product data, credentials, public API, CLI, or published contract changed.
+Risk: T18–T23 none — maintainer tooling, local skill-copy moves with a manifest and rollback, and documentation; no stored product data, credentials, public API, CLI, or published contract changed.
 
 Route evidence: T4–T10 meet the Writer trigger (a) — independent units with disjoint edit surfaces, each several files and well over 100 lines, launched together after the T3 contract exists. `SKILL.md`, `references/INDEX.md` and the shared contract files are parent-owned.
 
@@ -91,3 +92,4 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L26 (2026-10-22, user request, verbatim):** "si hagale". Authorized: implement local baseline isolation first — hide/restore with a manifest, symlink-safe, plus per-run input copies — and document the strict container/profile level for causal claims.
 - **L27:** Baseline isolation: `scripts/eval-isolate.mjs status|hide|restore` moves every known installed copy to `.kinetic-ui.disabled`, writes a recoverable manifest under `evals/workspace/`, preserves symlinks and rolls back a partial hide. `scripts/lib/agents.mjs` now holds the shared target map for installer and isolation. Each run copies its inputs to `inputs/` and the prompt is rewritten to that path, so no `RUN.md` points at the repository. Suite 36/36; real `status` detects the live symlink and `hide --dry-run` plans one move.
 - **L28 (2026-10-22, user request, verbatim):** "hagale". Authorized: fix the `3d-fallback` assertion, then build the blind quality lane. Iteration 1 (8 runs, `claude-sonnet-5` medium, skill hidden via `eval-isolate`) first scored 28/29 vs 14/29; after the post hoc `3d-fallback` fix 29/29 vs 14/29. The vocabulary assertions inflate the delta, which is why the blind lane exists.
+- **L29 (2026-10-22, user, blind review of iteration 1):** "en low-end gana la A, en operate-dashboard gana la a, porque la b esta en tsx y no pude verla, en vague landing sin duda la A", then "la A" for flawed-pricing-critique. Unblinded with `--preferences`: with_skill won vague-landing and low-end-3d on design, operate-dashboard only by default (B was an unrenderable `.tsx`), and without_skill won flawed-pricing-critique. Single reviewer, n=4: not a quotable result. Follow-up: `RUN.md` should require output that opens as-is in a browser, and the critique case needs a second look because the assertion lane (9/9 vs 7/9) and the human preference disagree.
