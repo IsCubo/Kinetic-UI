@@ -117,6 +117,22 @@ test('required-sections: effect without "## Low-end fallback" fails', () => {
   assert.match(out, /## Low-end fallback/);
 });
 
+test('required-sections: workflow file without "## Handoff" fails', () => {
+  const out = expectError('required-sections', (f) => {
+    f['references/workflow/loop.md'] = `# Loop
+
+> Keywords: loop, workflow
+> Summary: The four-stage build loop.
+
+## When to use
+
+Every interface.
+`;
+  });
+  assert.match(out, /references\/workflow\/loop\.md/);
+  assert.match(out, /## Handoff/);
+});
+
 test('header: reference file without a Keywords line fails', () => {
   expectError('header', (f) => { f['references/effects/parallax.md'] = PARALLAX_MD.replace(/> Keywords: .*\n/, ''); });
 });

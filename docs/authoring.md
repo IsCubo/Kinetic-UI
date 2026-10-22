@@ -56,6 +56,16 @@ Sections in this order. The two marked sections are mandatory and validated.
 ## Pitfalls
 ```
 
+### Workflow (`references/workflow/`)
+
+```markdown
+## When to use             <- the moment this stage runs, and what it refuses
+## ...                     <- stage-specific steps, matrix, or scorecard
+## Handoff                 <- MANDATORY: what the next stage receives, with paths
+```
+
+The two marked sections are mandatory for every workflow file and validated.
+
 ### Foundations, brand, platforms
 
 Free structure, but keep the header, tables over prose, and link the effect/component files they inform.
@@ -73,7 +83,7 @@ Free structure, but keep the header, tables over prose, and link the effect/comp
 | Accessibility | `references/foundations/accessibility-motion.md`: reduced motion keeps fades ≤200ms and removes travel; no more than 3 flashes per second; pause for motion over 5 s |
 | Animated properties | `transform` and `opacity` by default; anything else must state its cost |
 
-## Planned file manifest
+## File manifest
 
 | Folder | Files |
 | --- | --- |
@@ -83,8 +93,9 @@ Free structure, but keep the header, tables over prose, and link the effect/comp
 | `references/styles/` | `cyberpunk.md`, `glassmorphism.md`, `neo-brutalism.md`, `editorial.md`, `minimal-luxury.md`, `retro-futurism.md`, `organic-soft.md`, `playful-3d.md` |
 | `references/components/` | `buttons.md`, `inputs-forms.md`, `cards.md`, `navigation.md`, `overlays.md`, `feedback.md`, `selection-controls.md`, `carousels-galleries.md`, `hero-sections.md`, `lists-collections.md` |
 | `references/platforms/` | `web-frameworks.md`, `flutter.md`, `swiftui.md`, `jetpack-compose.md` |
+| `references/workflow/` | `loop.md`, `direction.md`, `verify.md`, `critique.md` |
 | `references/` | `libraries.md` |
-| `assets/` | `tokens/motion.css`, `snippets/motion-tier.js`; effect-specific assets go in `assets/effects/<effect-name>.{css,js}` |
+| `assets/` | `tokens/motion.css`, `snippets/motion-tier.js`, `snippets/verify-motion.js`; effect-specific assets go in `assets/effects/<effect-name>.{css,js}` |
 
 ## Workflow
 

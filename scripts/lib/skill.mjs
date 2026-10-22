@@ -19,6 +19,7 @@ export const REQUIRED_SECTIONS = {
   'references/effects/': ['## Reduced motion', '## Low-end fallback'],
   'references/components/': ['## Reduced motion', '## Low-end fallback'],
   'references/styles/': ['## Reduced motion', '## Low-end fallback'],
+  'references/workflow/': ['## When to use', '## Handoff'],
 };
 
 const INDEXED_ROOTS = ['references', 'assets'];
