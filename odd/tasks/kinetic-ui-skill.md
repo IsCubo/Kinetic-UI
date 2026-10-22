@@ -15,6 +15,11 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 - **S8 Structure.** "y el tema de la estructura y demás". Acceptance: the proposed structure — short `SKILL.md` router, `references/`, `assets/`, a fixed reference template, and a validator.
 - **S9 RAG-like index.** "dentro de la agent skill coloquemos como si fuera tipo rag ese decir que haya una referencia para que el agente sepa de una donde buscar sin necesidad de buscar en toda la estructura". Acceptance: an intent routing table in `SKILL.md` plus `references/INDEX.md`, a keyword catalog generated from each file's `Keywords` line. The validator fails when the index is stale or a path is missing.
 - **S10 Location.** The user chose "Repo propio (Recommended)" with the proposed name `kinetic-ui` at `~/projects/kinetic-ui`.
+- **S11 Direction.** The skill must decide before building: surface mode, visual world, and motion thesis, and emit a short brief the agent can follow. Acceptance: a workflow reference with inputs, steps, an output template, and anti-generic rules.
+- **S12 Critique.** The skill must evaluate a rendered interface, not code alone, with a scored and evidence-based protocol. Acceptance: a scorecard with anchored dimensions, severity levels, a findings format, and a re-check loop.
+- **S13 Verification.** The skill must prove the result works: functional states, keyboard and screen-reader access, contrast, reduced motion, motion tiers, and performance budgets, each with a how-to-test and a pass criterion. Acceptance: a verification matrix plus a runnable in-browser audit snippet.
+- **S14 Loop.** The four stages must compose into one end-to-end workflow the agent can follow, with the artifacts each stage produces.
+
 - **Assumptions (not yet confirmed by the user):** A1 the skill content is in English; A2 license Apache-2.0; A3 `metadata.author` is `IsCubo`.
 
 ## Tasks
@@ -33,6 +38,10 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T10 | S1 | delegated (parallel unit) | done | web frameworks, Flutter, SwiftUI, Compose — `1bd7631` |
 | T11 | S6 | inline | done | library catalog from verified research — `a1bee06` |
 | T12 | S9, S8 | inline | done | INDEX `5055af2`, README `d09cf0d`, skill link + registry refresh, 47 files validate, 14/14 tests |
+| T13 | S11, S14 | delegated (parallel unit) | pending | direction + workflow loop |
+| T14 | S12 | delegated (parallel unit) | pending | critique protocol and scorecard |
+| T15 | S13 | delegated (parallel unit) | pending | verification matrix + console audit snippet |
+| T16 | S11–S14 | inline | pending | router, description, README, index, full validation |
 
 Route evidence: T4–T10 meet the Writer trigger (a) — independent units with disjoint edit surfaces, each several files and well over 100 lines, launched together after the T3 contract exists. `SKILL.md`, `references/INDEX.md` and the shared contract files are parent-owned.
 
@@ -55,3 +64,4 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L14 (T12):** `INDEX.md` regenerated (`5055af2`), validator reports `OK: 47 files checked`, tests 14/14. The skill is symlinked at `~/.config/opencode/skills/kinetic-ui`, OpenCode detects it, and the registry lists 15 skills including it.
 - **L15 (defect found while closing, fixed):** `npm test` ran **zero** tests because npm resolves to the Windows binary, which cannot operate on a WSL UNC path and falls back to `C:\Windows`. A portable `scripts/test.mjs` resolves the files in Node and now runs all 14 tests; the README documents the direct `node` commands. Same class of gotcha as L6.
 - **Next:** full-suite verification is green. Remaining: the user's decision on committing the pending Impeccable files, and pushing this repo (there is no remote yet).
+- **L16 (2026-10-22, user request, verbatim):** "Entonces hagamos kinetic-ui más especial, con verificación, critico, y que al mismo tiempo nos de las herramientas de como hacerlo entonces así será completa te dice que hacer, si está bien y si quieres implementarlo tengas las herramientas de como hacerlo". Scope: add direction (what to do), critique (is it good), and verification (prove it works) on top of the existing implementation library, so the skill covers the full loop.
