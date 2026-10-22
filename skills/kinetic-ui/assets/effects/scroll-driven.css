@@ -1,0 +1,81 @@
+/* Keywords: scroll-driven animation, animation-timeline, view(), scroll(), animation-range, reveal on scroll, scroll progress bar, reading progress, css utilities, intersectionobserver fallback */
+/* Summary: Reveal-on-scroll and reading-progress utilities driven by CSS scroll timelines where supported, plus the styles used by the IntersectionObserver reveal fallback. */
+
+/*
+ * Requires assets/tokens/motion.css; assets/snippets/motion-tier.js sets data-motion-tier for T0.
+ * Markup:
+ *   <div class="kui-scroll-progress" aria-hidden="true"></div>   reading progress fixed to the top edge
+ *   <section class="kui-reveal">…</section>                      fades and rises while entering the viewport
+ *   <section class="kui-reveal kui-reveal--fade">…</section>     opacity only, for dense layouts
+ * Tune one reveal inline: style="--kui-reveal-range: entry 0% entry 100%".
+ * Unsupported browsers, reduced motion, and T0 render the final state. Browsers without scroll timelines
+ * may run the IntersectionObserver fallback in references/effects/scroll-driven.md, which toggles
+ * data-kui-reveal="pending|shown" (styled at the end of this file).
+ * Scroll-timeline durations are proportional: 1ms fills the whole range. Declare animation-timeline
+ * after the animation shorthand, which resets it.
+ */
+
+.kui-scroll-progress {
+  display: none; /* nothing to report without a scroll timeline */
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10;
+  block-size: 0.25rem;
+  background: var(--brand-accent, currentColor);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+.kui-scroll-progress:dir(rtl) { transform-origin: 100% 50%; }
+
+@media (forced-colors: active) {
+  .kui-scroll-progress { forced-color-adjust: none; background: Highlight; }
+}
+
+@supports (animation-timeline: view()) {
+  /* Progress indicator: kept at T0 because it reports position and moves no content. */
+  .kui-scroll-progress {
+    display: block;
+    animation: kui-scroll-progress 1ms linear both;
+    animation-timeline: scroll(root block);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion-tier="0"]) .kui-reveal {
+      animation: kui-reveal 1ms linear both;
+      animation-timeline: view();
+      animation-range: var(--kui-reveal-range, entry 10% cover 35%);
+    }
+    :root:not([data-motion-tier="0"]) .kui-reveal--fade { animation-name: kui-reveal-fade; }
+  }
+}
+
+@keyframes kui-scroll-progress {
+  to { transform: scaleX(1); }
+}
+
+@keyframes kui-reveal {
+  from { opacity: 0; transform: translateY(var(--kui-distance-lg)); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes kui-reveal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* IntersectionObserver fallback (no scroll timelines). Content stays visible unless JS marks it pending. */
+@supports not (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    :root:not([data-motion-tier="0"]) [data-kui-reveal] {
+      transition:
+        opacity var(--kui-duration-lg) var(--kui-ease-enter),
+        transform var(--kui-duration-lg) var(--kui-ease-enter);
+    }
+    :root:not([data-motion-tier="0"]) [data-kui-reveal="pending"] {
+      opacity: 0;
+      transform: translateY(var(--kui-distance-lg));
+    }
+    :root:not([data-motion-tier="0"]) .kui-reveal--fade[data-kui-reveal="pending"] { transform: none; }
+  }
+}
