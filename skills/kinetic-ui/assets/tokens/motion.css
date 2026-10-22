@@ -1,0 +1,93 @@
+/* Keywords: motion tokens, css variables, duration, easing, spring, stagger, distance, reduced motion, tier utilities */
+/* Summary: Motion design tokens (durations, easings, distances) that collapse automatically under reduced motion and T0, plus tier visibility utilities. */
+
+/*
+ * Rule of use: express movement through these tokens, e.g.
+ *   transform: translateY(var(--kui-distance-md));
+ *   transition: transform var(--kui-duration-md) var(--kui-ease-enter), opacity var(--kui-duration-md) var(--kui-ease-standard);
+ * Under reduced motion (or data-motion-tier="0") distances and scales become neutral, so components keep
+ * their opacity/color feedback but stop moving, with no per-component code.
+ */
+
+:root {
+  /* Durations: pick by distance travelled and element size, not by taste. */
+  --kui-duration-xs: 100ms; /* press, toggle, hover tint */
+  --kui-duration-sm: 150ms; /* small state changes, tooltips */
+  --kui-duration-md: 250ms; /* component enter/exit, menus */
+  --kui-duration-lg: 400ms; /* overlays, sheets, large surfaces */
+  --kui-duration-xl: 600ms; /* hero choreography, page transitions (upper bound) */
+  --kui-stagger: 40ms;      /* delay between items in a sequence; cap total stagger at ~300ms */
+
+  /* Easings */
+  --kui-ease-standard: cubic-bezier(0.2, 0, 0, 1);       /* on-screen moves */
+  --kui-ease-enter: cubic-bezier(0.05, 0.7, 0.1, 1);     /* decelerate: elements arriving */
+  --kui-ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);      /* accelerate: elements leaving */
+  --kui-ease-linear: linear;                             /* scroll-linked and looping motion */
+  /* Spring-like overshoot (~16%). Playful brands only; use sparingly. */
+  --kui-ease-spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1.004 83.8%, 1);
+
+  /* Distances and scales */
+  --kui-distance-sm: 4px;
+  --kui-distance-md: 12px;
+  --kui-distance-lg: 32px;
+  --kui-scale-press: 0.97;
+  --kui-scale-pop: 1.04;
+  --kui-parallax-strength: 1; /* multiplier consumed by parallax/depth effects */
+}
+
+/* Browsers without linear(): fall back to the standard curve. */
+@supports not (transition-timing-function: linear(0, 1)) {
+  :root { --kui-ease-spring: var(--kui-ease-standard); }
+}
+
+/* Reduced motion and T0: keep fades and color feedback, remove travel, scale, and parallax. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --kui-distance-sm: 0px;
+    --kui-distance-md: 0px;
+    --kui-distance-lg: 0px;
+    --kui-scale-press: 1;
+    --kui-scale-pop: 1;
+    --kui-parallax-strength: 0;
+    --kui-stagger: 0ms;
+    --kui-duration-lg: 200ms;
+    --kui-duration-xl: 200ms;
+  }
+  html { scroll-behavior: auto; }
+}
+
+:root[data-motion-tier="0"] {
+  --kui-distance-sm: 0px;
+  --kui-distance-md: 0px;
+  --kui-distance-lg: 0px;
+  --kui-scale-press: 1;
+  --kui-scale-pop: 1;
+  --kui-parallax-strength: 0;
+  --kui-stagger: 0ms;
+  --kui-duration-lg: 200ms;
+  --kui-duration-xl: 200ms;
+}
+
+/* T1 (essential): lighter parallax, no long choreography. */
+:root[data-motion-tier="1"] {
+  --kui-parallax-strength: 0.4;
+  --kui-stagger: 20ms;
+}
+
+/*
+ * Tier visibility utilities.
+ *   data-kui-min-tier="N": render only when the current tier >= N (enhanced layers: canvas, video, 3D mount).
+ *   data-kui-max-tier="N": render only when the current tier <= N (static posters and fallbacks).
+ * Before JS sets data-motion-tier, min-tier 2/3 content stays hidden, so first paint is the safe tier.
+ */
+[data-kui-min-tier="1"],
+[data-kui-min-tier="2"],
+[data-kui-min-tier="3"] { display: none; }
+
+:root:is([data-motion-tier="1"], [data-motion-tier="2"], [data-motion-tier="3"]) [data-kui-min-tier="1"],
+:root:is([data-motion-tier="2"], [data-motion-tier="3"]) [data-kui-min-tier="2"],
+:root[data-motion-tier="3"] [data-kui-min-tier="3"] { display: revert; }
+
+:root[data-motion-tier="1"] [data-kui-max-tier="0"],
+:root[data-motion-tier="2"] :is([data-kui-max-tier="0"], [data-kui-max-tier="1"]),
+:root[data-motion-tier="3"] :is([data-kui-max-tier="0"], [data-kui-max-tier="1"], [data-kui-max-tier="2"]) { display: none; }

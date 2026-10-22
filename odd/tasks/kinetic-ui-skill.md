@@ -23,7 +23,7 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | --- | --- | --- | --- | --- |
 | T1 | S8, S10 | inline | done | repo scaffold: README, LICENSE, .gitignore — `0c2aac5` |
 | T2 | S7, S8, S9 | inline | done | validator + index builder: RED 14/14 fail → GREEN 14/14 pass |
-| T3 | S1, S7, S8, S9 | inline | pending | SKILL.md router, reference template, tiers, reduced-motion, motion tokens, tier snippet |
+| T3 | S1, S7, S8, S9 | inline | done | SKILL.md router, reference template, tiers, reduced-motion, motion tokens, tier snippet |
 | T4 | S2 | delegated (parallel unit) | pending | foundations: UX principles, UI patterns, motion principles, devices |
 | T5 | S5 | delegated (parallel unit) | pending | brand intake + emotion-to-style |
 | T6 | S3, S7 | delegated (parallel unit) | pending | effects A: micro-interactions, cursor, text, page transitions |
@@ -44,4 +44,5 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L4:** Library research was delegated (read-only, background) to verify versions, licenses, and Baseline status before T7/T10/T11.
 - **L5:** Research returned (npm/pub.dev registries, web-features 3.43.0, BCD 8.1.7, 2026-10-22). GitHub was unreachable, so repo activity is unverified. Key facts: GSAP 3.15 is free but not OSI-licensed; atropos/vanilla-tilt/lottie-web/flutter_animate are stale (17+ months); deviceMemory and saveData are Chromium-only; postprocessing needs three <0.187; scroll-driven animations are Baseline Limited (Firefox 159 due 2026-10-27).
 - **L6 (T2):** Gotcha — in Node 22, `node --check file.js` silently passes ESM syntax errors. The validator now parses JS via stdin with `--input-type=module --check`. Node 22 also rejects a directory argument in `node --test`; use a glob.
-- **Next:** T3 inline (SKILL.md and core contract), then launch T4–T10 in parallel.
+- **L7 (T3):** The contract has landed: SKILL.md (~818 tokens, description 216 chars), performance-tiers, accessibility-motion, motion.css, motion-tier.js, and docs/authoring.md (template, invariants, manifest). The validator passes everything except 17 `links` errors that point to planned files; T4–T10 must clear them. The assess for f6e2a4a returned medium/under_budget, so it stays pending in the slice.
+- **Next:** launch T4–T10 as parallel writers. They read docs/authoring.md and the T3 contract files and write only their own surfaces.
