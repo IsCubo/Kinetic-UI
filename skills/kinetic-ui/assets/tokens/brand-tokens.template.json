@@ -1,0 +1,61 @@
+{
+  "$keywords": "brand tokens, design tokens, DTCG, token template, brand primary, on-primary, accent, surface, on-surface, muted, brand font, display font, body font, radius, oklch, tokens de marca",
+  "$summary": "Design Tokens Community Group template for the nine shared brand tokens; copy it into the project and fill it during brand intake or after a confirmed no-brand proposal.",
+  "brand": {
+    "$description": "Shared brand tokens. The token path maps to a CSS custom property: brand.primary becomes --brand-primary. Copy this file into the project; never edit the skill's template. Every placeholder color is the same gray, so an unfilled token fails every contrast check. When you fill a value, set $extensions.kinetic-ui.origin to given, derived, assumed, or proposed.",
+    "primary": {
+      "$type": "color",
+      "$value": { "colorSpace": "oklch", "components": [0.6, 0, 0], "hex": "#808080" },
+      "$description": "CSS variable --brand-primary. Main brand color for primary actions and key highlights. Keep the exact given value; derived steps never replace it.",
+      "$extensions": { "kinetic-ui": { "origin": "placeholder" } }
+    },
+    "on-primary": {
+      "$type": "color",
+      "$value": { "colorSpace": "oklch", "components": [0.6, 0, 0], "hex": "#808080" },
+      "$description": "CSS variable --brand-on-primary. Text and icons placed on --brand-primary; must reach 4.5:1 against it.",
+      "$extensions": { "kinetic-ui": { "origin": "placeholder" } }
+    },
+    "accent": {
+      "$type": "color",
+      "$value": { "colorSpace": "oklch", "components": [0.6, 0, 0], "hex": "#808080" },
+      "$description": "CSS variable --brand-accent. One secondary color for highlights, focus, and signature effects; 3:1 on --brand-surface for graphics, 4.5:1 when it carries text.",
+      "$extensions": { "kinetic-ui": { "origin": "placeholder" } }
+    },
+    "surface": {
+      "$type": "color",
+      "$value": { "colorSpace": "oklch", "components": [0.6, 0, 0], "hex": "#808080" },
+      "$description": "CSS variable --brand-surface. Page and container background.",
+      "$extensions": { "kinetic-ui": { "origin": "placeholder" } }
+    },
+    "on-surface": {
+      "$type": "color",
+      "$value": { "colorSpace": "oklch", "components": [0.6, 0, 0], "hex": "#808080" },
+      "$description": "CSS variable --brand-on-surface. Main text and icon color on --brand-surface; must reach 4.5:1 (aim for 7:1 for long reading).",
+      "$extensions": { "kinetic-ui": { "origin": "placeholder" } }
+    },
+    "muted": {
+      "$type": "color",
+      "$value": { "colorSpace": "oklch", "components": [0.6, 0, 0], "hex": "#808080" },
+      "$description": "CSS variable --brand-muted. Low-emphasis color for secondary text, captions, and dividers on --brand-surface; 4.5:1 when it carries text.",
+      "$extensions": { "kinetic-ui": { "origin": "placeholder" } }
+    },
+    "font-display": {
+      "$type": "fontFamily",
+      "$value": ["<display family>", "system-ui", "sans-serif"],
+      "$description": "CSS variable --brand-font-display. Headline family first, then a metric-close fallback and a generic family. Verify the web license.",
+      "$extensions": { "kinetic-ui": { "origin": "placeholder" } }
+    },
+    "font-body": {
+      "$type": "fontFamily",
+      "$value": ["<body family>", "system-ui", "sans-serif"],
+      "$description": "CSS variable --brand-font-body. Body and UI family; may equal the display family. Verify the web license and language coverage.",
+      "$extensions": { "kinetic-ui": { "origin": "placeholder" } }
+    },
+    "radius": {
+      "$type": "dimension",
+      "$value": { "value": 0, "unit": "px" },
+      "$description": "CSS variable --brand-radius. Corner radius of interactive components (buttons, inputs, cards). Placeholder 0px; take the value from the brand design system or the chosen style.",
+      "$extensions": { "kinetic-ui": { "origin": "placeholder" } }
+    }
+  }
+}

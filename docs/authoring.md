@@ -68,7 +68,8 @@ Free structure, but keep the header, tables over prose, and link the effect/comp
 | Tier attribute | `<html data-motion-tier="0..3">`, set by `assets/snippets/motion-tier.js` (`applyMotionTier`, `watchFrameRate`, event `kui:motiontierchange`) |
 | Tier utilities | `data-kui-min-tier="N"` / `data-kui-max-tier="N"` from `assets/tokens/motion.css` |
 | Motion tokens | `--kui-duration-{xs,sm,md,lg,xl}`, `--kui-ease-{standard,enter,exit,linear,spring}`, `--kui-distance-{sm,md,lg}`, `--kui-scale-{press,pop}`, `--kui-stagger`, `--kui-parallax-strength` from `assets/tokens/motion.css` |
-| Brand tokens | `--brand-primary`, `--brand-on-primary`, `--brand-accent`, `--brand-surface`, `--brand-on-surface`, `--brand-muted`, `--brand-font-display`, `--brand-font-body`, `--brand-radius` |
+| Brand tokens | `--brand-primary`, `--brand-on-primary`, `--brand-accent`, `--brand-surface`, `--brand-on-surface`, `--brand-muted`, `--brand-font-display`, `--brand-font-body`, `--brand-radius`. Derived tint/shade scales are project-local suffixes (`--brand-primary-50` … `--brand-primary-950`, see `references/brand/brand-intake.md`); the nine tokens stay the shared API |
+| Motion personalities | Calm, Precise, Energetic, Playful, Luxurious, defined in `references/foundations/motion-principles.md`. Overrides load after `assets/tokens/motion.css` inside `@media (prefers-reduced-motion: no-preference)` so they never cancel the reduced-motion collapse |
 | Accessibility | `references/foundations/accessibility-motion.md`: reduced motion keeps fades ≤200ms and removes travel; no more than 3 flashes per second; pause for motion over 5 s |
 | Animated properties | `transform` and `opacity` by default; anything else must state its cost |
 
