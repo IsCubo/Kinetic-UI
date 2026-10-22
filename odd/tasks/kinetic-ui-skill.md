@@ -38,10 +38,10 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T10 | S1 | delegated (parallel unit) | done | web frameworks, Flutter, SwiftUI, Compose — `1bd7631` |
 | T11 | S6 | inline | done | library catalog from verified research — `a1bee06` |
 | T12 | S9, S8 | inline | done | INDEX `5055af2`, README `d09cf0d`, skill link + registry refresh, 47 files validate, 14/14 tests |
-| T13 | S11, S14 | delegated (parallel unit) | pending | direction + workflow loop |
-| T14 | S12 | delegated (parallel unit) | pending | critique protocol and scorecard |
-| T15 | S13 | delegated (parallel unit) | pending | verification matrix + console audit snippet |
-| T16 | S11–S14 | inline | pending | router, description, README, index, full validation |
+| T13 | S11, S14 | delegated (parallel unit) | done | direction + loop — `b1f8bf1` |
+| T14 | S12 | delegated (parallel unit) | done | critique protocol, 10-dimension scorecard — `35b6a7a` |
+| T15 | S13 | delegated (parallel unit) | done | 15-row matrix, DevTools passes, console audit — `2af3a84` |
+| T16 | S11–S14 | inline | done | router, description 242 chars, README, index 73 entries — `4af1ac7` |
 
 Route evidence: T4–T10 meet the Writer trigger (a) — independent units with disjoint edit surfaces, each several files and well over 100 lines, launched together after the T3 contract exists. `SKILL.md`, `references/INDEX.md` and the shared contract files are parent-owned.
 
@@ -65,3 +65,5 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L15 (defect found while closing, fixed):** `npm test` ran **zero** tests because npm resolves to the Windows binary, which cannot operate on a WSL UNC path and falls back to `C:\Windows`. A portable `scripts/test.mjs` resolves the files in Node and now runs all 14 tests; the README documents the direct `node` commands. Same class of gotcha as L6.
 - **Next:** full-suite verification is green. Remaining: the user's decision on committing the pending Impeccable files, and pushing this repo (there is no remote yet).
 - **L16 (2026-10-22, user request, verbatim):** "Entonces hagamos kinetic-ui más especial, con verificación, critico, y que al mismo tiempo nos de las herramientas de como hacerlo entonces así será completa te dice que hacer, si está bien y si quieres implementarlo tengas las herramientas de como hacerlo". Scope: add direction (what to do), critique (is it good), and verification (prove it works) on top of the existing implementation library, so the skill covers the full loop.
+- **L17 (T13–T16):** The skill now covers the full loop. Direction (`b1f8bf1`) fixes mode, visual world, motion thesis, and constraints in a 14-field brief. Verification (`2af3a84`) adds a 15-row matrix with numeric criteria and `assets/snippets/verify-motion.js`, a dependency-free audit for tiers, loops, reduced motion, autoplay, CLS, and naming. Critique (`35b6a7a`) scores ten dimensions with 0/2/4 anchors and severity by user impact. The router and description now advertise the loop (`4af1ac7`). Validator: `OK: 52 files`; index has 73 entries; tests 14/14.
+- **L18:** Two cross-unit defects were caught at integration: `direction.md` was missing its `## Inputs` heading, and `verify.md` claimed its companion stages did not exist yet. Both fixed before the final commit. The critique unit also reported that the audit snippet is module-only, so it cannot be pasted directly into the DevTools console; the file documents `await import()` instead.
