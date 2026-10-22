@@ -47,7 +47,9 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T16 | S11–S14 | inline | done | router, description 242 chars, README, index 73 entries — `4af1ac7` |
 | T17 | S15 | inline | done | `scripts/install.mjs`, 10 installer tests, README — `a4cf3c4` |
 | T18 | S16 | inline | done | 4 cases / 29 assertions; runner+grader; 30 tests pass; init prepared 8 runs — `ae86d0d` |
-| T19 | S17 | inline | done | `references/workflow/tooling.md`, linked from verify/router/loop; 53 files validated, 30 tests pass |
+| T19 | S17 | inline | done | `references/workflow/tooling.md`, linked from verify/router/loop; 53 files validated, 30 tests pass — `bec1a57` |
+
+Risk: T18–T19 none — maintainer tooling and documentation; no stored data, credentials, public API, CLI, or published contract changed.
 
 Route evidence: T4–T10 meet the Writer trigger (a) — independent units with disjoint edit surfaces, each several files and well over 100 lines, launched together after the T3 contract exists. `SKILL.md`, `references/INDEX.md` and the shared contract files are parent-owned.
 
