@@ -36,6 +36,7 @@ Search `INDEX.md` for a keyword (e.g. "glitch", "magnetic", "sticky") and open o
 | Devices, breakpoints, input modes | `references/foundations/devices-responsive.md` |
 | Brand given / no brand | `references/brand/brand-intake.md` / `references/brand/emotion-to-style.md` |
 | Micro-interactions | `references/effects/microinteractions.md` |
+| Cursor, text, ambient backgrounds | `references/effects/cursor-pointer.md`, `references/effects/text-effects.md`, `references/effects/ambient-backgrounds.md` |
 | Parallax, scroll, depth | `references/effects/parallax.md`, `references/effects/scroll-driven.md`, `references/effects/depth-layers.md` |
 | 2D, 3D, page transitions | `references/effects/motion-2d.md`, `references/effects/webgl-3d.md`, `references/effects/page-transitions.md` |
 | Visual styles (cyberpunk, glass…) | `references/styles/` |
