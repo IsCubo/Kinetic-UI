@@ -111,6 +111,13 @@ test('installer: project scope resolves under the given project', () => {
   });
 });
 
+test('installer: user scope resolves from the current home', () => {
+  const r = run('--agent', 'opencode', '--dry-run');
+  assert.equal(r.code, 0, r.out);
+  const expected = path.join(os.homedir(), '.config', 'opencode', 'skills', 'kinetic-ui');
+  assert.ok(r.out.includes(expected), `expected ${expected} in: ${r.out}`);
+});
+
 test('installer: --agent and --dest are mutually exclusive', () => {
   const r = run('--agent', 'opencode', '--dest', '/tmp/somewhere');
   assert.equal(r.code, 1);

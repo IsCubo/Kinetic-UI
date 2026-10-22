@@ -139,8 +139,8 @@ function installOne({ target, link, force, dryRun }) {
   if (state) {
     const alreadyLinked = link && state.isSymbolicLink() && realpathSafe(target) === realpathSafe(SOURCE);
     if (alreadyLinked) return { action: 'unchanged', target };
-    if (!force) fail(`${target} already exists; pass --force to replace it`);
     if (dryRun) return { action: 'replace', target };
+    if (!force) fail(`${target} already exists; pass --force to replace it`);
     removeExisting(target, state);
   } else if (dryRun) {
     return { action: 'install', target };
@@ -177,12 +177,14 @@ function main(argv) {
   assertSource();
   const base = opts.dest
     ? path.resolve(opts.dest)
-    : AGENTS[opts.agent][opts.scope](path.resolve(opts.project));
+    : AGENTS[opts.agent][opts.scope](opts.project ? path.resolve(opts.project) : undefined);
   const target = path.join(base, SKILL_NAME);
 
   const result = installOne({ target, link: opts.link, force: opts.force, dryRun: opts.dryRun });
   const mode = opts.link ? 'link' : `copy, ${countFiles(SOURCE)} files`;
-  const prefix = opts.dryRun ? 'Would install' : result.action === 'unchanged' ? 'Already installed' : 'Installed';
+  const prefix = opts.dryRun
+    ? (result.action === 'replace' ? 'Would replace' : 'Would install')
+    : result.action === 'unchanged' ? 'Already installed' : 'Installed';
   process.stdout.write(`${prefix} ${SKILL_NAME} (${mode}) -> ${target}\n`);
   if (!opts.dryRun && result.action !== 'unchanged') {
     process.stdout.write('Reload the agent (or restart it) if the skill does not appear.\n');

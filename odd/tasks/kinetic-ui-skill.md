@@ -43,7 +43,7 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T14 | S12 | delegated (parallel unit) | done | critique protocol, 10-dimension scorecard — `35b6a7a` |
 | T15 | S13 | delegated (parallel unit) | done | 15-row matrix, DevTools passes, console audit — `2af3a84` |
 | T16 | S11–S14 | inline | done | router, description 242 chars, README, index 73 entries — `4af1ac7` |
-| T17 | S15 | inline | done | `scripts/install.mjs`, 9 installer tests, README — `a4cf3c4` |
+| T17 | S15 | inline | done | `scripts/install.mjs`, 10 installer tests, README — `a4cf3c4` |
 
 Route evidence: T4–T10 meet the Writer trigger (a) — independent units with disjoint edit surfaces, each several files and well over 100 lines, launched together after the T3 contract exists. `SKILL.md`, `references/INDEX.md` and the shared contract files are parent-owned.
 
@@ -71,4 +71,5 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L18:** Two cross-unit defects were caught at integration: `direction.md` was missing its `## Inputs` heading, and `verify.md` claimed its companion stages did not exist yet. Both fixed before the final commit. The critique unit also reported that the audit snippet is module-only, so it cannot be pasted directly into the DevTools console; the file documents `await import()` instead.
 - **L19:** The validator now enforces the workflow contract too: every file under `references/workflow/` must contain `## When to use` and `## Handoff`. Added the matching test (15 total) and documented the workflow template, the manifest row, and the audit snippet in `docs/authoring.md`.
 - **L20 (2026-10-22, user request, verbatim):** "peor debemos colocar el tema de la symlink para que funcione en cualquier pc o agente, entonces no deberia apuntar a mi maquina, sino a la de la persona que instale la skill, que me recomiendas?". Decision: a symlink is a local development shortcut, not a distribution mechanism. Ship an installer that computes the target from `os.homedir()` or the project, copies by default, and documents `--link` as maintainer-only.
-- **L21:** Installer smoke checks: `--help` lists only `~/` targets and contains no home path; `--dry-run` wrote nothing. Suite is 24/24 (15 validator, 9 installer). The source copy is 53 files (51 indexed plus `SKILL.md` and `INDEX.md`).
+- **L21:** Installer smoke checks: `--help` lists only `~/` targets and contains no home path; `--dry-run` wrote nothing. Suite is 25/25 (15 validator, 10 installer). The source copy is 53 files (51 indexed plus `SKILL.md` and `INDEX.md`).
+- **L22:** Smoke-testing the documented command (`--agent opencode --dry-run`) exposed a user-scope crash (`path.resolve(undefined)`) that the `--dest` tests missed. Fixed, added a regression test for home-based resolution, and made `--dry-run` report `Would replace` on an existing install without requiring `--force`.
