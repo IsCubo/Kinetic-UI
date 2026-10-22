@@ -108,8 +108,10 @@ node scripts/eval.mjs grade
 
 Each case runs twice: with a snapshot of the skill and without any skill.
 `grade` writes `grading.json` per run and `benchmark.json` with the delta. Runs
-live in `evals/workspace/`, which is gitignored. See `evals/README.md` for the
-isolation rules, assertion types, and limits.
+live in `evals/workspace/`, which is gitignored. For a clean baseline,
+`node scripts/eval-isolate.mjs hide --yes` moves installed copies aside;
+restore them after the last session. See `evals/README.md` for the strict
+container level, the local limitation, and the assertion types.
 
 ## Maintain
 

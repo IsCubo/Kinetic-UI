@@ -77,6 +77,17 @@ test('eval: init writes a snapshot, both variants, and a RUN.md per run', () => 
 
     const withoutSkill = fs.readFileSync(path.join(iter, 'vague-landing', 'without_skill', 'RUN.md'), 'utf8');
     assert.match(withoutSkill, /Do not load the kinetic-ui skill/);
+
+    const critiqueRun = path.join(iter, 'flawed-pricing-critique', 'with_skill');
+    const copied = path.join(critiqueRun, 'inputs', 'index.html');
+    assert.equal(fs.existsSync(copied), true);
+    assert.equal(
+      fs.readFileSync(copied, 'utf8'),
+      fs.readFileSync(path.join(ROOT, 'evals', 'fixtures', 'flawed-pricing', 'index.html'), 'utf8'),
+    );
+    const critiqueRunFile = fs.readFileSync(path.join(critiqueRun, 'RUN.md'), 'utf8');
+    assert.match(critiqueRunFile, new RegExp(copied.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.doesNotMatch(critiqueRunFile, /evals[\\/]fixtures/);
   });
 });
 

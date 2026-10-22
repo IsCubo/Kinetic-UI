@@ -22,6 +22,7 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 - **S15 Portable install.** The skill must install on any machine and any skills-compatible agent without a committed symlink or an absolute maintainer path. Acceptance: a cross-platform installer that resolves the target from the current user's home or project, copies by default, supports `--link` for development (junction on Windows), `--force`, `--dry-run`, and a generic `--dest`; tests cover copy, replace, link, dry-run, and target resolution; README documents it.
 - **S16 Evals.** The skill must be measurable, not just plausible: a maintainer eval pack with realistic prompts, with/without-skill baselines, structured assertions, a workspace scaffold, and a grader that writes per-run and aggregate results. Acceptance: 4 cases, an intentionally flawed fixture for critique, `scripts/eval.mjs` (init/list/grade), tests, and a README that explains isolation and iteration.
 - **S17 Tooling bridge.** The verify stage must route to the tools the runtime actually has — Playwright MCP, Chrome DevTools MCP, screenshots, Lighthouse, axe — with a default, a fallback, and an explicit BLOCKED state when none exists. Acceptance: a workflow reference with `## When to use` and `## Handoff`, linked from `verify.md` and the router, validated.
+- **S18 Baseline isolation.** The without-skill eval baseline must be enforceable, not advisory: a local tool that moves every known installed copy out of the agent skills directories, writes a recoverable manifest, preserves symlinks, rolls back a partial hide, and restores after a failure; each run copies its inputs under `inputs/` so no prompt points back to the repository. Acceptance: `scripts/eval-isolate.mjs status|hide|restore`, 6 tests, and docs with strict container/profile, local hide/restore, and advisory levels.
 
 - **Assumptions (not yet confirmed by the user):** A1 the skill content is in English; A2 license Apache-2.0; A3 `metadata.author` is `IsCubo`.
 
@@ -48,8 +49,9 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T17 | S15 | inline | done | `scripts/install.mjs`, 10 installer tests, README — `a4cf3c4` |
 | T18 | S16 | inline | done | 4 cases / 29 assertions; runner+grader; 30 tests pass; init prepared 8 runs — `ae86d0d` |
 | T19 | S17 | inline | done | `references/workflow/tooling.md`, linked from verify/router/loop; 53 files validated, 30 tests pass — `bec1a57` |
+| T20 | S18 | inline | done | `scripts/eval-isolate.mjs` + per-run input copies; 36 tests pass; docs |
 
-Risk: T18–T19 none — maintainer tooling and documentation; no stored data, credentials, public API, CLI, or published contract changed.
+Risk: T18–T20 none — maintainer tooling, local skill-copy moves with a manifest and rollback, and documentation; no stored product data, credentials, public API, CLI, or published contract changed.
 
 Route evidence: T4–T10 meet the Writer trigger (a) — independent units with disjoint edit surfaces, each several files and well over 100 lines, launched together after the T3 contract exists. `SKILL.md`, `references/INDEX.md` and the shared contract files are parent-owned.
 
@@ -82,3 +84,4 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L23 (2026-10-22, user request, verbatim):** "si empieza, ¿y luego el puente de herramientas?". Authorized: build the eval pack first (measure protocol compliance with and without the skill), then the tooling bridge (route verification to available tools with explicit fallbacks).
 - **L24:** Eval pack: `evals/evals.json` (4 cases, 29 assertions), an intentionally flawed pricing fixture, `scripts/eval.mjs` (`init`/`list`/`grade`), 5 eval tests, and `evals/README.md`. Suite is 30/30; `init` prepared 8 isolated runs under `evals/workspace/iteration-1/`.
 - **L25:** Tooling bridge: capability map (Playwright MCP, Chrome DevTools MCP, Playwright, axe, Lighthouse), selection order, stable invocations, failure modes, and BLOCKED rules in `references/workflow/tooling.md`; linked from `verify.md`, `SKILL.md`, and `loop.md`. Validator 53 files; suite 30/30.
+- **L26 (2026-10-22, user request, verbatim):** "si hagale". Authorized: implement local baseline isolation first — hide/restore with a manifest, symlink-safe, plus per-run input copies — and document the strict container/profile level for causal claims.

@@ -5,29 +5,14 @@
 // which does not require Developer Mode or administrator rights.
 
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { AGENTS, SKILL_NAME } from './lib/agents.mjs';
+
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '..');
-const SKILL_NAME = 'kinetic-ui';
 const SOURCE = path.join(REPO, 'skills', SKILL_NAME);
-
-const AGENTS = {
-  opencode: {
-    user: () => path.join(os.homedir(), '.config', 'opencode', 'skills'),
-    project: (project) => path.join(project, '.opencode', 'skills'),
-  },
-  claude: {
-    user: () => path.join(os.homedir(), '.claude', 'skills'),
-    project: (project) => path.join(project, '.claude', 'skills'),
-  },
-  agents: {
-    user: () => path.join(os.homedir(), '.agents', 'skills'),
-    project: (project) => path.join(project, '.agents', 'skills'),
-  },
-};
 
 const HELP = `kinetic-ui installer
 

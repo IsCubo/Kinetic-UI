@@ -44,7 +44,9 @@ evals/workspace/iteration-1/
 ```
 
 Hand each `RUN.md` to a fresh session. The run writes its full response to
-`outputs/response.md` and puts any code files in `outputs/` too. Then:
+`outputs/response.md` and puts any code files in `outputs/` too. Before the
+first session, choose an isolation level below; for the local level, hide
+installed copies now and restore after the last run. Then:
 
 ```bash
 node scripts/eval.mjs grade --iteration 1
@@ -54,18 +56,57 @@ node scripts/eval.mjs grade --iteration 1
 iteration. A second iteration uses `init --iteration 2`; the first workspace
 stays intact for comparison.
 
-## Isolation rules
+## Isolation levels
+
+The without-skill baseline is only causal when the agent cannot load the skill.
+Pick the strongest level you can afford.
+
+### 1. Disposable profile or container (strict)
+
+Run each variant in a fresh OS profile or container with no kinetic-ui
+installed. For the with-skill run, install only the snapshot from
+`evals/workspace/iteration-N/skill-snapshot/`; for the without-skill run, install
+nothing. Copy the run directory and its `inputs/` into the profile so no path
+points back to this repository. This is the only level that supports a
+publishable causal claim.
+
+### 2. Local hide/restore (quick)
+
+Move every known installed copy out of the agent skills directories:
+
+```bash
+node scripts/eval-isolate.mjs status
+node scripts/eval-isolate.mjs hide --yes
+# start fresh agent processes and run the sessions
+node scripts/eval-isolate.mjs restore
+```
+
+`hide` moves each copy to `.kinetic-ui.disabled` in the same directory and
+writes a manifest at `evals/workspace/.isolated-skills.json`; `restore` puts
+every copy back, including symlinks. Hide before **both** variants: the
+with-skill run reads the snapshot named in its `RUN.md`, and the without-skill
+run starts with no skill installed. A running session keeps its old skill list,
+so start a new process after hiding.
+
+This is not a sandbox. It removes the advertised skill and moves the installed
+copies, but a determined agent can still read `skills/kinetic-ui` in this
+repository. For a claim you will publish, use level 1.
+
+### 3. Advisory instruction (weak)
+
+The `RUN.md` tells the without-skill run not to load any skill. Use it only for
+exploration. The runtime may still advertise a globally installed skill, so the
+baseline is not clean enough for a delta.
+
+### All levels
 
 - One fresh context per run. Do not reuse a conversation.
-- With skill: read only the snapshot named in `RUN.md`. Do not load the
-  globally installed skill.
-- Without skill: do not load kinetic-ui or any other skill. The globally
-  installed skill may still be advertised to the agent, so the instruction is
-  explicit. This is a harness limitation, not a property of the pack.
 - Do not show the agent `evals.json`, the assertions, or a previous grading
   result.
-- Do not let two runs share a workspace. Each run owns its directory and writes
-  nowhere else.
+- Each run owns its directory and writes nowhere else. Inputs are copied into
+  `inputs/`, and the prompt is rewritten to point there.
+- Keep the runtime, model, and date next to the iteration; a delta without them
+  is not reproducible.
 
 ## Assertions
 
@@ -127,6 +168,8 @@ both variants have at least one graded case.
 - Four cases and 29 assertions are a smoke test, not a benchmark.
 - Regex assertions are blunt. A bad answer that uses the right words can pass.
 - Free models give a floor, not a ceiling. A strong model may hide a weak skill.
+- Local hide/restore removes installed copies but not the repository source; a
+  publishable delta needs a disposable profile or container.
 - Rendering tools are not assumed. The critique case accepts an `unverified`
   verdict when the agent cannot render the page; the code-level findings still
   count.

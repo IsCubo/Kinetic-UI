@@ -184,19 +184,25 @@ export function summarize(results) {
   };
 }
 
-function runInstructions(testCase, variant, snapshot) {
-  const lines = [`# Eval run: ${testCase.id} — ${variant}`, '', '## Task', '', testCase.prompt, ''];
-  const files = (testCase.files ?? []).map((file) => path.resolve(REPO, file));
-  if (files.length > 0) {
-    lines.push('## Input files', '', ...files.map((file) => `- \`${file}\``), '');
+function runInstructions(testCase, variant, snapshot, inputs) {
+  let prompt = testCase.prompt;
+  const originals = testCase.files ?? [];
+  for (let i = 0; i < originals.length && i < inputs.length; i++) {
+    prompt = prompt.split(originals[i]).join(inputs[i]);
+  }
+  const lines = [`# Eval run: ${testCase.id} — ${variant}`, '', '## Task', '', prompt, ''];
+  if (inputs.length > 0) {
+    lines.push('## Input files', '', ...inputs.map((file) => `- \`${file}\` (inside this run directory)`), '');
   }
   lines.push('## Skill', '');
   if (variant === 'with_skill') {
     lines.push(
-      `Read \`${path.join(snapshot, 'SKILL.md')}\` and follow it. Read only files inside \`${snapshot}\` that it routes you to. Do not read the globally installed skill.`,
+      `Read \`${path.join(snapshot, 'SKILL.md')}\` and follow it. Read only files inside \`${snapshot}\` that it routes you to, plus any input files listed above. Do not read the globally installed skill or the rest of this repository.`,
     );
   } else {
-    lines.push('Do not load the kinetic-ui skill or any other skill. Answer from your own knowledge and judgment.');
+    lines.push(
+      'Do not load the kinetic-ui skill or any other skill. Answer from your own knowledge and judgment. Do not read the repository; use only the input files listed above.',
+    );
   }
   lines.push(
     '',
@@ -208,6 +214,26 @@ function runInstructions(testCase, variant, snapshot) {
     '',
   );
   return lines.join('\n');
+}
+
+function copyInputs(testCase, dir) {
+  const files = testCase.files ?? [];
+  if (files.length === 0) return [];
+  const inputDir = path.join(dir, 'inputs');
+  fs.mkdirSync(inputDir, { recursive: true });
+  return files.map((rel) => {
+    const source = path.resolve(REPO, rel);
+    if (!fs.existsSync(source)) throw new Error(`missing input file: ${rel}`);
+    const base = path.basename(source);
+    const target = path.join(inputDir, base);
+    if (fs.existsSync(target)) {
+      throw new Error(`duplicate input basename in ${testCase.id}: ${base}`);
+    }
+    const stat = fs.statSync(source);
+    if (stat.isDirectory()) fs.cpSync(source, target, { recursive: true });
+    else fs.copyFileSync(source, target);
+    return target;
+  });
 }
 
 function cmdInit(opts) {
@@ -225,7 +251,8 @@ function cmdInit(opts) {
     for (const variant of VARIANTS) {
       const dir = path.join(iter, testCase.id, variant);
       fs.mkdirSync(path.join(dir, 'outputs'), { recursive: true });
-      fs.writeFileSync(path.join(dir, 'RUN.md'), runInstructions(testCase, variant, snapshot));
+      const inputs = copyInputs(testCase, dir);
+      fs.writeFileSync(path.join(dir, 'RUN.md'), runInstructions(testCase, variant, snapshot, inputs));
       runs++;
     }
   }
@@ -361,4 +388,10 @@ function main() {
 
 const isMain =
   process.argv[1] !== undefined && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
-if (isMain) main();
+if (isMain) {
+  try {
+    main();
+  } catch (error) {
+    fail(`error: ${error.message}`);
+  }
+}

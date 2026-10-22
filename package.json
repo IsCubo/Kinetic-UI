@@ -13,6 +13,7 @@
     "validate": "node scripts/validate.mjs skills/kinetic-ui",
     "eval": "node scripts/eval.mjs",
     "eval:grade": "node scripts/eval.mjs grade",
+    "eval:isolate": "node scripts/eval-isolate.mjs",
     "skill:install": "node scripts/install.mjs"
   }
 }
