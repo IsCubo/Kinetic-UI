@@ -24,14 +24,14 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T1 | S8, S10 | inline | done | repo scaffold: README, LICENSE, .gitignore — `0c2aac5` |
 | T2 | S7, S8, S9 | inline | done | validator + index builder: RED 14/14 fail → GREEN 14/14 pass |
 | T3 | S1, S7, S8, S9 | inline | done | SKILL.md router, reference template, tiers, reduced-motion, motion tokens, tier snippet |
-| T4 | S2 | delegated (parallel unit) | pending | foundations: UX principles, UI patterns, motion principles, devices |
-| T5 | S5 | delegated (parallel unit) | pending | brand intake + emotion-to-style |
-| T6 | S3, S7 | delegated (parallel unit) | pending | effects A: micro-interactions, cursor, text, page transitions |
-| T7 | S3, S7 | delegated (parallel unit) | pending | effects B: parallax, scroll-driven, depth, 2D, 3D/WebGL |
-| T8 | S3 | delegated (parallel unit) | pending | styles: cyberpunk and others |
-| T9 | S4, S7 | delegated (parallel unit) | pending | components |
-| T10 | S1 | delegated (parallel unit) | pending | platforms: web frameworks, Flutter, SwiftUI, Compose |
-| T11 | S6 | inline | done (uncommitted) | library catalog from verified research |
+| T4 | S2 | delegated (parallel unit) | done | foundations: UX, UI patterns, motion, devices — `5708261` |
+| T5 | S5 | delegated (parallel unit) | done | brand intake + emotion-to-style + token template — `d160f94` |
+| T6 | S3, S7 | delegated (parallel unit) | partial | micro-interactions `7967e0d`; cursor/text/page-transitions/ambient in flight |
+| T7 | S3, S7 | delegated (parallel unit) | partial | parallax, scroll-driven, depth `7967e0d`; 2D/WebGL in flight |
+| T8 | S3 | delegated (parallel unit) | done | eight styles, 1363 lines — `3523a42` |
+| T9 | S4, S7 | delegated (parallel unit) | partial | buttons, cards, forms, navigation `882b285`; overlays/feedback/selection/carousels/hero/lists in flight |
+| T10 | S1 | delegated (parallel unit) | done | web frameworks, Flutter, SwiftUI, Compose — `1bd7631` |
+| T11 | S6 | inline | done | library catalog from verified research — `a1bee06` |
 | T12 | S9, S8 | inline | pending | final INDEX, README, opencode-config link, full validation |
 
 Route evidence: T4–T10 meet the Writer trigger (a) — independent units with disjoint edit surfaces, each several files and well over 100 lines, launched together after the T3 contract exists. `SKILL.md`, `references/INDEX.md` and the shared contract files are parent-owned.
@@ -47,3 +47,7 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L7 (T3):** The contract has landed: SKILL.md (~818 tokens, description 216 chars), performance-tiers, accessibility-motion, motion.css, motion-tier.js, and docs/authoring.md (template, invariants, manifest). The validator passes everything except 17 `links` errors that point to planned files; T4–T10 must clear them. The assess for f6e2a4a returned medium/under_budget, so it stays pending in the slice.
 - **L8:** T4–T10 were launched as 7 parallel writers. The run was interrupted when the work moved to the background. Only `references/components/buttons.md` (T9) and `references/styles/cyberpunk.md` (T8) were written; both are complete (202 lines each, all template sections, validator clean apart from cross-unit links). The same writer sessions were resumed in the background to finish their remaining files.
 - **Next:** wait for T4–T10, check each diff against its surface, write T11 (libraries) inline meanwhile, then T12.
+- **L9 (T4, T5, T8):** Three units landed and were committed after a path check: `5708261` foundations (734 lines), `d160f94` brand (472 lines), `3523a42` styles (1363 lines). Two contract changes were accepted into `docs/authoring.md`: derived brand scales as project-local suffixes (`--brand-primary-700`), and the motion personalities defined in T4. A latent bug was fixed in `448eda2`: `--kui-duration-md` (250 ms) was not collapsed under reduced motion or tier 0, breaking the ≤200 ms fade rule.
+- **L10 (2026-10-22, user correction, verbatim):** "Hermano continua, pero con otros modelos porque ya se me acabaron los creditos". Anthropic credits are exhausted. The four remaining units were relaunched on free providers (`opencode/deepseek-v4.1-flash-free`, `opencode/glm-5.3-flash-free`) with the same prompts, surfaces, and verification commands.
+- **L11:** The parent committed the units that were already complete: `7967e0d` effects (micro-interactions, parallax, scroll-driven, depth + `assets/effects/scroll-driven.css`), `882b285` components (buttons, cards, forms, navigation), `1bd7631` platforms (all four). `assets/effects/webgl-3d.js` stays uncommitted with its incomplete unit T7.
+- **L12:** Remaining work: 6 effect files and 6 component files in flight, then `INDEX.md`, README, the OpenCode skills link, and full validation.
