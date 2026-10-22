@@ -47,7 +47,7 @@ Never add a tier-2 or tier-3 effect before its tier-0 and tier-1 behavior exists
 
 Prove the build, do not describe it. The output is a report with one row per check: PASS, FAIL, or BLOCKED, each with evidence.
 
-- Full matrix and tooling: `references/workflow/verify.md`.
+- Full matrix: `references/workflow/verify.md`; tool routing and fallbacks: `references/workflow/tooling.md`.
 - Run the console audit: `assets/snippets/verify-motion.js`.
 - A single blocker fails the stage, whatever the rest of the report says.
 - If the artifact cannot be rendered, the stage reports BLOCKED, not PASS.

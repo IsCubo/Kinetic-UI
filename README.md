@@ -73,7 +73,7 @@ skills/kinetic-ui/
     components/               buttons, forms, cards, navigation, overlays, feedback,
                               selection controls, carousels, heroes, lists
     platforms/                web frameworks, Flutter, SwiftUI, Jetpack Compose
-    workflow/                 direction, loop, verify, critique
+    workflow/                 direction, loop, verify, tooling, critique
     libraries.md              verified catalog: names, licenses, caveats, dates
   assets/
     tokens/motion.css         duration, easing, distance, and scale tokens

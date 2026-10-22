@@ -37,6 +37,7 @@ Search `INDEX.md` for a keyword (e.g. "glitch", "magnetic", "sticky") and open o
 | Devices, breakpoints, input modes | `references/foundations/devices-responsive.md` |
 | Brand given / no brand | `references/brand/brand-intake.md` / `references/brand/emotion-to-style.md` |
 | Direction, verify, critique | `references/workflow/direction.md`, `references/workflow/verify.md`, `references/workflow/critique.md` |
+| Tool routing for verify | `references/workflow/tooling.md` |
 | Micro-interactions | `references/effects/microinteractions.md` |
 | Cursor, text, ambient backgrounds | `references/effects/cursor-pointer.md`, `references/effects/text-effects.md`, `references/effects/ambient-backgrounds.md` |
 | Parallax, scroll, depth | `references/effects/parallax.md`, `references/effects/scroll-driven.md`, `references/effects/depth-layers.md` |
@@ -52,7 +53,7 @@ Search `INDEX.md` for a keyword (e.g. "glitch", "magnetic", "sticky") and open o
 1. Follow `references/workflow/loop.md`: direction, build, verify, critique.
 2. Direction: `references/workflow/direction.md` — mode, visual world, focal motion moment.
 3. Build: tokens and tier detection first, lowest tier first, effects and components through `INDEX.md`.
-4. Verify: `references/workflow/verify.md` plus `assets/snippets/verify-motion.js`.
+4. Verify: `references/workflow/verify.md`, the tools in `references/workflow/tooling.md`, and `assets/snippets/verify-motion.js`.
 5. Critique: `references/workflow/critique.md` — rendered result, scorecard, findings by severity.
 
 ## Output Contract

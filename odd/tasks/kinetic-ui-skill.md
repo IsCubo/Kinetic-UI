@@ -46,8 +46,8 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T15 | S13 | delegated (parallel unit) | done | 15-row matrix, DevTools passes, console audit — `2af3a84` |
 | T16 | S11–S14 | inline | done | router, description 242 chars, README, index 73 entries — `4af1ac7` |
 | T17 | S15 | inline | done | `scripts/install.mjs`, 10 installer tests, README — `a4cf3c4` |
-| T18 | S16 | inline | done | 4 cases / 29 assertions; runner+grader; 30 tests pass; init prepared 8 runs |
-| T19 | S17 | inline | pending | tooling bridge reference and links |
+| T18 | S16 | inline | done | 4 cases / 29 assertions; runner+grader; 30 tests pass; init prepared 8 runs — `ae86d0d` |
+| T19 | S17 | inline | done | `references/workflow/tooling.md`, linked from verify/router/loop; 53 files validated, 30 tests pass |
 
 Route evidence: T4–T10 meet the Writer trigger (a) — independent units with disjoint edit surfaces, each several files and well over 100 lines, launched together after the T3 contract exists. `SKILL.md`, `references/INDEX.md` and the shared contract files are parent-owned.
 
@@ -79,3 +79,4 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L22:** Smoke-testing the documented command (`--agent opencode --dry-run`) exposed a user-scope crash (`path.resolve(undefined)`) that the `--dest` tests missed. Fixed, added a regression test for home-based resolution, and made `--dry-run` report `Would replace` on an existing install without requiring `--force`.
 - **L23 (2026-10-22, user request, verbatim):** "si empieza, ¿y luego el puente de herramientas?". Authorized: build the eval pack first (measure protocol compliance with and without the skill), then the tooling bridge (route verification to available tools with explicit fallbacks).
 - **L24:** Eval pack: `evals/evals.json` (4 cases, 29 assertions), an intentionally flawed pricing fixture, `scripts/eval.mjs` (`init`/`list`/`grade`), 5 eval tests, and `evals/README.md`. Suite is 30/30; `init` prepared 8 isolated runs under `evals/workspace/iteration-1/`.
+- **L25:** Tooling bridge: capability map (Playwright MCP, Chrome DevTools MCP, Playwright, axe, Lighthouse), selection order, stable invocations, failure modes, and BLOCKED rules in `references/workflow/tooling.md`; linked from `verify.md`, `SKILL.md`, and `loop.md`. Validator 53 files; suite 30/30.

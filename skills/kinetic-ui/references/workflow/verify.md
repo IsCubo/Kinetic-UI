@@ -61,6 +61,8 @@ Rows that need a recorder, a screen reader, or physical hardware stay in the tab
 
 ## Tools
 
+Which of these your runtime actually exposes, how to invoke it, and what to do when it is absent is in `references/workflow/tooling.md`. Run its capability check before the first row; a missing tool produces BLOCKED, not a downgraded pass.
+
 | Tool | Proves | Does not prove |
 | --- | --- | --- |
 | DevTools Rendering and Emulation | This engine's behavior under an emulated media feature (`prefers-reduced-motion`, `forced-colors`, `prefers-contrast`) right now | Other engines, the real OS setting, assistive technology |
