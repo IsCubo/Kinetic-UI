@@ -1,0 +1,276 @@
+{
+  "skill_name": "kinetic-ui",
+  "version": 1,
+  "cases": [
+    {
+      "id": "vague-landing",
+      "title": "Vague landing page with no brand",
+      "prompt": "Make a landing page for a small-batch coffee roaster. It should feel premium but not like a generic SaaS page. I do not have a brand guide or an existing site.",
+      "expected_output": "A design brief that names the surface mode, a visual world with an avoid list, one focal motion moment, constraints, and out-of-scope work; then implementation guidance that uses motion tiers, reduced motion, and a verification report.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "brief-mode",
+          "text": "Names a surface mode from the skill's four modes",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(mode|surface)\\b[\\s\\S]{0,160}\\b(Persuade|Operate|Read|Experience)\\b"
+          }
+        },
+        {
+          "id": "brief-world",
+          "text": "Names a visual world and an avoid or anti-reference list",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(visual world|world)\\b[\\s\\S]{0,240}\\b(avoid|reference|anti-reference)\\b"
+          }
+        },
+        {
+          "id": "brief-focal",
+          "text": "Chooses one focal motion moment",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bfocal (moment|motion)\\b"
+          }
+        },
+        {
+          "id": "reduced-motion",
+          "text": "Plans reduced-motion behavior, not just animation",
+          "check": {
+            "type": "regex",
+            "pattern": "prefers-reduced-motion|reduced motion"
+          }
+        },
+        {
+          "id": "tier-0",
+          "text": "Names the T0 reduced behavior",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bT0\\b|\\btier\\s*0\\b"
+          }
+        },
+        {
+          "id": "tier-1",
+          "text": "Names the T1 essential behavior",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bT1\\b|\\btier\\s*1\\b"
+          }
+        },
+        {
+          "id": "verification",
+          "text": "Reports verification with PASS and FAIL or BLOCKED results",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bPASS\\b[\\s\\S]{0,200}\\b(FAIL|BLOCKED)\\b|\\b(FAIL|BLOCKED)\\b[\\s\\S]{0,200}\\bPASS\\b"
+          }
+        }
+      ]
+    },
+    {
+      "id": "operate-dashboard",
+      "title": "Operate dashboard redesign",
+      "prompt": "Redesign the metrics dashboard for my B2B SaaS. Operators stare at it all day; it should feel fast and clear, not decorative.",
+      "expected_output": "An Operate treatment: scanability and density over expression, a restrained motion role, keyboard and focus behavior, T0/T1 behavior, and a verification table.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "operate-mode",
+          "text": "Classifies the surface as Operate",
+          "check": {
+            "type": "regex",
+            "pattern": "\\boperate\\b"
+          }
+        },
+        {
+          "id": "density",
+          "text": "Prioritizes density or scanability",
+          "check": {
+            "type": "regex",
+            "pattern": "density|scanab|compact|information-dense"
+          }
+        },
+        {
+          "id": "keyboard",
+          "text": "Plans keyboard and focus behavior",
+          "check": {
+            "type": "regex",
+            "pattern": "keyboard|focus-visible|tab order|focus state"
+          }
+        },
+        {
+          "id": "reduced-motion",
+          "text": "Plans reduced-motion behavior",
+          "check": {
+            "type": "regex",
+            "pattern": "prefers-reduced-motion|reduced motion"
+          }
+        },
+        {
+          "id": "tier-0",
+          "text": "Names the T0 reduced behavior",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bT0\\b|\\btier\\s*0\\b"
+          }
+        },
+        {
+          "id": "verification",
+          "text": "Reports verification with PASS and FAIL or BLOCKED results",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bPASS\\b[\\s\\S]{0,200}\\b(FAIL|BLOCKED)\\b|\\b(FAIL|BLOCKED)\\b[\\s\\S]{0,200}\\bPASS\\b"
+          }
+        }
+      ]
+    },
+    {
+      "id": "flawed-pricing-critique",
+      "title": "Critique an intentionally flawed pricing page",
+      "prompt": "Critique the pricing page in `evals/fixtures/flawed-pricing/index.html`. I need to know what blocks shipping. If you cannot render it, say so.",
+      "expected_output": "A critique with located findings by severity, covering the infinite animation and missing reduced-motion handling, low contrast, the unnamed icon button, removed focus styles, and the image without dimensions; a verdict from the critique vocabulary.",
+      "files": [
+        "evals/fixtures/flawed-pricing/index.html"
+      ],
+      "assertions": [
+        {
+          "id": "infinite",
+          "text": "Finds the infinite animation or pulse",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(infinite|loops?|puls(e|es|ing))\\b"
+          }
+        },
+        {
+          "id": "reduced-motion",
+          "text": "Connects the animation to reduced-motion handling",
+          "check": {
+            "type": "regex",
+            "pattern": "prefers-reduced-motion|reduced motion"
+          }
+        },
+        {
+          "id": "contrast",
+          "text": "Finds a contrast problem",
+          "check": {
+            "type": "regex",
+            "pattern": "contrast"
+          }
+        },
+        {
+          "id": "contrast-ratio",
+          "text": "Uses a numeric contrast criterion",
+          "check": {
+            "type": "regex",
+            "pattern": "4\\.5|3:1|WCAG"
+          }
+        },
+        {
+          "id": "accessible-name",
+          "text": "Finds the icon button without an accessible name",
+          "check": {
+            "type": "regex",
+            "pattern": "accessible name|aria-label|name, role|unnamed"
+          }
+        },
+        {
+          "id": "focus",
+          "text": "Finds the removed focus indicator",
+          "check": {
+            "type": "regex",
+            "pattern": "outline:\\s*none|focus (style|indicator)|focus-visible"
+          }
+        },
+        {
+          "id": "image-dimensions",
+          "text": "Finds the image without intrinsic dimensions or CLS risk",
+          "check": {
+            "type": "regex",
+            "pattern": "(width|dimensions|intrinsic size|CLS)"
+          }
+        },
+        {
+          "id": "severity",
+          "text": "Assigns findings a severity",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(blocker|major|minor)\\b"
+          }
+        },
+        {
+          "id": "verdict",
+          "text": "Ends with a critique verdict",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(not shippable|shippable with named debt|shippable|unverified)\\b"
+          }
+        }
+      ]
+    },
+    {
+      "id": "low-end-3d",
+      "title": "Parallax and 3D on a low-end phone",
+      "prompt": "Build a product page with a parallax hero and 3D cards, but it must work on a low-end Android phone and with reduced motion enabled.",
+      "expected_output": "A T0/T1-first build: parallax becomes static, 3D degrades or lazy-loads, the tier attribute is present, a performance budget is stated, and verification is reported.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "parallax-fallback",
+          "text": "Gives parallax a static or disabled T0 fallback",
+          "check": {
+            "type": "regex",
+            "pattern": "parallax[\\s\\S]{0,320}\\b(static|disable|disabled|removed|T0|tier 0)\\b"
+          }
+        },
+        {
+          "id": "3d-fallback",
+          "text": "Gives 3D or WebGL a fallback, lazy load, or tier cap",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(3D|WebGL)\\b[\\s\\S]{0,320}\\b(fallback|disable|disabled|lazy|poster|T1|T2|tier 1|tier 2)\\b"
+          }
+        },
+        {
+          "id": "tier-attribute",
+          "text": "Uses the data-motion-tier attribute",
+          "check": {
+            "type": "regex",
+            "pattern": "data-motion-tier"
+          }
+        },
+        {
+          "id": "performance",
+          "text": "States a performance budget",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bLCP\\b|\\bINP\\b|\\bCLS\\b|frame budget|16\\.7|60\\s*fps"
+          }
+        },
+        {
+          "id": "reduced-motion",
+          "text": "Plans reduced-motion behavior",
+          "check": {
+            "type": "regex",
+            "pattern": "prefers-reduced-motion|reduced motion"
+          }
+        },
+        {
+          "id": "tier-0",
+          "text": "Names the T0 reduced behavior",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bT0\\b|\\btier\\s*0\\b"
+          }
+        },
+        {
+          "id": "verification",
+          "text": "Reports verification with PASS and FAIL or BLOCKED results",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bPASS\\b[\\s\\S]{0,200}\\b(FAIL|BLOCKED)\\b|\\b(FAIL|BLOCKED)\\b[\\s\\S]{0,200}\\bPASS\\b"
+          }
+        }
+      ]
+    }
+  ]
+}

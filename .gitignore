@@ -6,3 +6,4 @@ Thumbs.db
 # local scratch (tests use mktemp -d outside the repo)
 .tmp/
 node_modules/
+evals/workspace/

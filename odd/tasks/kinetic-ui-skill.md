@@ -18,8 +18,10 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 - **S11 Direction.** The skill must decide before building: surface mode, visual world, and motion thesis, and emit a short brief the agent can follow. Acceptance: a workflow reference with inputs, steps, an output template, and anti-generic rules.
 - **S12 Critique.** The skill must evaluate a rendered interface, not code alone, with a scored and evidence-based protocol. Acceptance: a scorecard with anchored dimensions, severity levels, a findings format, and a re-check loop.
 - **S13 Verification.** The skill must prove the result works: functional states, keyboard and screen-reader access, contrast, reduced motion, motion tiers, and performance budgets, each with a how-to-test and a pass criterion. Acceptance: a verification matrix plus a runnable in-browser audit snippet.
-- **S14 Loop.** The four stages must compose into one end-to-end workflow the agent can follow, with the artifacts each stage produces.- **S15 Portable install.** The skill must install on any machine and any skills-compatible agent without a committed symlink or an absolute maintainer path. Acceptance: a cross-platform installer that resolves the target from the current user's home or project, copies by default, supports `--link` for development (junction on Windows), `--force`, `--dry-run`, and a generic `--dest`; tests cover copy, replace, link, dry-run, and target resolution; README documents it.
-
+- **S14 Loop.** The four stages must compose into one end-to-end workflow the agent can follow, with the artifacts each stage produces.
+- **S15 Portable install.** The skill must install on any machine and any skills-compatible agent without a committed symlink or an absolute maintainer path. Acceptance: a cross-platform installer that resolves the target from the current user's home or project, copies by default, supports `--link` for development (junction on Windows), `--force`, `--dry-run`, and a generic `--dest`; tests cover copy, replace, link, dry-run, and target resolution; README documents it.
+- **S16 Evals.** The skill must be measurable, not just plausible: a maintainer eval pack with realistic prompts, with/without-skill baselines, structured assertions, a workspace scaffold, and a grader that writes per-run and aggregate results. Acceptance: 4 cases, an intentionally flawed fixture for critique, `scripts/eval.mjs` (init/list/grade), tests, and a README that explains isolation and iteration.
+- **S17 Tooling bridge.** The verify stage must route to the tools the runtime actually has — Playwright MCP, Chrome DevTools MCP, screenshots, Lighthouse, axe — with a default, a fallback, and an explicit BLOCKED state when none exists. Acceptance: a workflow reference with `## When to use` and `## Handoff`, linked from `verify.md` and the router, validated.
 
 - **Assumptions (not yet confirmed by the user):** A1 the skill content is in English; A2 license Apache-2.0; A3 `metadata.author` is `IsCubo`.
 
@@ -44,6 +46,8 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T15 | S13 | delegated (parallel unit) | done | 15-row matrix, DevTools passes, console audit — `2af3a84` |
 | T16 | S11–S14 | inline | done | router, description 242 chars, README, index 73 entries — `4af1ac7` |
 | T17 | S15 | inline | done | `scripts/install.mjs`, 10 installer tests, README — `a4cf3c4` |
+| T18 | S16 | inline | done | 4 cases / 29 assertions; runner+grader; 30 tests pass; init prepared 8 runs |
+| T19 | S17 | inline | pending | tooling bridge reference and links |
 
 Route evidence: T4–T10 meet the Writer trigger (a) — independent units with disjoint edit surfaces, each several files and well over 100 lines, launched together after the T3 contract exists. `SKILL.md`, `references/INDEX.md` and the shared contract files are parent-owned.
 
@@ -73,3 +77,5 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L20 (2026-10-22, user request, verbatim):** "peor debemos colocar el tema de la symlink para que funcione en cualquier pc o agente, entonces no deberia apuntar a mi maquina, sino a la de la persona que instale la skill, que me recomiendas?". Decision: a symlink is a local development shortcut, not a distribution mechanism. Ship an installer that computes the target from `os.homedir()` or the project, copies by default, and documents `--link` as maintainer-only.
 - **L21:** Installer smoke checks: `--help` lists only `~/` targets and contains no home path; `--dry-run` wrote nothing. Suite is 25/25 (15 validator, 10 installer). The source copy is 53 files (51 indexed plus `SKILL.md` and `INDEX.md`).
 - **L22:** Smoke-testing the documented command (`--agent opencode --dry-run`) exposed a user-scope crash (`path.resolve(undefined)`) that the `--dest` tests missed. Fixed, added a regression test for home-based resolution, and made `--dry-run` report `Would replace` on an existing install without requiring `--force`.
+- **L23 (2026-10-22, user request, verbatim):** "si empieza, ¿y luego el puente de herramientas?". Authorized: build the eval pack first (measure protocol compliance with and without the skill), then the tooling bridge (route verification to available tools with explicit fallbacks).
+- **L24:** Eval pack: `evals/evals.json` (4 cases, 29 assertions), an intentionally flawed pricing fixture, `scripts/eval.mjs` (`init`/`list`/`grade`), 5 eval tests, and `evals/README.md`. Suite is 30/30; `init` prepared 8 isolated runs under `evals/workspace/iteration-1/`.

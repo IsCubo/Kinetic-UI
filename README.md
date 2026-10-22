@@ -94,6 +94,23 @@ skills/kinetic-ui/
 
 `assets/snippets/motion-tier.js` sets `<html data-motion-tier>` from capability and runtime frame rate; `assets/tokens/motion.css` collapses distances and scales at T0.
 
+## Evaluate
+
+The skill ships with a maintainer eval pack under `evals/`. It measures protocol
+compliance — surface mode, reduced motion, tiers, verification — not taste.
+
+```bash
+node scripts/eval.mjs list
+node scripts/eval.mjs init
+# hand each evals/workspace/iteration-1/<case>/<variant>/RUN.md to a fresh session
+node scripts/eval.mjs grade
+```
+
+Each case runs twice: with a snapshot of the skill and without any skill.
+`grade` writes `grading.json` per run and `benchmark.json` with the delta. Runs
+live in `evals/workspace/`, which is gitignored. See `evals/README.md` for the
+isolation rules, assertion types, and limits.
+
 ## Maintain
 
 Requires Node 18+ (developed on Node 22).

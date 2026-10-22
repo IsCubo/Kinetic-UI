@@ -11,6 +11,8 @@
     "test": "node scripts/test.mjs",
     "index": "node scripts/build-index.mjs skills/kinetic-ui",
     "validate": "node scripts/validate.mjs skills/kinetic-ui",
+    "eval": "node scripts/eval.mjs",
+    "eval:grade": "node scripts/eval.mjs grade",
     "skill:install": "node scripts/install.mjs"
   }
 }
