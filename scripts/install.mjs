@@ -16,17 +16,14 @@ const SOURCE = path.join(REPO, 'skills', SKILL_NAME);
 
 const AGENTS = {
   opencode: {
-    label: 'OpenCode',
     user: () => path.join(os.homedir(), '.config', 'opencode', 'skills'),
     project: (project) => path.join(project, '.opencode', 'skills'),
   },
   claude: {
-    label: 'Claude Code',
     user: () => path.join(os.homedir(), '.claude', 'skills'),
     project: (project) => path.join(project, '.claude', 'skills'),
   },
   agents: {
-    label: 'Agent Skills convention',
     user: () => path.join(os.homedir(), '.agents', 'skills'),
     project: (project) => path.join(project, '.agents', 'skills'),
   },
@@ -41,7 +38,7 @@ Usage:
 Targets (user scope):
   opencode   ~/.config/opencode/skills
   claude     ~/.claude/skills
-  agents     ~/.agents/skills
+  agents     ~/.agents/skills (shared; OpenCode reads it)
 
 Targets (project scope, under <project>):
   opencode   .opencode/skills

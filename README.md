@@ -24,7 +24,7 @@ cd kinetic-ui
 
 node scripts/install.mjs --agent opencode   # ~/.config/opencode/skills/kinetic-ui
 node scripts/install.mjs --agent claude     # ~/.claude/skills/kinetic-ui
-node scripts/install.mjs --agent agents     # ~/.agents/skills/kinetic-ui
+node scripts/install.mjs --agent agents     # ~/.agents/skills/kinetic-ui (shared; OpenCode reads it)
 ```
 
 Project scope and other agents:
