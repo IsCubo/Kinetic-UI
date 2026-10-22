@@ -224,10 +224,10 @@
         },
         {
           "id": "3d-fallback",
-          "text": "Gives 3D or WebGL a fallback, lazy load, or tier cap",
+          "text": "Gives the 3D or tilt effect a fallback, lazy load, tier cap, or gate",
           "check": {
             "type": "regex",
-            "pattern": "\\b(3D|WebGL)\\b[\\s\\S]{0,320}\\b(fallback|disable|disabled|lazy|poster|T1|T2|tier 1|tier 2)\\b"
+            "pattern": "\\b(3D|WebGL|tilt)\\b[\\s\\S]{0,320}\\b(fallback|disable|disabled|static|lazy|poster|gated?|no-op|T0|T1|T2|tier 0|tier 1|tier 2)\\b"
           }
         },
         {

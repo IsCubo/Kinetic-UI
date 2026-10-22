@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { gradeText } from '../scripts/eval.mjs';
+import { DIMENSIONS, gradeText } from '../scripts/eval.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const EVAL = path.join(ROOT, 'scripts', 'eval.mjs');
@@ -136,4 +136,115 @@ test('eval: grade writes per-run grading and an aggregate benchmark', () => {
     assert.equal(benchmark.run_summary.delta, null);
     assert.equal(benchmark.cases['low-end-3d'].with_skill.status, 'empty');
   });
+});
+
+function walkNames(dir) {
+  const names = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    names.push(entry.name);
+    if (entry.isDirectory()) names.push(...walkNames(path.join(dir, entry.name)));
+  }
+  return names;
+}
+
+function seedRuns(base) {
+  assert.equal(run('init', '--workspace', base, '--iteration', '1').code, 0);
+  const iter = path.join(base, 'iteration-1');
+  for (const variant of ['with_skill', 'without_skill']) {
+    fs.writeFileSync(
+      path.join(iter, 'vague-landing', variant, 'outputs', 'response.md'),
+      `answer from ${variant}\n`,
+    );
+  }
+  return iter;
+}
+
+test('eval blind: anonymizes the pair, keeps the key outside review, and is reproducible by seed', () => {
+  withTemp((base) => {
+    const iter = seedRuns(base);
+    const first = run('blind', '--workspace', base, '--iteration', '1', '--seed', '7');
+    assert.equal(first.code, 0, first.out);
+    assert.match(first.out, /skipped, missing outputs/);
+
+    const review = path.join(iter, 'review');
+    const leaked = walkNames(review).filter((name) => /with_skill|without_skill/.test(name));
+    assert.deepEqual(leaked, []);
+    assert.equal(fs.existsSync(path.join(review, 'vague-landing', 'A', 'response.md')), true);
+    assert.equal(fs.existsSync(path.join(review, 'vague-landing', 'PROMPT.md')), true);
+    assert.equal(fs.existsSync(path.join(review, 'blind-key.json')), false);
+
+    const key = JSON.parse(fs.readFileSync(path.join(iter, 'blind-key.json'), 'utf8'));
+    const { A, B } = key.cases['vague-landing'];
+    assert.deepEqual([A, B].sort(), ['with_skill', 'without_skill']);
+    assert.match(fs.readFileSync(path.join(review, 'vague-landing', 'A', 'response.md'), 'utf8'), new RegExp(A));
+
+    assert.equal(run('blind', '--workspace', base, '--iteration', '1', '--seed', '7').code, 1);
+    assert.equal(run('blind', '--workspace', base, '--iteration', '1', '--seed', '7', '--force').code, 0);
+    const again = JSON.parse(fs.readFileSync(path.join(iter, 'blind-key.json'), 'utf8'));
+    assert.deepEqual(again.cases, key.cases);
+  });
+});
+
+test('eval blind: fails when no case has outputs for both variants', () => {
+  withTemp((base) => {
+    assert.equal(run('init', '--workspace', base, '--iteration', '1').code, 0);
+    const result = run('blind', '--workspace', base, '--iteration', '1');
+    assert.equal(result.code, 1);
+    assert.match(result.out, /no case has outputs/);
+  });
+});
+
+test('eval unblind: maps scores back to variants and merges them into the benchmark', () => {
+  withTemp((base) => {
+    const iter = seedRuns(base);
+    assert.equal(run('grade', '--workspace', base, '--iteration', '1').code, 0);
+    assert.equal(run('blind', '--workspace', base, '--iteration', '1', '--seed', '3').code, 0);
+    const key = JSON.parse(fs.readFileSync(path.join(iter, 'blind-key.json'), 'utf8'));
+    const winner = key.cases['vague-landing'].A === 'with_skill' ? 'A' : 'B';
+    const loser = winner === 'A' ? 'B' : 'A';
+
+    const scoresFile = path.join(iter, 'review', 'scores.json');
+    const scores = JSON.parse(fs.readFileSync(scoresFile, 'utf8'));
+    scores.reviewer = 'Test Reviewer';
+    for (const dimension of DIMENSIONS) {
+      scores.cases['vague-landing'][winner][dimension] = 4;
+      scores.cases['vague-landing'][loser][dimension] = 1;
+    }
+    scores.cases['vague-landing'][loser].typography = null;
+    fs.writeFileSync(scoresFile, JSON.stringify(scores));
+
+    const result = run('unblind', '--workspace', base, '--iteration', '1');
+    assert.equal(result.code, 0, result.out);
+    const review = JSON.parse(fs.readFileSync(path.join(iter, 'review-test-reviewer.json'), 'utf8'));
+    assert.equal(review.per_case['vague-landing'].with_skill.mean, 4);
+    assert.equal(review.per_case['vague-landing'].without_skill.mean, 1);
+    assert.equal(review.per_case['vague-landing'].without_skill.scored, DIMENSIONS.length - 1);
+    assert.equal(review.summary.delta, 3);
+    const benchmark = JSON.parse(fs.readFileSync(path.join(iter, 'benchmark.json'), 'utf8'));
+    assert.equal(benchmark.human_review['Test Reviewer'].summary.delta, 3);
+  });
+});
+
+test('eval unblind: rejects an empty reviewer, an out-of-range score, and unknown dimensions', () => {
+  withTemp((base) => {
+    const iter = seedRuns(base);
+    assert.equal(run('blind', '--workspace', base, '--iteration', '1', '--seed', '3').code, 0);
+    const scoresFile = path.join(iter, 'review', 'scores.json');
+    const scores = JSON.parse(fs.readFileSync(scoresFile, 'utf8'));
+    scores.cases['vague-landing'].A.color = 5;
+    scores.cases['vague-landing'].B.sparkle = 2;
+    fs.writeFileSync(scoresFile, JSON.stringify(scores));
+    const result = run('unblind', '--workspace', base, '--iteration', '1');
+    assert.equal(result.code, 1);
+    assert.match(result.out, /reviewer is empty/);
+    assert.match(result.out, /not an integer 0-4/);
+    assert.match(result.out, /unknown dimension sparkle/);
+    assert.match(result.out, /no dimension scored/);
+    assert.equal(fs.existsSync(path.join(iter, 'review-reviewer.json')), false);
+  });
+});
+
+test('eval rubric: documents every dimension the scorer accepts', () => {
+  const rubric = fs.readFileSync(path.join(ROOT, 'evals', 'rubric.md'), 'utf8');
+  for (const dimension of DIMENSIONS) assert.match(rubric, new RegExp(`\`${dimension}\``));
 });

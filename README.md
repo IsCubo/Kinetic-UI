@@ -111,7 +111,9 @@ Each case runs twice: with a snapshot of the skill and without any skill.
 live in `evals/workspace/`, which is gitignored. For a clean baseline,
 `node scripts/eval-isolate.mjs hide --yes` moves installed copies aside;
 restore them after the last session. See `evals/README.md` for the strict
-container level, the local limitation, and the assertion types.
+container level, the local limitation, the assertion types, and the blind
+quality review (`blind` / `unblind`) that scores design separately from the
+protocol pass rate.
 
 ## Maintain
 

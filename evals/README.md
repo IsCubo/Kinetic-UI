@@ -152,6 +152,31 @@ Statuses:
 reported in their case but excluded from the totals. `delta` is `null` unless
 both variants have at least one graded case.
 
+## Blind review (quality)
+
+Assertions check protocol vocabulary; they cannot say whether a design is good.
+The blind lane measures that separately and never mixes with the pass rate.
+
+```bash
+node scripts/eval.mjs blind --iteration 1      # review/<case>/A and B, random order
+# fill review/scores.json following evals/rubric.md, then:
+node scripts/eval.mjs unblind --iteration 1 --scores <file>
+```
+
+`blind` copies the two outputs of every case that has both variants into
+`review/`, assigns them to A and B by a random draw (`--seed N` makes it
+reproducible), and writes the key to `blind-key.json` outside `review/`. The
+reviewer opens only `review/`, scores nine dimensions from 0 to 4 (`null` when
+a dimension does not apply), and runs `unblind`. It rejects scores outside 0-4,
+unknown dimensions, a missing reviewer name, and any answer with no scored
+dimension. Results go to `review-<reviewer>.json` and to a `human_review` section
+in `benchmark.json`. Use two independent reviewers when you will quote the
+result; each fills a separate copy of `scores.json`.
+
+Blinding is imperfect. Answers made with the skill use its vocabulary and vendor
+its snippets, so a reviewer can often tell which is which. `rubric.md` says to
+score the page, not the vocabulary, and to note when you recognized an answer.
+
 ## Interpreting the result
 
 - High with-skill, low baseline: evidence the skill changes behavior.
@@ -165,7 +190,12 @@ both variants have at least one graded case.
 
 ## Limits
 
-- Four cases and 29 assertions are a smoke test, not a benchmark.
+- Four cases and 29 assertions are a smoke test, not a benchmark. Each cell is a
+  single run, so variance is unmeasured.
+- Assertions changed after seeing iteration 1 must be logged as post hoc. The
+  `3d-fallback` pattern was widened from "3D/WebGL" to the effect ("tilt"),
+  because a valid CSS-tilt answer was penalized; the baseline result for that
+  assertion did not change.
 - Regex assertions are blunt. A bad answer that uses the right words can pass.
 - Free models give a floor, not a ceiling. A strong model may hide a weak skill.
 - Local hide/restore removes installed copies but not the repository source; a
