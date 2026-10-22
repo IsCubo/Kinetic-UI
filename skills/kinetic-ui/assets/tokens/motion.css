@@ -50,6 +50,7 @@
     --kui-scale-pop: 1;
     --kui-parallax-strength: 0;
     --kui-stagger: 0ms;
+    --kui-duration-md: 200ms;
     --kui-duration-lg: 200ms;
     --kui-duration-xl: 200ms;
   }
@@ -64,6 +65,7 @@
   --kui-scale-pop: 1;
   --kui-parallax-strength: 0;
   --kui-stagger: 0ms;
+  --kui-duration-md: 200ms;
   --kui-duration-lg: 200ms;
   --kui-duration-xl: 200ms;
 }
