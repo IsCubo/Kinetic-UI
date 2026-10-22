@@ -195,7 +195,7 @@ Two habits keep the table honest. First, name the artifact in the Evidence colum
 
 Critique receives the filled table, the raw `findings` array as JSON (`JSON.stringify(result.findings)`), screenshots at the three widths plus the reduced-motion state, the tier notes, and the list of BLOCKED checks with the reason. Those rows become critique's starting list: do not pre-argue them, and do not mark a blocked check as passing because the design looks right.
 
-Then continue in the planned critique stage, re-enter the build with its fixes, and come back through this file. The companion stages are references/workflow/direction.md, references/workflow/critique.md, and references/workflow/loop.md.
+Then continue in the critique stage, re-enter the build with its fixes, and come back through this file. The companion stages are `references/workflow/direction.md`, `references/workflow/critique.md`, and `references/workflow/loop.md`.
 
 When critique disagrees with a PASS, record both verdicts instead of rerunning the same check to settle it. Verification settles facts; critique settles judgment. The next build needs to know which one it is answering.
 

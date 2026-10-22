@@ -1,6 +1,6 @@
 ---
 name: kinetic-ui
-description: "Trigger: micro-interactions, motion, animation, parallax, scroll effects, 3D/WebGL, depth, cyberpunk or other visual styles, brand identity, UI components. Builds distinctive, accessible, device-aware frontend UX/UI."
+description: "Trigger: frontend UI direction, micro-interactions, motion, parallax, scroll and 3D effects, visual styles, brand identity, components, critique, verification. Decides, builds with tiers and reduced motion, verifies, and critiques the result."
 license: Apache-2.0
 metadata:
   author: IsCubo
@@ -11,7 +11,7 @@ metadata:
 
 ## Activation Contract
 
-Load for frontend work that needs a distinctive look or motion on any framework or platform: micro-interactions, component behavior, scroll, parallax, depth, 2D/3D effects, visual styles, brand-driven UI, or choosing an animation library. Not for backend-only tasks.
+Load for frontend work that needs a distinctive look or motion on any framework or platform: micro-interactions, component behavior, scroll, parallax, depth, 2D/3D effects, visual styles, brand-driven UI, animation libraries, or judging and verifying an existing interface. Not for backend-only tasks.
 
 ## Hard Rules
 
@@ -22,6 +22,7 @@ Load for frontend work that needs a distinctive look or motion on any framework 
 5. Motion must serve feedback, orientation, hierarchy, or delight; drop motion that hurts readability or performance.
 6. Nothing flashes more than 3 times per second; motion longer than 5 s needs a pause control.
 7. Take library facts from `references/libraries.md` and confirm current versions in official docs before installing.
+8. Verify the rendered result and critique it before calling the work done; source alone is not evidence.
 
 ## Find What You Need
 
@@ -35,6 +36,7 @@ Search `INDEX.md` for a keyword (e.g. "glitch", "magnetic", "sticky") and open o
 | Easing, timing, choreography | `references/foundations/motion-principles.md` |
 | Devices, breakpoints, input modes | `references/foundations/devices-responsive.md` |
 | Brand given / no brand | `references/brand/brand-intake.md` / `references/brand/emotion-to-style.md` |
+| Direction, verify, critique | `references/workflow/direction.md`, `references/workflow/verify.md`, `references/workflow/critique.md` |
 | Micro-interactions | `references/effects/microinteractions.md` |
 | Cursor, text, ambient backgrounds | `references/effects/cursor-pointer.md`, `references/effects/text-effects.md`, `references/effects/ambient-backgrounds.md` |
 | Parallax, scroll, depth | `references/effects/parallax.md`, `references/effects/scroll-driven.md`, `references/effects/depth-layers.md` |
@@ -47,13 +49,12 @@ Search `INDEX.md` for a keyword (e.g. "glitch", "magnetic", "sticky") and open o
 
 ## Execution Steps
 
-1. Identify the surface (brand page or product UI), audience, platform, and stack.
-2. Resolve identity: brand intake, or a proposed style from emotion and page type.
-3. Choose effects and components through `INDEX.md`; read only those files.
-4. Add the motion tokens and tier detection before building effects.
-5. Build the lowest tier first, enhance per tier, and add each reduced-motion variant.
-6. Verify reduced motion, CPU-throttled low-end behavior, keyboard access, contrast, and mobile plus desktop sizes.
+1. Follow `references/workflow/loop.md`: direction, build, verify, critique.
+2. Direction: `references/workflow/direction.md` — mode, visual world, focal motion moment.
+3. Build: tokens and tier detection first, lowest tier first, effects and components through `INDEX.md`.
+4. Verify: `references/workflow/verify.md` plus `assets/snippets/verify-motion.js`.
+5. Critique: `references/workflow/critique.md` — rendered result, scorecard, findings by severity.
 
 ## Output Contract
 
-Report the identity used (given or proposed), each effect with its tiers, libraries added and why, reduced-motion and fallback behavior, and the checks run.
+Report the brief, each effect with its tiers, libraries added and why, the verification table, findings by severity, and open decisions.

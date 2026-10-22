@@ -1,6 +1,6 @@
 # kinetic-ui
 
-A universal [Agent Skill](https://agentskills.io) for distinctive, accessible, device-aware frontend UX/UI: micro-interactions, motion, parallax, scroll-driven effects, depth, 2D/3D, visual styles, component behavior, brand identity, and proven libraries.
+A universal [Agent Skill](https://agentskills.io) for distinctive, accessible, device-aware frontend UX/UI. It runs a full loop — **direction → build → verify → critique** — so the agent decides what the interface should be, builds it with motion tiers and reduced-motion fallbacks, proves it with a verification matrix, and judges the rendered result.
 
 Works with any agent that reads the agent-skills format (OpenCode, Claude Code, and others). No runtime, no dependencies, no build step: plain Markdown, CSS, and vanilla JS.
 
@@ -11,6 +11,8 @@ Most UI work fails in the same three places: motion that ignores `prefers-reduce
 - **Reduced motion is not optional.** Every effect and component file carries a `## Reduced motion` section with its exact tier-0 behavior, enforced by the validator.
 - **Every effect has a budget.** Motion tiers T0–T3 (`references/foundations/performance-tiers.md`) decide what runs on a low-end phone, and each file states its `## Low-end fallback`.
 - **Brand first, style second.** A provided brand maps into nine `--brand-*` tokens; with no brand, the agent proposes a style from page type and intended emotion, and labels it a proposal.
+- **Direction before code, critique after it.** A short brief fixes the surface mode, visual world, and focal motion moment; the critique scores the rendered result and reports located findings by severity.
+- **Verification is a report, not a claim.** A matrix of checks — keyboard, screen reader, contrast, reduced motion, tiers, LCP/INP/CLS, zoom — each with a PASS/FAIL/BLOCKED result and evidence, plus a console audit you can run.
 
 ## Install
 
@@ -30,7 +32,7 @@ Ask for the outcome, not the file. The skill activates on frontend work that nee
 
 > "Build a pricing page with a cyberpunk feel, but keep our brand blue and make it usable on a low-end Android."
 
-The agent then reads `SKILL.md`, follows its intent routing, and opens only the files it needs through `INDEX.md` (keyword catalog generated from each file's header).
+The agent then reads `SKILL.md`, follows its intent routing, and opens only the files it needs through `INDEX.md` (keyword catalog generated from each file's header). It writes a short brief, builds the lowest motion tier first, runs the verification matrix, and reports findings by severity instead of declaring the work done.
 
 ## Structure
 
@@ -48,11 +50,13 @@ skills/kinetic-ui/
     components/               buttons, forms, cards, navigation, overlays, feedback,
                               selection controls, carousels, heroes, lists
     platforms/                web frameworks, Flutter, SwiftUI, Jetpack Compose
+    workflow/                 direction, loop, verify, critique
     libraries.md              verified catalog: names, licenses, caveats, dates
   assets/
     tokens/motion.css         duration, easing, distance, and scale tokens
     tokens/brand-tokens.template.json
     snippets/motion-tier.js   detection and tier application
+    snippets/verify-motion.js console audit: tiers, loops, reduced motion, a11y red flags
     effects/                  effect-specific CSS/JS
 ```
 
