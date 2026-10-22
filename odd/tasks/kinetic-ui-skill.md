@@ -49,7 +49,7 @@ Branch: `feat/kinetic-ui-skill` (from `main`) · Delivery: `single-pr` (new solo
 | T17 | S15 | inline | done | `scripts/install.mjs`, 10 installer tests, README — `a4cf3c4` |
 | T18 | S16 | inline | done | 4 cases / 29 assertions; runner+grader; 30 tests pass; init prepared 8 runs — `ae86d0d` |
 | T19 | S17 | inline | done | `references/workflow/tooling.md`, linked from verify/router/loop; 53 files validated, 30 tests pass — `bec1a57` |
-| T20 | S18 | inline | done | `scripts/eval-isolate.mjs` + per-run input copies; 36 tests pass; docs |
+| T20 | S18 | inline | done | `scripts/eval-isolate.mjs` + per-run input copies; 36 tests pass; docs — `671f675` |
 
 Risk: T18–T20 none — maintainer tooling, local skill-copy moves with a manifest and rollback, and documentation; no stored product data, credentials, public API, CLI, or published contract changed.
 
@@ -85,3 +85,4 @@ Route evidence: T4–T10 meet the Writer trigger (a) — independent units with 
 - **L24:** Eval pack: `evals/evals.json` (4 cases, 29 assertions), an intentionally flawed pricing fixture, `scripts/eval.mjs` (`init`/`list`/`grade`), 5 eval tests, and `evals/README.md`. Suite is 30/30; `init` prepared 8 isolated runs under `evals/workspace/iteration-1/`.
 - **L25:** Tooling bridge: capability map (Playwright MCP, Chrome DevTools MCP, Playwright, axe, Lighthouse), selection order, stable invocations, failure modes, and BLOCKED rules in `references/workflow/tooling.md`; linked from `verify.md`, `SKILL.md`, and `loop.md`. Validator 53 files; suite 30/30.
 - **L26 (2026-10-22, user request, verbatim):** "si hagale". Authorized: implement local baseline isolation first — hide/restore with a manifest, symlink-safe, plus per-run input copies — and document the strict container/profile level for causal claims.
+- **L27:** Baseline isolation: `scripts/eval-isolate.mjs status|hide|restore` moves every known installed copy to `.kinetic-ui.disabled`, writes a recoverable manifest under `evals/workspace/`, preserves symlinks and rolls back a partial hide. `scripts/lib/agents.mjs` now holds the shared target map for installer and isolation. Each run copies its inputs to `inputs/` and the prompt is rewritten to that path, so no `RUN.md` points at the repository. Suite 36/36; real `status` detects the live symlink and `hide --dry-run` plans one move.
