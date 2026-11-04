@@ -1,6 +1,6 @@
 # Jetpack Compose
 
-> Keywords: jetpack compose, android, kotlin, animateFloatAsState, animate*AsState, AnimatedVisibility, AnimatedContent, updateTransition, rememberInfiniteTransition, Animatable, spring, SharedTransitionLayout, sharedElement, MotionDurationScale, animator duration scale, remove animations, CompositionLocal, MaterialTheme, graphicsLayer, RuntimeShader, AGSL, low RAM, battery saver, animaciones android
+> Keywords: jetpack compose, android, kotlin, animateFloatAsState, animate*AsState, AnimatedVisibility, AnimatedContent, updateTransition, rememberInfiniteTransition, Animatable, spring, SharedTransitionLayout, sharedElement, MotionDurationScale, animator duration scale, remove animations, CompositionLocal, MaterialTheme, graphicsLayer, RuntimeShader, AGSL, low RAM, battery saver, animaciones android, Shape, Outline.Generic, Path.arcTo, shadowElevation, floating bottom bar, notched bottom bar, concentric arc cutout
 > Summary: How to implement kinetic-ui motion in Jetpack Compose: tiers and tokens in a CompositionLocal, which animation API to use per tier, how Compose follows the system animation scale, and low-end fallbacks.
 
 Build every effect from its framework-agnostic file first (`references/effects/`), then translate it with the tables below.
@@ -121,6 +121,55 @@ SharedTransitionLayout {
 ```
 
 The default `AnimatedContent` transition includes a scale-in, so always pass a `transitionSpec` that matches the tier.
+
+## Floating notched bottom bar (custom `Shape` with a real shadow)
+
+See the pattern and its geometry (concentric arc, why a two-curve "V" fails, the contrast rule) in `references/components/navigation.md`. This is the tested Compose shape: a `Shape` wraps the bar's `Path` (rounded rect with a circular cutout concentric with the active icon) so `graphicsLayer { shadowElevation }` can cast a real shadow through the notch — a `Canvas` can draw the path but cannot shadow it.
+
+```kotlin
+private class NotchBarShape(
+    private val barTop: Float, private val corner: Float, private val centerX: Float,
+    private val circleCenterY: Float, private val cageRadius: Float,
+) : Shape {
+    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density) =
+        Outline.Generic(buildPath(size.width, size.height))
+
+    fun buildPath(width: Float, height: Float): Path = Path().apply {
+        val dy = circleCenterY - barTop
+        val dx = sqrt((cageRadius * cageRadius - dy * dy).coerceAtLeast(0f))
+        val leftAngle = Math.toDegrees(atan2(-dy.toDouble(), -dx.toDouble())).toFloat()
+        val rightAngle = Math.toDegrees(atan2(-dy.toDouble(), dx.toDouble())).toFloat()
+        val sweep = -(360f - (rightAngle - leftAngle))      // long way, through the bottom
+
+        moveTo(0f, barTop + corner)
+        arcTo(Rect(0f, barTop, corner * 2f, barTop + corner * 2f), 180f, 90f, false)
+        lineTo(centerX - dx, barTop)
+        arcTo(
+            Rect(centerX - cageRadius, circleCenterY - cageRadius, centerX + cageRadius, circleCenterY + cageRadius),
+            leftAngle, sweep, false,
+        )
+        lineTo(width - corner, barTop)
+        arcTo(Rect(width - corner * 2f, barTop, width, barTop + corner * 2f), 270f, 90f, false)
+        lineTo(width, height - corner); arcTo(Rect(width - corner * 2f, height - corner * 2f, width, height), 0f, 90f, false)
+        lineTo(corner, height); arcTo(Rect(0f, height - corner * 2f, corner * 2f, height), 90f, 90f, false)
+        close()
+    }
+}
+```
+
+Use it with the shadow on the surface, and clamp `cageRadius` per item so the cutout never collides with the bar's rounded corners:
+
+```kotlin
+Box(
+    Modifier.matchParentSize().graphicsLayer {
+        shape = NotchBarShape(barTopPx, cornerPx, centerX, circleCenterYPx, cageRadius)
+        shadowElevation = 8.dp.toPx()   // this is what makes the cutout read against a near-white page
+        clip = true
+    }.background(barColor)
+)
+```
+
+Read the active item's sliding position (`animateFloatAsState`) inside the `graphicsLayer` block, not in composition, so the spring only redraws the layer instead of recomposing the bar.
 
 ## Reduced motion
 

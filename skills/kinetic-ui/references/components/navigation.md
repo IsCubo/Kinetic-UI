@@ -1,6 +1,6 @@
 # Navigation
 
-> Keywords: navigation, navbar, top bar, app bar, header, sticky header, hide on scroll, headroom, mega menu, dropdown navigation, drawer, side menu, hamburger, bottom navigation, tab bar, tabs as navigation, breadcrumbs, skip link, aria-current, menú, navegación
+> Keywords: navigation, navbar, top bar, app bar, header, sticky header, hide on scroll, headroom, mega menu, dropdown navigation, drawer, side menu, hamburger, bottom navigation, tab bar, tabs as navigation, breadcrumbs, skip link, aria-current, floating bottom bar, floating nav, notched bottom bar, cutout nav, concentric notch, cradle, protruding circle, V-shaped notch, menú, navegación, barra flotante, muesca, cuna
 > Summary: How navigation components behave: top bar, sticky and hide-on-scroll header, mega menu, drawer, bottom navigation, tabs as navigation, breadcrumbs, and skip link, with reduced-motion and low-end rules.
 
 ## When to use
@@ -163,6 +163,33 @@ Bottom navigation: links, never buttons. Always show labels, and respect the saf
 
 `.bottom-nav { position: fixed; inset-inline: 0; inset-block-end: 0; padding-block-end: env(safe-area-inset-bottom); }`. Pad the page end by the bar's height.
 
+### Floating bottom bar with a protruding circle and a concentric notch
+
+A variant seen in native apps: the bar floats inset from the screen edges, the active item is a solid circle that pokes above the bar's top edge, and the bar surface is carved around it so the circle looks detached rather than wedged in.
+
+Two rules decide whether this reads as intended or as a broken shape, independent of the platform:
+
+1. **Carve the notch as an arc of the circle concentric with the icon**, not as two mirrored curves (Bézier or otherwise) meeting at a point under the icon. A concentric arc — same center as the icon, radius = `iconRadius + gap` — is, by construction, exactly `gap` away from the icon at every point of its circumference. Two curves meeting at a point only guarantee that distance at the meeting point; everywhere else the gap can pinch toward zero, which reads as a "V" that appears to touch the icon even when the center point is technically clear.
+
+   Geometry, in the bar's local coordinates (`centerX`, `barTop` = y of the bar's top edge, `circleCenterY` = y of the icon circle's center, `cageRadius = iconRadius + gap`):
+
+   ```
+   dy = circleCenterY - barTop
+   dx = sqrt(cageRadius² - dy²)                       // half-width of the notch at the bar's edge
+   leftAngle  = atan2(-dy, -dx)                        // tangent point, left of centerX
+   rightAngle = atan2(-dy,  dx)                        // tangent point, right of centerX
+   capSweep   = rightAngle - leftAngle                 // the small arc that already pokes above the bar
+   sweep      = -(360 - capSweep)                      // sweep the long way, through the bottom
+   ```
+
+   Draw a line to `(centerX - dx, barTop)`, an arc of the circle `(center = (centerX, circleCenterY), radius = cageRadius)` from `leftAngle` sweeping `sweep` degrees, then continue the bar's outline from `(centerX + dx, barTop)`. On the web, build the same shape with an SVG `<path>` (`A` arc command) or a `clip-path: path(...)`; in Canvas/Skia-backed APIs (Compose `Path.arcTo`, SwiftUI `Path.addArc`, Flutter `CustomClipper` with `Path.arcTo`) the same two angles and one arc apply directly.
+
+   Clamp `cageRadius` near the bar's rounded corners (`min(cageRadius, centerX - corner, barWidth - corner - centerX)`) instead of distorting the arc into an ellipse, so end items keep a clean circular cutout, just a smaller one.
+
+2. **The notch is invisible without real contrast or elevation.** The cutout only shows whatever is behind the bar. If the bar's surface color is close to the page background (a common case: a white bar on an `#f6f8fa`-ish page), the gap reads as nothing no matter how wide the arc is — widening the notch does not fix a contrast problem. Either keep the bar's surface clearly distinct from the page, or give the bar a real elevation/shadow (native `shadowElevation`/`elevation`, or a CSS `box-shadow`) so the shadow falls through the cutout and makes the cradle read. A flat `Canvas`/SVG fill cannot cast a shadow from an arbitrary path; wrap the same path in a native shape (Compose `Shape` + `graphicsLayer { shadowElevation }`, SwiftUI `.shadow` on a `Path`-backed shape, a Flutter `ClipPath` + `PhysicalShape`) or, on the web, approximate it with `filter: drop-shadow()` on an SVG mask.
+
+Also give the protruding circle enough height that the active item's label has clearance underneath it: if the circle's bottom edge sits close to the bar's bottom padding, the label crowds the circle instead of sitting clearly inside the floating bar.
+
 Tabs as navigation. When each tab is its own URL, use links in a `<nav>` with `aria-current="page"`, not `role="tab"`. Use the APG Tabs pattern only for in-page panels. Move one indicator with `translate` and `scale` rather than `width`:
 
 ```js
@@ -244,3 +271,5 @@ None needed. Accessible navigation primitives for React: React Aria, Radix UI. I
 - A drawer built as a `<div>` with no focus containment or Esc. Use `<dialog>`.
 - Bottom navigation with icon-only items. Labels are required for recognition.
 - `aria-current` missing, so screen-reader users cannot tell where they are.
+- A floating circle's notch carved with two curves meeting at a point under the icon. It reads as a "V" that touches the icon even when the center point has clearance; use one arc concentric with the icon instead.
+- A floating notched bar whose surface color nearly matches the page background. The notch is invisible regardless of width; fix the contrast or add a real shadow, don't widen the cutout.

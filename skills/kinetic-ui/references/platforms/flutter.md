@@ -1,6 +1,6 @@
 # Flutter
 
-> Keywords: flutter, dart, implicit animations, AnimatedContainer, AnimatedOpacity, TweenAnimationBuilder, AnimationController, AnimatedSwitcher, Hero, page transitions, PageTransitionsTheme, spring, physics, SpringSimulation, Rive, Lottie, flutter_animate, fragment shader, FragmentProgram, Impeller, RepaintBoundary, ThemeExtension, disableAnimations, reduceMotion, animaciones flutter
+> Keywords: flutter, dart, implicit animations, AnimatedContainer, AnimatedOpacity, TweenAnimationBuilder, AnimationController, AnimatedSwitcher, Hero, page transitions, PageTransitionsTheme, spring, physics, SpringSimulation, Rive, Lottie, flutter_animate, fragment shader, FragmentProgram, Impeller, RepaintBoundary, ThemeExtension, disableAnimations, reduceMotion, animaciones flutter, CustomClipper, PhysicalShape, Path.arcTo, floating bottom bar, notched bottom bar, concentric arc cutout
 > Summary: How to implement kinetic-ui motion in Flutter: tiers and tokens as a ThemeExtension, which animation API to use per tier, reduced motion on iOS and Android, shaders, and low-end performance.
 
 Build every effect from its framework-agnostic file first (`references/effects/`), then translate it with the tables below.
@@ -175,6 +175,65 @@ class GlowPainter extends CustomPainter {
 
 Wrap the `CustomPaint` in a `RepaintBoundary`. Below T3, paint a static `LinearGradient` in the brand colors instead.
 
+## Floating notched bottom bar (`CustomClipper` with a real shadow)
+
+See the pattern and its geometry (concentric arc, why a two-curve "V" fails, the contrast rule) in `references/components/navigation.md`. A `CustomPaint`/`Canvas` can draw the carved path but cannot cast a shadow from it; use `PhysicalShape` with a `CustomClipper<Path>`, which clips to the path *and* elevates it, so the shadow falls through the notch and makes the cutout read against a near-white page.
+
+```dart
+import 'dart:math' as math;
+
+class NotchBarClipper extends CustomClipper<Path> {
+  const NotchBarClipper({
+    required this.corner, required this.centerX, required this.circleCenterY, required this.cageRadius,
+  });
+  final double corner, centerX, circleCenterY, cageRadius;
+
+  @override
+  Path getClip(Size size) {
+    const barTop = 0.0; // the clipper's own box starts at the bar's top edge
+    final dy = circleCenterY - barTop;
+    final dx = math.sqrt(math.max(cageRadius * cageRadius - dy * dy, 0));
+    final leftAngle = math.atan2(-dy, -dx);
+    final rightAngle = math.atan2(-dy, dx);
+    final sweep = -(2 * math.pi - (rightAngle - leftAngle)); // long way, through the bottom
+
+    return Path()
+      ..moveTo(0, barTop + corner)
+      ..arcToPoint(Offset(corner, barTop), radius: Radius.circular(corner))
+      ..lineTo(centerX - dx, barTop)
+      ..arcTo(
+        Rect.fromCircle(center: Offset(centerX, circleCenterY), radius: cageRadius),
+        leftAngle, sweep, false,
+      )
+      ..lineTo(size.width - corner, barTop)
+      ..arcToPoint(Offset(size.width, barTop + corner), radius: Radius.circular(corner), clockwise: true)
+      ..lineTo(size.width, size.height - corner)
+      ..arcToPoint(Offset(size.width - corner, size.height), radius: Radius.circular(corner))
+      ..lineTo(corner, size.height)
+      ..arcToPoint(Offset(0, size.height - corner), radius: Radius.circular(corner))
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(covariant NotchBarClipper old) =>
+      old.centerX != centerX || old.cageRadius != cageRadius;
+}
+```
+
+```dart
+PhysicalShape(
+  clipper: NotchBarClipper(
+    corner: 10, centerX: centerX, circleCenterY: circleCenterY, cageRadius: cageRadius,
+  ),
+  elevation: 8, // this is what makes the cutout read, not the arc width
+  color: barColor,
+  shadowColor: Colors.black,
+  child: SizedBox(width: barWidth, height: barHeight),
+)
+```
+
+Clamp `cageRadius` near the bar's rounded corners the same way as the generic pattern (`min(cageRadius, centerX - corner, barWidth - corner - centerX)`), and drive `centerX`/`cageRadius` from an `AnimationController`/`Tween` read in `build`, not recomputed per-frame in `setState`, so the slide only repaints this one clipped layer.
+
 ## Reduced motion
 
 The platforms expose the setting differently. Read both flags:
@@ -249,3 +308,4 @@ Performance rules:
 - Forgetting `dispose()` on controllers leaks tickers and throws after the widget unmounts.
 - `AnimatedSwitcher` children without distinct keys do not animate.
 - Shader uniforms are set by index in declaration order; a reordered uniform silently breaks the effect.
+- Clipping a notched bar with `ClipPath` instead of `PhysicalShape`. `ClipPath` only clips; it cannot elevate, so the shadow that makes the cutout read never appears.
