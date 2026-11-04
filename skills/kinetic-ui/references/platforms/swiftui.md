@@ -1,6 +1,6 @@
 # SwiftUI
 
-> Keywords: swiftui, ios, ipados, macos, visionos, withAnimation, spring, bounce, matchedGeometryEffect, PhaseAnimator, KeyframeAnimator, scrollTransition, visualEffect, TimelineView, accessibilityReduceMotion, accessibilityReduceTransparency, ProMotion, 120 Hz, Low Power Mode, thermal state, EnvironmentValues, Metal shader, animaciones swiftui
+> Keywords: swiftui, ios, ipados, macos, visionos, withAnimation, spring, bounce, matchedGeometryEffect, PhaseAnimator, KeyframeAnimator, scrollTransition, visualEffect, TimelineView, accessibilityReduceMotion, accessibilityReduceTransparency, ProMotion, 120 Hz, Low Power Mode, thermal state, EnvironmentValues, Metal shader, animaciones swiftui, Shape, addArc, floating bottom bar, notched bottom bar, concentric arc cutout
 > Summary: How to implement kinetic-ui motion in SwiftUI: tiers and tokens through the environment, which animation API to use per tier and OS version, reduced motion and transparency, ProMotion, and low-end fallbacks.
 
 Build every effect from its framework-agnostic file first (`references/effects/`), then translate it with the tables below.
@@ -142,6 +142,62 @@ Choreography: use `.phaseAnimator([false, true], trigger: count) { content, up i
 
 Shared elements: `matchedGeometryEffect` needs both views in the same hierarchy and a single `isSource`. For navigation pushes on iOS 18+, use `.navigationTransition(.zoom(sourceID:in:))` with `.matchedTransitionSource(id:in:)`. At T0, use `.transition(.opacity)` and skip both.
 
+## Floating notched bottom bar (custom `Shape` with a real shadow)
+
+See the pattern and its geometry (concentric arc, why a two-curve "V" fails, the contrast rule) in `references/components/navigation.md`. Unlike Compose and Flutter, `.shadow` in SwiftUI follows the alpha mask of whatever it's attached to, so a filled custom `Shape` casts a correct shadow around its cutout with no extra elevation API — the shape itself is enough, as long as `.shadow` sits on the filled shape and not on an ancestor that clips it away first.
+
+```swift
+struct NotchBarShape: Shape {
+    var corner: CGFloat
+    var centerX: CGFloat
+    var circleCenterY: CGFloat
+    var cageRadius: CGFloat
+
+    // Lets the cradle track an animatable centerX/cageRadius through `withAnimation`.
+    var animatableData: AnimatablePair<CGFloat, CGFloat> {
+        get { AnimatablePair(centerX, cageRadius) }
+        set { (centerX, cageRadius) = (newValue.first, newValue.second) }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        let barTop: CGFloat = 0
+        let dy = circleCenterY - barTop
+        let dx = sqrt(max(cageRadius * cageRadius - dy * dy, 0))
+        let leftAngle = Angle(radians: atan2(-dy, -dx))
+        let rightAngle = Angle(radians: atan2(-dy, dx))
+        let sweep = -(2 * .pi - (rightAngle.radians - leftAngle.radians)) // long way, through the bottom
+
+        var path = Path()
+        path.move(to: CGPoint(x: 0, y: barTop + corner))
+        path.addArc(center: CGPoint(x: corner, y: barTop + corner), radius: corner,
+                    startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
+        path.addLine(to: CGPoint(x: centerX - dx, y: barTop))
+        path.addArc(center: CGPoint(x: centerX, y: circleCenterY), radius: cageRadius,
+                    startAngle: leftAngle, endAngle: Angle(radians: leftAngle.radians + sweep), clockwise: true)
+        path.addLine(to: CGPoint(x: rect.width - corner, y: barTop))
+        path.addArc(center: CGPoint(x: rect.width - corner, y: barTop + corner), radius: corner,
+                    startAngle: .degrees(270), endAngle: .degrees(0), clockwise: false)
+        path.addLine(to: CGPoint(x: rect.width, y: rect.height - corner))
+        path.addArc(center: CGPoint(x: rect.width - corner, y: rect.height - corner), radius: corner,
+                    startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
+        path.addLine(to: CGPoint(x: corner, y: rect.height))
+        path.addArc(center: CGPoint(x: corner, y: rect.height - corner), radius: corner,
+                    startAngle: .degrees(90), endAngle: .degrees(180), clockwise: false)
+        path.closeSubpath()
+        return path
+    }
+}
+```
+
+```swift
+NotchBarShape(corner: 10, centerX: centerX, circleCenterY: circleCenterY, cageRadius: cageRadius)
+    .fill(barColor)
+    .shadow(color: .black.opacity(0.18), radius: 8, y: 2) // this is what makes the cutout read, not the arc width
+    .frame(width: barWidth, height: barHeight)
+```
+
+Clamp `cageRadius` near the bar's rounded corners the same way as the generic pattern (`min(cageRadius, centerX - corner, barWidth - corner - centerX)`), and drive `centerX` with `withAnimation(.spring(...))` on the selection change; `animatableData` makes the shape itself interpolate, so SwiftUI redraws the shape each frame without re-running the view's `body`.
+
 ## Reduced motion
 
 | Setting | Environment value | Behavior |
@@ -188,3 +244,4 @@ Performance rules:
 - `.animation(_:)` without `value:` is deprecated and animates unrelated changes.
 - iOS 17-only APIs (`PhaseAnimator`, `KeyframeAnimator`, `scrollTransition`, `visualEffect`, shaders) need `if #available(iOS 17, *)` and a T1 path for older systems.
 - Reduce Motion does not mean "no feedback": keep opacity and color changes so actions stay visible.
+- Putting `.shadow` on a container that clips its content (e.g. `.clipShape` applied above the shadow, or a parent with `.clipped()`) cuts the shadow off instead of letting it fall through the cutout.
