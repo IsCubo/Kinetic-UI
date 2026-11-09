@@ -128,11 +128,27 @@
       "id": "flawed-pricing-critique",
       "title": "Critique an intentionally flawed pricing page",
       "prompt": "Critique the pricing page in `evals/fixtures/flawed-pricing/index.html`. I need to know what blocks shipping. If you cannot render it, say so.",
-      "expected_output": "A critique with located findings by severity, covering the infinite animation and missing reduced-motion handling, low contrast, the unnamed icon button, removed focus styles, and the image without dimensions; a verdict from the critique vocabulary.",
+      "expected_output": "A critique with located findings by severity, covering the page shipping no script so every control is inert, the infinite animation and missing reduced-motion handling, low contrast, the unnamed icon button, removed focus styles, the image without dimensions, and the two competing superlative badges; a verdict from the critique vocabulary.",
       "files": [
         "evals/fixtures/flawed-pricing/index.html"
       ],
       "assertions": [
+        {
+          "id": "dead-controls",
+          "text": "Finds that the page ships no script, so its controls are inert",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(no|without|zero)\\b[^.\\n]{0,40}(<script|javascript\\b)"
+          }
+        },
+        {
+          "id": "competing-claims",
+          "text": "Finds the two competing superlative badges",
+          "check": {
+            "type": "regex",
+            "pattern": "best value"
+          }
+        },
         {
           "id": "infinite",
           "text": "Finds the infinite animation or pulse",

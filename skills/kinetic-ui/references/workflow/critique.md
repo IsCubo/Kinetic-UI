@@ -1,7 +1,7 @@
 # Critique
 
-> Keywords: critique, design critique, design review, UI review, design audit, heuristic evaluation, scorecard, severity, severity levels, blocker, major, minor, findings, evidence, screenshot, capture widths, 360, 768, 1440, surface mode, visual audit, contrast audit, keyboard pass, reduced motion check, tier fallback check, second opinion, prioritized fixes, what to fix first, quality review, unverified, re-check, design QA, evaluación de diseño, revisión de diseño, crítica de diseño
-> Summary: How to judge a rendered interface with evidence: capture set, surface mode, ten dimensions scored 0–4 with anchors, severity levels, one-line findings, and a re-check scope.
+> Keywords: critique, design critique, design review, UI review, design audit, heuristic evaluation, scorecard, severity, severity levels, blocker, major, minor, findings, evidence, screenshot, capture widths, 360, 768, 1440, surface mode, visual audit, contrast audit, keyboard pass, reduced motion check, tier fallback check, second opinion, prioritized fixes, what to fix first, quality review, unverified, re-check, design QA, dead button, unwired control, no script, button does nothing, functional check, source-provable, evaluación de diseño, revisión de diseño, crítica de diseño
+> Summary: How to judge an interface with evidence: functional reality check, capture set, surface mode, ten dimensions scored 0–4 with anchors, severity levels, source-provable findings when nothing renders, one-line findings, and a re-check scope.
 
 This file judges a result. It does not build, style, or choose effects; open the implementation files for that. Critique answers one question: given what the user actually sees, what is wrong, how bad is it, and what is the smallest change that fixes it.
 
@@ -20,33 +20,50 @@ One stage of the skill's direction → build → verify → critique loop; the l
 
 ## Evidence rule
 
-Judge what renders. A rule that was written but never observed is a claim, not a finding.
+Judge what renders. A rule that was written but never observed is a claim, not a finding — except for the closed set of source-provable facts in the table below, which no viewport, state, or browser can change.
 
 | Counts as evidence | Does not count |
 | --- | --- |
-| Full-page screenshots at the capture widths in `## Procedure` | Source code, CSS files, component props |
+| Full-page screenshots at the capture widths in `## Procedure` | Source as a substitute for what renders (`## Functional reality check` is the only exception) |
 | A screen recording of one real task, 30–60 s | The author's description of the animation |
 | Measured numbers: contrast ratio, LCP, INP, CLS, frame time, computed token values, animation counts from `assets/snippets/verify-motion.js` | "Looks good", "feels fast", a design mockup |
 | The same capture with `prefers-reduced-motion: reduce` and `data-motion-tier="0..3"` forced | A claim that reduced motion is handled |
 | Both themes, if the product ships both | Light theme only, with the dark theme assumed to match |
+| Source-provable facts: an unwired control, a rule with no override anywhere, a contrast ratio between two flat colors, an image with no intrinsic size | Any claim about layout, spacing, type rendering, timing, or performance read from source |
 
 Rules:
 
 1. Use the product's real widths, not a resized window that hides overflow. Read the viewport width from the browser, not from the device name.
 2. Capture both themes when `prefers-color-scheme` or a theme switch exists; glows, shadows, noise, and borders change with the scheme.
 3. Force each motion tier you claim to support and capture the T0 state; a fallback that exists only in code is unverified.
-4. If the interface cannot be rendered, say exactly why in one line, mark every rendering-dependent dimension `unverified`, and set the verdict to `unverified`. Do not convert code reading into a score.
+4. If the interface cannot be rendered, say exactly why in one line, mark every rendering-dependent dimension `unverified`, and set the score to `unverified`. Do not turn code reading into a score.
 5. Keep captures in one folder with the names from `## Findings format` so a finding can be checked without a second run.
+6. `unverified` covers the score, not every claim. A fact that does not change with viewport, state, or browser is provable from the source and belongs in the findings with a `[blocker]`, `[major]`, or `[minor]` label. The closed list: a control with no handler, no script, or no destination; a global rule that removes an affordance with no replacement anywhere in the stylesheet; a contrast ratio computed between two flat colors; an image with no intrinsic size; a declared animation with no `prefers-reduced-motion` block.
+7. Name the source-provable findings as such. Never mix them into the score, and never let an unrendered run report only `unverified` when a provable blocker exists.
+
+## Functional reality check
+
+Run this before any visual judgment, rendered or not. A page whose primary action does nothing has no visual quality worth scoring, and this is the one class of defect that a source read proves outright.
+
+| Check | How | Failure means |
+| --- | --- | --- |
+| The primary action is wired | Find a `<script>`, a form `action`, a real `href`, or an event handler that reaches it | The page cannot complete its own task — blocker |
+| Every shown control does something | For each `button`, `a`, and input: handler, destination, or an explicit disabled state | A control that looks active and is inert — blocker on a money path, major elsewhere |
+| The state it claims is the state it renders | Toggle handlers versus the markup the user first sees | A control stuck in one state — major |
+| Nothing is a dead end | An empty `href="#"`, a `type="button"` with no handler, a form that submits nowhere | Dead end on a task path — blocker |
+
+Report the result as one line per control the first time, then only the failures. Skip the check when the input is a screenshot, a video, or a live URL you already drove.
 
 ## Procedure
 
-1. **Capture.** Take the full set below at a device pixel ratio of 1, then one 2× crop of the primary action and the smallest body text to judge type rendering.
-2. **Name the surface mode.** Product UI, content and commerce, or brand and marketing. The mode sets what is expected and the tier cap; the same empty state is fine on a brand page and a defect in a dashboard.
-3. **Score the ten dimensions** against the anchors in `## Scorecard`. Score what the captures show, not what the code intends.
-4. **List findings** in the format from `## Findings format`, one issue per line, sorted by severity.
-5. **Fix** blockers first, as `references/workflow/loop.md` orders them; one smallest change per finding, batched only while the batch stays reviewable. Keep every passing element.
-6. **Re-check only what changed**, using the scope table below, and re-capture only the affected widths.
-7. **Report** with `## Interpreting the score`; hand off per `## Handoff`.
+1. **Functional reality check.** Run `## Functional reality check` from the source, rendered or not. Its failures enter the findings with severity before any capture is scored.
+2. **Capture.** Take the full set below at a device pixel ratio of 1, then one 2× crop of the primary action and the smallest body text to judge type rendering.
+3. **Name the surface mode.** Product UI, content and commerce, or brand and marketing. The mode sets what is expected and the tier cap; the same empty state is fine on a brand page and a defect in a dashboard.
+4. **Score the ten dimensions** against the anchors in `## Scorecard`. Score what the captures show, not what the code intends. Leave an unrendered run unverified.
+5. **List findings** in the format from `## Findings format`, one issue per line, sorted by severity.
+6. **Fix** blockers first, as `references/workflow/loop.md` orders them; one smallest change per finding, batched only while the batch stays reviewable. Keep every passing element.
+7. **Re-check only what changed**, using the scope table below, and re-capture only the affected widths.
+8. **Report** with `## Interpreting the score`; hand off per `## Handoff`.
 
 | Capture | Width | What it proves |
 | --- | --- | --- |
@@ -108,7 +125,7 @@ Severity comes from user impact, never from how hard the fix is.
 
 | Level | Examples |
 | --- | --- |
-| Blocker | The recommended plan's CTA sits off screen at 360 px with `scrollWidth` 412 > 360 · Body text measures 3.1:1 against its surface · A dialog traps keyboard focus with no Escape handler |
+| Blocker | The recommended plan's CTA sits off screen at 360 px with `scrollWidth` 412 > 360 · Body text measures 3.1:1 against its surface · A dialog traps keyboard focus with no Escape handler · The primary CTA has no handler and the document ships no script, so pressing it does nothing |
 | Major | Primary submit gives no feedback for 1.8 s and stays clickable · Hero LCP is 4.1 s because a 3D chunk blocks the poster · Hover-only row actions are unreachable on touch |
 | Minor | Section gap is 40 px beside 32 px siblings · Two hovers use different easing curves for the same role · One toast says "Done" where the rest say "Saved" |
 
@@ -130,7 +147,7 @@ One issue per line, exactly this shape:
 | Field | Must contain |
 | --- | --- |
 | `severity` | `blocker`, `major`, or `minor`, from `## Severity` |
-| `where` | A selector or a named region plus the capture it is visible in, e.g. `.plan--recommended .cta @ C1` |
+| `where` | A selector or a named region plus the capture it is visible in, e.g. `.plan--recommended .cta @ C1`; for a source-provable finding, the selector plus the markup or rule that proves it, e.g. `.hero .cta @ script scan: no `<script>` in document` |
 | `observed` | A measurement: pixels, ratio, milliseconds, count, or a named element state. Not an adjective |
 | `why it matters` | The user effect in one clause: task lost, group excluded, trust lost, time added |
 | `fix` | The smallest concrete change, naming the token or property to use |
@@ -152,8 +169,8 @@ Rules:
 1. One issue per line. Two fixes in one line cannot be verified separately.
 2. Every motion finding names the trigger, the animated property, and the token that should run. "The card animation" is not a finding; "hover on `.card` translates 12 px over 450 ms with `ease-in-out` instead of `--kui-duration-sm` and `--kui-ease-standard`" is.
 3. Name the concrete change whenever a subjective word appears. Ban `modern`, `clean`, `pop`, `polished`, `engaging`, and `premium feel` unless the same line states what to change.
-4. A finding without a capture reference is unverified; move it to the capture set or drop it.
-5. Report only what the captures show. A suspicion belongs in the next direction pass, not in the findings list.
+4. Every finding cites where it was observed: a capture id, or, for a source-provable fact, the selector plus the markup or rule that proves it.
+5. Report only what the captures or the source prove. A suspicion belongs in the next direction pass, not in the findings list.
 
 ## Interpreting the score
 
@@ -165,6 +182,7 @@ Never average the ten scores. There is no "7/10", no single percentage, and no l
 | No blocker, one or more major | Verdict `shippable with named debt`; list the majors and the dimension they sit in |
 | All dimensions ≥ 3, no major | Verdict `shippable`; list the minors as optional |
 | Any rendering-dependent dimension unverified | Verdict `unverified`, with the reason; no numeric claim on that dimension |
+| Unrendered, with a source-provable blocker | Verdict `unverified`; state in one line that the blocker alone makes it not shippable, and list it first |
 
 Always name, after the verdict:
 

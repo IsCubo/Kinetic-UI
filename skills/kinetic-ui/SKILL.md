@@ -22,7 +22,7 @@ Load for frontend work that needs a distinctive look or motion on any framework 
 5. Motion must serve feedback, orientation, hierarchy, or delight; drop motion that hurts readability or performance.
 6. Nothing flashes more than 3 times per second; motion longer than 5 s needs a pause control.
 7. Take library facts from `references/libraries.md` and confirm current versions in official docs before installing.
-8. Verify the rendered result and critique it before calling the work done; source alone is not evidence.
+8. Verify the rendered result and critique it before calling the work done; source alone is not evidence, except for the source-provable facts `references/workflow/critique.md` lists — an unwired control is a blocker with or without a render.
 
 ## Find What You Need
 

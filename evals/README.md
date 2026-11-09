@@ -44,9 +44,12 @@ evals/workspace/iteration-1/
 ```
 
 Hand each `RUN.md` to a fresh session. The run writes its full response to
-`outputs/response.md` and puts any code files in `outputs/` too. Before the
-first session, choose an isolation level below; for the local level, hide
-installed copies now and restore after the last run. Then:
+`outputs/response.md` and puts any code files in `outputs/` too. Anything the
+run builds must open as-is in a browser: one self-contained `.html` with inline
+CSS and JS, no compile step. A `.tsx`-only answer cannot be reviewed, so it
+loses the design lane by default. Before the first session, choose an isolation
+level below; for the local level, hide installed copies now and restore after
+the last run. Then:
 
 ```bash
 node scripts/eval.mjs grade --iteration 1
@@ -197,19 +200,24 @@ score the page, not the vocabulary, and to note when you recognized an answer.
 
 ## Limits
 
-- Four cases and 29 assertions are a smoke test, not a benchmark. Each cell is a
+- Four cases and 31 assertions are a smoke test, not a benchmark. Each cell is a
   single run, so variance is unmeasured.
 - Assertions changed after seeing iteration 1 must be logged as post hoc. The
   `3d-fallback` pattern was widened from "3D/WebGL" to the effect ("tilt"),
   because a valid CSS-tilt answer was penalized; the baseline result for that
-  assertion did not change.
+  assertion did not change. Two critique assertions were added later
+  (`dead-controls`, `competing-claims`) because the fixture shipped no script at
+  all and two competing badges, and no assertion covered either; the blind human
+  reviewer preferred the baseline, which had found both. Regraded: the critique
+  case ties at 9/11, so the aggregate rose to 29/31 against 16/31.
 - Regex assertions are blunt. A bad answer that uses the right words can pass.
 - Free models give a floor, not a ceiling. A strong model may hide a weak skill.
 - Local hide/restore removes installed copies but not the repository source; a
   publishable delta needs a disposable profile or container.
 - Rendering tools are not assumed. The critique case accepts an `unverified`
-  verdict when the agent cannot render the page; the code-level findings still
-  count.
+  verdict when the agent cannot render the page; the source-provable findings
+  still count, and since the critique page gained a functional reality check, an
+  inert control is a blocker even with no render.
 - The pack measures the skill's protocol, not the quality of a specific
   implementation. Do not use it as a release gate without human review.
 
