@@ -1,6 +1,20 @@
+<p align="center">
+  <img src="docs/brand/banner.svg" alt="kinetic-ui — Agent Skill for distinctive, verified motion UI" width="560">
+</p>
+
+<p align="center">
+  <img alt="license: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-3b5bff">
+  <img alt="node >=18" src="https://img.shields.io/badge/node-%E2%89%A518-3b5bff">
+  <img alt="no runtime dependencies" src="https://img.shields.io/badge/dependencies-none-3b5bff">
+</p>
+
 # kinetic-ui
 
-A universal [Agent Skill](https://agentskills.io) for distinctive, accessible, device-aware frontend UX/UI. It runs a full loop — **direction → build → verify → critique** — so the agent decides what the interface should be, builds it with motion tiers and reduced-motion fallbacks, proves it with a verification matrix, and judges the rendered result.
+A universal [Agent Skill](https://agentskills.io) for distinctive, accessible, device-aware frontend UX/UI. It runs a full loop so the agent decides what the interface should be, builds it with motion tiers and reduced-motion fallbacks, proves it with a verification matrix, and judges the rendered result:
+
+<p align="center">
+  <img src="docs/brand/loop.svg" alt="The loop: Direction sets mode, world, and one focal moment. Build ships T0 first with reduced motion always on. Verify reports PASS, FAIL, or BLOCKED with evidence. Critique reports severity, findings, and one highest-leverage fix. Critique's fixes loop back into Build for a re-check." width="720">
+</p>
 
 Works with any agent that reads the agent-skills format (OpenCode, Claude Code, and others). No runtime, no dependencies, no build step: plain Markdown, CSS, and vanilla JS.
 
@@ -19,7 +33,7 @@ Most UI work fails in the same three places: motion that ignores `prefers-reduce
 The skill is the folder `skills/kinetic-ui/`; it is self-contained and needs no runtime. The repository ships an installer for convenience (Node 18+), but copying the folder by hand works too.
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/IsCubo/Kinetic-UI.git kinetic-ui
 cd kinetic-ui
 
 node scripts/install.mjs --agent opencode   # ~/.config/opencode/skills/kinetic-ui
@@ -98,6 +112,17 @@ skills/kinetic-ui/
 
 The skill ships with a maintainer eval pack under `evals/`. It measures protocol
 compliance — surface mode, reduced motion, tiers, verification — not taste.
+
+**Latest run (2026-11-09, `claude-sonnet-5-5` medium, 4 cases):**
+
+| | with skill | without skill |
+| --- | --- | --- |
+| Protocol checks (assertions) | 29/31 (94%) | 15/31 (48%) |
+| Blind human preference (2 reviewers) | 4 | 0 |
+
+One run per cell, on one model: a floor, not a permanent benchmark. Reproduce
+with the commands below, or read `evals/README.md` for what the numbers do and
+do not prove.
 
 ```bash
 node scripts/eval.mjs list
