@@ -4,7 +4,7 @@
 
 <p align="center">
   <img alt="license: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-3b5bff">
-  <img alt="node >=18" src="https://img.shields.io/badge/node-%E2%89%A518-3b5bff">
+  <img alt="node 18 or newer" src="https://img.shields.io/badge/node-%E2%89%A518-3b5bff">
   <img alt="no runtime dependencies" src="https://img.shields.io/badge/dependencies-none-3b5bff">
 </p>
 
