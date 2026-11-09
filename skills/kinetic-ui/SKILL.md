@@ -42,6 +42,7 @@ Search `INDEX.md` for a keyword (e.g. "glitch", "magnetic", "sticky") and open o
 | Cursor, text, ambient backgrounds | `references/effects/cursor-pointer.md`, `references/effects/text-effects.md`, `references/effects/ambient-backgrounds.md` |
 | Parallax, scroll, depth | `references/effects/parallax.md`, `references/effects/scroll-driven.md`, `references/effects/depth-layers.md` |
 | 2D, 3D, page transitions | `references/effects/motion-2d.md`, `references/effects/webgl-3d.md`, `references/effects/page-transitions.md` |
+| Icons, logos, illustrations, SVG craft | `references/effects/svg-graphics.md` |
 | Visual styles (cyberpunk, glass…) | `references/styles/` |
 | Component behavior | `references/components/` |
 | Framework or platform | `references/platforms/` |

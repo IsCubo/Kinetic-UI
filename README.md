@@ -81,7 +81,8 @@ skills/kinetic-ui/
     foundations/              UX laws, UI patterns, motion, devices, tiers, accessibility
     brand/                    brand intake, emotion-to-style proposal
     effects/                  micro-interactions, cursor, text, page transitions,
-                              ambient, parallax, scroll, depth, 2D, 3D/WebGL
+                              ambient, parallax, scroll, depth, 2D, 3D/WebGL,
+                              SVG craft (static icons/logos + motion handoff)
     styles/                   cyberpunk, glassmorphism, neo-brutalism, editorial,
                               minimal luxury, retro-futurism, organic soft, playful 3D
     components/               buttons, forms, cards, navigation, overlays, feedback,
