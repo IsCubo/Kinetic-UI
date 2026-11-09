@@ -88,6 +88,9 @@ test('eval: init writes a snapshot, both variants, and a RUN.md per run', () => 
     const critiqueRunFile = fs.readFileSync(path.join(critiqueRun, 'RUN.md'), 'utf8');
     assert.match(critiqueRunFile, new RegExp(copied.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     assert.doesNotMatch(critiqueRunFile, /evals[\\/]fixtures/);
+    assert.match(critiqueRunFile, /open as-is in a browser/);
+    assert.match(critiqueRunFile, /self-contained `\.html`/);
+    assert.match(withoutSkill, /open as-is in a browser/);
   });
 });
 

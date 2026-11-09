@@ -249,6 +249,8 @@ function runInstructions(testCase, variant, snapshot, inputs) {
     '',
     'Write your complete response to `outputs/response.md`. Put every code file you produce in `outputs/` as well.',
     '',
+    'Anything you build must open as-is in a browser: one self-contained `.html` file per screen or demo, with its CSS and JS inline, and no local reference you did not ship. Do not deliver `.tsx`, `.jsx`, `.vue`, `.svelte`, or any source that needs a compile step as your only artifact; if you show component code, also ship the working `.html` preview.',
+    '',
     'Do not read `evals/evals.json` or any other grading material. Do not write outside this run directory.',
     '',
   );
