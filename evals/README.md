@@ -200,7 +200,7 @@ score the page, not the vocabulary, and to note when you recognized an answer.
 
 ## Limits
 
-- Four cases and 31 assertions are a smoke test, not a benchmark. Each cell is a
+- Four cases and 33 assertions are a smoke test, not a benchmark. Each cell is a
   single run, so variance is unmeasured.
 - Assertions changed after seeing iteration 1 must be logged as post hoc. The
   `3d-fallback` pattern was widened from "3D/WebGL" to the effect ("tilt"),
@@ -210,6 +210,18 @@ score the page, not the vocabulary, and to note when you recognized an answer.
   all and two competing badges, and no assertion covered either; the blind human
   reviewer preferred the baseline, which had found both. Regraded: the critique
   case ties at 9/11, so the aggregate rose to 29/31 against 16/31.
+- Two more critique assertions were added post hoc (`message-clarity`,
+  `price-label`) after the user kept the baseline's coverage of content clarity
+  and asked for the skill to match it without losing rigor. Regrading iteration 2
+  with them split the case: the baseline scored 12/13 because it had already
+  found both, and the skill scored 11/13 because it had noticed the generic hero
+  and then declined to score it — its own "the owner's call" rule. The rule in
+  `references/workflow/critique.md` changed, and a focused `iteration-3` run of
+  the critique case on `claude-sonnet-5-5` medium then scored 13/13, reporting
+  the missing offer, the missing billing period, and the smallest change for
+  each while leaving the wording to the owner. The aggregate for iteration 2 is
+  therefore 29/33 against 17/33, and that pair is not comparable to iteration 1:
+  the assertions changed under both variants.
 - Regex assertions are blunt. A bad answer that uses the right words can pass.
 - Free models give a floor, not a ceiling. A strong model may hide a weak skill.
 - Local hide/restore removes installed copies but not the repository source; a

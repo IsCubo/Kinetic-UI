@@ -128,7 +128,7 @@
       "id": "flawed-pricing-critique",
       "title": "Critique an intentionally flawed pricing page",
       "prompt": "Critique the pricing page in `evals/fixtures/flawed-pricing/index.html`. I need to know what blocks shipping. If you cannot render it, say so.",
-      "expected_output": "A critique with located findings by severity, covering the page shipping no script so every control is inert, the infinite animation and missing reduced-motion handling, low contrast, the unnamed icon button, removed focus styles, the image without dimensions, and the two competing superlative badges; a verdict from the critique vocabulary.",
+      "expected_output": "A critique with located findings by severity, covering the page shipping no script so every control is inert, the infinite animation and missing reduced-motion handling, low contrast, the unnamed icon button, removed focus styles, the image without dimensions, the two competing superlative badges, and the message the page never states: what it is, who it is for, what the action does, and what the price costs per period; a verdict from the critique vocabulary.",
       "files": [
         "evals/fixtures/flawed-pricing/index.html"
       ],
@@ -219,6 +219,22 @@
           "check": {
             "type": "regex",
             "pattern": "\\b(not shippable|shippable with named debt|shippable|unverified)\\b"
+          }
+        },
+        {
+          "id": "message-clarity",
+          "text": "Reports that the hero or fold communicates no offer, audience, or action, and names the change",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(hero|headline|fold)\\b[^\\n]{0,400}?\\b(generic|says nothing|does not (state|communicate|say)|no offer|names no|vague|unclear|no audience|no action)\\b[^\\n]{0,400}?\\b(add|state|include|name|show|shrink|reduce|move|replace|rewrite|clarify|put)\\b"
+          }
+        },
+        {
+          "id": "price-label",
+          "text": "Reports that the prices carry no period or unit",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(price|pricing|\\$\\d+)\\b[^\\n]{0,200}?(/month|per month|billing period|monthly|billing cycle|per seat|per user)"
           }
         }
       ]

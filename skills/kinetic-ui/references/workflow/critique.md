@@ -1,7 +1,7 @@
 # Critique
 
-> Keywords: critique, design critique, design review, UI review, design audit, heuristic evaluation, scorecard, severity, severity levels, blocker, major, minor, findings, evidence, screenshot, capture widths, 360, 768, 1440, surface mode, visual audit, contrast audit, keyboard pass, reduced motion check, tier fallback check, second opinion, prioritized fixes, what to fix first, quality review, unverified, re-check, design QA, dead button, unwired control, no script, button does nothing, functional check, source-provable, evaluación de diseño, revisión de diseño, crítica de diseño
-> Summary: How to judge an interface with evidence: functional reality check, capture set, surface mode, ten dimensions scored 0–4 with anchors, severity levels, source-provable findings when nothing renders, one-line findings, and a re-check scope.
+> Keywords: critique, design critique, design review, UI review, design audit, heuristic evaluation, scorecard, severity, severity levels, blocker, major, minor, findings, evidence, screenshot, capture widths, 360, 768, 1440, surface mode, visual audit, contrast audit, keyboard pass, reduced motion check, tier fallback check, second opinion, prioritized fixes, what to fix first, quality review, unverified, re-check, design QA, dead button, unwired control, no script, button does nothing, functional check, source-provable, message clarity, first visit, first-visit read, fold comprehension, offer clarity, price label, price period, hero copy, copy clarity, evaluación de diseño, revisión de diseño, crítica de diseño
+> Summary: How to judge an interface with evidence: functional reality check, first-visit read, capture set, surface mode, ten dimensions scored 0–4 with anchors, severity levels, source-provable findings when nothing renders, one-line findings, and a re-check scope.
 
 This file judges a result. It does not build, style, or choose effects; open the implementation files for that. Critique answers one question: given what the user actually sees, what is wrong, how bad is it, and what is the smallest change that fixes it.
 
@@ -54,16 +54,37 @@ Run this before any visual judgment, rendered or not. A page whose primary actio
 
 Report the result as one line per control the first time, then only the failures. Skip the check when the input is a screenshot, a video, or a live URL you already drove.
 
+## First-visit read
+
+Read the fold (C5) as a stranger and answer four questions, one line each, before any dimension is scored. Each answer is either the text you can quote or `not communicated`.
+
+| Question | Answer it with |
+| --- | --- |
+| What is this? | The `h1` and the fold copy, quoted |
+| Who is it for? | The audience the fold names, or `not communicated` |
+| What does the primary action do? | The button label and where it leads, or `not communicated` |
+| What does it cost? | The price with its period and unit, or `not communicated` |
+
+A `not communicated` answer is a finding, not a preference: a visitor who cannot close that gap by looking never learns it. Judge whether the page communicates its message, never what the message should say — the wording belongs to the owner.
+
+Rules:
+
+1. Quote the screen. "The hero says nothing" is not a finding; "`h1` reads `Scale your business with our platform`, which names no offer, no audience, and no action" is.
+2. A price with no period, unit, or billing term is an incomplete label, not a content decision: `$49` alone leaves the cost `not communicated`.
+3. Do not rewrite the copy. Name the smallest change that makes the answer findable and leave the wording to the owner.
+4. Score it in `## Copy`. A `not communicated` answer on the path that spends money is at least major.
+
 ## Procedure
 
 1. **Functional reality check.** Run `## Functional reality check` from the source, rendered or not. Its failures enter the findings with severity before any capture is scored.
 2. **Capture.** Take the full set below at a device pixel ratio of 1, then one 2× crop of the primary action and the smallest body text to judge type rendering.
 3. **Name the surface mode.** Product UI, content and commerce, or brand and marketing. The mode sets what is expected and the tier cap; the same empty state is fine on a brand page and a defect in a dashboard.
-4. **Score the ten dimensions** against the anchors in `## Scorecard`. Score what the captures show, not what the code intends. Leave an unrendered run unverified.
-5. **List findings** in the format from `## Findings format`, one issue per line, sorted by severity.
-6. **Fix** blockers first, as `references/workflow/loop.md` orders them; one smallest change per finding, batched only while the batch stays reviewable. Keep every passing element.
-7. **Re-check only what changed**, using the scope table below, and re-capture only the affected widths.
-8. **Report** with `## Interpreting the score`; hand off per `## Handoff`.
+4. **First-visit read.** Answer the four questions in `## First-visit read` from C5. Every `not communicated` answer enters the findings before the dimensions are scored.
+5. **Score the ten dimensions** against the anchors in `## Scorecard`. Score what the captures show, not what the code intends. Leave an unrendered run unverified.
+6. **List findings** in the format from `## Findings format`, one issue per line, sorted by severity.
+7. **Fix** blockers first, as `references/workflow/loop.md` orders them; one smallest change per finding, batched only while the batch stays reviewable. Keep every passing element.
+8. **Re-check only what changed**, using the scope table below, and re-capture only the affected widths.
+9. **Report** with `## Interpreting the score`; hand off per `## Handoff`.
 
 | Capture | Width | What it proves |
 | --- | --- | --- |
@@ -104,7 +125,7 @@ Score each dimension 0–4. Use 1 or 3 when the row below and the row above both
 | Color and contrast | Any body text under 4.5:1, any UI part under 3:1, or meaning carried by color alone | Text passes but muted text, placeholders, or borders fail, or one theme loses a surface edge | Every pair measured and passing in both themes; states carry icon or text as well | C3, C1, both themes |
 | States and feedback | Actions show no visible change within 100 ms; empty, error, or loading state missing | Happy path complete; one state missing or feedback later than 400 ms | Rest, hover, press, focus, disabled, loading, empty, error, success all present; busy state in place | C6, task clip |
 | Motion | Motion has no named purpose, reduced motion is unhandled, or a loop runs beside text | Purposes named, but timing is off-token or one effect ignores T0 | Every animation names one purpose and uses the motion tokens; T0 exact; interruptible | C6, forced T0 and tiers |
-| Copy | Labels use internal jargon; errors state neither cause nor fix | Plain language, but repeated labels ("Learn more" twice) or a heading that misses its content | Every label names the action or object; one name per concept; errors state cause and fix | C1–C3 |
+| Copy | The fold names no offer, no audience, and no action, or labels use internal jargon | Plain language, but the fold states the category without what the page does, or a heading misses its content | The fold states what this is, who it is for, and what the action does; every label names the action or object; one name per concept; errors state cause and fix | C1–C3, C5, first-visit read |
 | Accessibility | Keyboard cannot reach an interactive element, focus is invisible, or there is no heading or landmark | Keyboard works, but focus is clipped or obscured, or one control has no accessible name | Keyboard and screen-reader pass; focus never obscured; targets ≥ 24 px, 44 px on touch; reduced motion honored | C6, forced T0 |
 | Performance | LCP over 4 s, INP over 500 ms, or CLS over 0.25 caused by the design | In the "needs improvement" band: LCP 2.5–4 s, INP 200–500 ms, or CLS 0.1–0.25 | LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1; no task over 50 ms during the main interaction at 4× CPU | C5, DevTools traces |
 | Distinctiveness | Interchangeable with a template; the layout survives a logo swap | One distinctive element (type, color, or motion) with a default frame around it | The brief's visual world reads at first glance and survives with the logo and images removed, at T0 | C1, C3, stripped capture |
@@ -126,7 +147,7 @@ Severity comes from user impact, never from how hard the fix is.
 | Level | Examples |
 | --- | --- |
 | Blocker | The recommended plan's CTA sits off screen at 360 px with `scrollWidth` 412 > 360 · Body text measures 3.1:1 against its surface · A dialog traps keyboard focus with no Escape handler · The primary CTA has no handler and the document ships no script, so pressing it does nothing |
-| Major | Primary submit gives no feedback for 1.8 s and stays clickable · Hero LCP is 4.1 s because a 3D chunk blocks the poster · Hover-only row actions are unreachable on touch |
+| Major | Primary submit gives no feedback for 1.8 s and stays clickable · Hero LCP is 4.1 s because a 3D chunk blocks the poster · Hover-only row actions are unreachable on touch · The fold names no offer, no audience, and no action, so a first-time visitor cannot tell what the page is |
 | Minor | Section gap is 40 px beside 32 px siblings · Two hovers use different easing curves for the same role · One toast says "Done" where the rest say "Saved" |
 
 Rules:
@@ -234,11 +255,11 @@ The remaining blocker is the badge contrast; the second pass starts there, not f
 | --- | --- | --- |
 | Code style, naming, or file structure | The user never sees it, and it is not a rendered result | Report it only when it causes a rendered defect, such as `transition: all` janking a scroll |
 | Taste without evidence | "I would have used blue" is a preference; the brief and the brand tokens decide | Name the token or principle the render breaks |
-| Anything the brief did not ask for | Mid-review scope grows the fix and stalls the loop | Record it as a proposal for the next direction pass |
+| Anything the brief did not ask for | Mid-review scope grows the fix and stalls the loop | Record it as a proposal for the next direction pass — except a page that does not communicate its own offer, action, or cost (`## First-visit read`), which is always in scope |
 | Mockups, source files, or the build's own summary | They are intent, not result | Capture the render, or mark the dimension unverified |
 | A full redesign | A rewrite hides which change fixed which finding and discards work that already passes | One smallest change per finding; keep what passes |
 | Performance felt rather than measured | "Feels slow" cannot be re-checked | Measure LCP, INP, CLS, and frame time |
-| Content policy the owner supplied (prices, legal text) | Not the designer's decision | Ask the owner; judge only placement and legibility |
+| The owner's message and price policy (wording, prices, legal text) | Not the designer's decision | Ask the owner; judge only whether the page communicates it — placement, legibility, and whether the label is complete (`## First-visit read`) |
 | The approved visual world itself | A taste conflict with an approved direction reopens scope mid-loop | Re-open direction with the evidence and a proposal |
 
 Rewriting to fix a finding is a last resort: it resets the evidence and costs a full re-capture. A rewrite needs its own direction pass (`references/workflow/direction.md`) and a new critique.
