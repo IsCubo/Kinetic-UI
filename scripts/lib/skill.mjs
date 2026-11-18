@@ -110,6 +110,17 @@ export function buildIndex(skillDir) {
   return lines.join('\n');
 }
 
+// Line endings are a checkout artifact, never content: compare on LF so a CRLF
+// clone (Git for Windows default) is not reported as a stale generated index.
+const normalizeEol = (text) => text.replace(/\r\n/g, '\n');
+
+// Reports whether the on-disk INDEX.md matches generated output: missing | stale | fresh.
+export function indexFreshness(skillDir) {
+  const target = path.join(skillDir, INDEX_FILE);
+  if (!fs.existsSync(target)) return 'missing';
+  return normalizeEol(fs.readFileSync(target, 'utf8')) === normalizeEol(buildIndex(skillDir)) ? 'fresh' : 'stale';
+}
+
 // Collects path references (markdown links and code spans) that point inside the skill.
 function referencedPaths(text) {
   const found = new Set();
@@ -178,10 +189,9 @@ export function validate(skillDir) {
     }
   }
 
-  const indexPath = path.join(skillDir, INDEX_FILE);
-  const expected = buildIndex(skillDir);
-  if (!fs.existsSync(indexPath)) err('index-fresh', INDEX_FILE, 'not found; run scripts/build-index.mjs');
-  else if (fs.readFileSync(indexPath, 'utf8') !== expected) err('index-fresh', INDEX_FILE, 'stale; run scripts/build-index.mjs');
+  const state = indexFreshness(skillDir);
+  if (state === 'missing') err('index-fresh', INDEX_FILE, 'not found; run scripts/build-index.mjs');
+  else if (state === 'stale') err('index-fresh', INDEX_FILE, 'stale; run scripts/build-index.mjs');
 
   return { errors, warnings, checked: files.length + 1 };
 }

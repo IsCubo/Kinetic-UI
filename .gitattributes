@@ -1,0 +1,4 @@
+# Keep every text file LF. INDEX.md is compared byte-for-byte against
+# generated output, so a CRLF checkout (Git for Windows default) would
+# report it as stale on every run.
+* text=auto eol=lf
