@@ -469,7 +469,7 @@
           "text": "Simplifies per device capability or motion tier",
           "check": {
             "type": "regex",
-            "pattern": "\\bT[0-3]\\b|motion tier|low[- ]end|cheap (android|phone)"
+            "pattern": "\\bT[0-3]\\b|motion tier|low[- ]end"
           }
         },
         {
