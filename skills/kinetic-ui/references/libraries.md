@@ -1,9 +1,9 @@
 # Libraries
 
-> Keywords: libraries, animation library, three.js, react three fiber, gsap, motion, framer motion, lenis, anime.js, pixi, ogl, lottie, dotlottie, rive, auto-animate, tresjs, threlte, postprocessing, tilt, flutter animation, license, versions
-> Summary: Verified catalog of proven animation, scroll, 2D, and 3D libraries with license, maintenance status, caveats, and which need and tier each one fits.
+> Keywords: libraries, animation library, three.js, react three fiber, gsap, motion, framer motion, lenis, anime.js, pixi, ogl, lottie, dotlottie, rive, auto-animate, tresjs, threlte, postprocessing, tilt, flutter animation, babylon.js, model-viewer, gltf-transform, meshoptimizer, gltfpack, ktx2, gltf validator, three-mesh-bvh, license, versions
+> Summary: Verified catalog of proven animation, scroll, 2D, 3D, and 3D-asset libraries with license, maintenance status, caveats, and which need and tier each one fits.
 
-Snapshot verified on **2026-10-22** against the npm and pub.dev registries, web-features 3.43.0, and MDN browser-compat-data 8.1.7. Versions move. Before installing, confirm the current version and license in the registry or official docs, and pin the exact version in the lockfile.
+Snapshot verified on **2026-10-22** against the npm and pub.dev registries, web-features 3.43.0, and MDN browser-compat-data 8.1.7. The 3D rendering and asset-tooling entries were re-verified on **2026-11-18**. Versions move. Before installing, confirm the current version and license in the registry or official docs, and pin the exact version in the lockfile.
 
 ## Choose by need
 
@@ -21,18 +21,29 @@ Snapshot verified on **2026-10-22** against the npm and pub.dev registries, web-
 | Interactive, stateful character or illustration | Rive | — | T2 |
 | 2D GPU scenes and many sprites | PixiJS | Canvas 2D | T2–T3 |
 | 3D scenes, product viewers, shaders | three.js | OGL (minimal) | T3 |
+| Photoreal render of a real piece | three.js with `NeutralToneMapping`, one PMREM environment, and a contact shadow (see `references/3d/real-object-render.md`) | Babylon.js | T3 |
 | 3D in React / Vue / Svelte | React Three Fiber (+ drei) / TresJS / Threlte | — | T3 |
 | 3D post-processing (bloom, glitch, chromatic aberration) | pmndrs `postprocessing` (+ `@react-three/postprocessing`) | three.js `EffectComposer` | T3 |
+| Full web 3D engine: GUI, inspector, physics, node materials | Babylon.js | three.js plus custom UI | T3 |
+| 360 viewer with AR and no build step | `<model-viewer>` | three.js custom viewer | T2–T3 |
+| Asset cleanup, compression, and validation | glTF Transform, glTF Validator | gltfpack, Blender exporter | Build time |
+| Fast raycasts for hotspot occlusion and picking | three-mesh-bvh | three.js `Raycaster` alone | T3 |
 | Tilt cards | A small custom implementation (see `references/effects/depth-layers.md`) | Atropos, vanilla-tilt (both stale) | T2 |
 
 ## Web catalog
 
 | Package | Version (2026-10-22) | License | Last release | Use | Caveats |
 | --- | --- | --- | --- | --- | --- |
-| `three` | 0.186.1 | MIT | 2026-09 | Core 3D (WebGL; `three/webgpu`, `three/tsl`) | Not semver: any release can break APIs, so pin it. WebGPURenderer tries WebGPU, then falls back to WebGL 2 |
+| `three` | 0.187.0 | MIT | 2026-10 | Core 3D (WebGL; `three/webgpu`, `three/tsl`) | Not semver: any release can break APIs, so pin it. WebGPURenderer tries WebGPU, then falls back to WebGL 2. `NeutralToneMapping`, `AgXToneMapping`, and `scene.environmentIntensity` are available |
+| `@babylonjs/core` | 9.37.1 | Apache-2.0 | 2026-11 | Engine-first web 3D (`PBRMaterial`, inspector, GUI, physics) | Larger core than three.js: import only the modules used and lazy-load the chunk |
+| `@google/model-viewer` | 4.4.0 | Apache-2.0 | 2026-10 | `<model-viewer>` web component with AR (WebXR, Scene Viewer, Quick Look) | One model per viewer; limited custom interaction. iOS AR needs a USDZ companion; `tone-mapping` supports `neutral` and `agx` |
+| `@gltf-transform/cli` | 4.5.1 | MIT | 2026-09 | glTF optimization: dedup, prune, simplify, Draco/Meshopt, KTX2, WebP | Build-time tooling only; command flags change between majors, so check `--help` |
+| `meshoptimizer` | 1.3.0 | MIT | 2026-09 | `gltfpack` and Meshopt geometry compression | Decoding needs `MeshoptDecoder` wired into the loader |
+| `gltf-validator` | 2.0.0-dev.3.10 | Apache-2.0 | 2024-10 | Spec conformance gate for a shipped `.glb` | A dev-version package with no release since 2024-10: useful and stable in practice, but treat it as frozen |
+| `three-mesh-bvh` | 0.9.18 | MIT | 2026-11 | Accelerated raycasting for hotspot occlusion and picking | Pre-1.0; rebuild the BVH after geometry changes |
 | `@react-three/fiber` | 9.8.2 | MIT | 2026-10 | React renderer for three.js | Requires React `>=19 <19.4` and three `>=0.156`; v10 is still alpha |
 | `@react-three/drei` | 10.7.9 | MIT | 2026-09 | Helpers for R3F (controls, loaders, environment) | Requires React 19 and fiber 9 |
-| `postprocessing` | 6.39.5 | Zlib | 2026-09 | Effect pipeline for three.js | Requires three `>=0.168 <0.187`, so pin three and postprocessing together |
+| `postprocessing` | 6.39.6 | Zlib | 2026-11 | Effect pipeline for three.js | Requires three `>=0.168 <0.188`, so pin three and postprocessing together |
 | `@react-three/postprocessing` | 3.2.2 | MIT | 2026-10 | R3F wrapper for postprocessing | Requires fiber `>=9.7` and postprocessing ^6.36 |
 | `gsap` | 3.15.0 | Custom no-charge license (not OSI) | 2026-04 | Timelines, ScrollTrigger, SplitText, Flip, MorphSVG | Free for all users, including the plugins. The license is proprietary: it restricts use in no-code visual animation tools that compete with Webflow. Review it before using GSAP in such a product |
 | `motion` | 14.6.0 | MIT | 2026-10 | `motion/react` plus vanilla `animate`, `scroll`, `inView` | Supports React 18/19. `framer-motion` is built from the same repo. Some editor tooling is paid (Motion+) |
@@ -53,7 +64,7 @@ Snapshot verified on **2026-10-22** against the npm and pub.dev registries, web-
 
 | Platform | Built-in APIs (no package) | Packages | Notes |
 | --- | --- | --- | --- |
-| Flutter | Implicit animations, `AnimationController`, `Hero`, `AnimatedSwitcher`, `FragmentProgram` shaders | `rive` 0.14.11 (pub.dev, 2026-08; needs Flutter ≥3.28, Dart ≥3.6); `flutter_animate` 4.5.2 | `flutter_animate` has had no release in about 23 months: maintenance risk. Verify the Rive package license before use. See `references/platforms/flutter.md` |
+| Flutter | Implicit animations, `AnimationController`, `Hero`, `AnimatedSwitcher`, `FragmentProgram` shaders | `rive` 0.14.11 (pub.dev, 2026-08; needs Flutter ≥3.28, Dart ≥3.6); `flutter_animate` 4.5.2; `flutter_scene` 0.24.3 (2026-10, Impeller-based glTF 3D); `model_viewer_plus` 1.10.0 (2025-11, WebView viewer with AR) | `flutter_animate` has had no release in about 23 months: maintenance risk. `flutter_gl` 0.0.21 (2022-10) is stale; prefer `flutter_scene` or a platform view. Verify the Rive package license before use. See `references/platforms/flutter.md` and `references/3d/platforms-3d.md` |
 | SwiftUI | `withAnimation`, springs, `matchedGeometryEffect` (iOS 14+), `PhaseAnimator`, `KeyframeAnimator`, `scrollTransition` (iOS 17+) | Rive and Lottie iOS runtimes | See `references/platforms/swiftui.md` |
 | Jetpack Compose | `animate*AsState`, `AnimatedVisibility`, `AnimatedContent`, `updateTransition`, `SharedTransitionLayout` | Rive and Lottie Android runtimes | Check whether shared-element APIs are still experimental in your Compose version. See `references/platforms/jetpack-compose.md` |
 
@@ -80,3 +91,4 @@ Snapshot verified on **2026-10-22** against the npm and pub.dev registries, web-
 5. Check every license against the product's use case. Not every free library is open source: GSAP's license is proprietary.
 6. Self-host WASM engines and fonts instead of loading them from third-party CDNs at runtime.
 7. Re-verify this table when it is older than six months: query the npm registry (`https://registry.npmjs.org/<package>/latest`) or the library's official docs.
+8. A 3D asset arrives as glTF 2.0 in metres with PBR metallic-roughness materials, compressed and validated before it reaches the page. The pipeline and budgets live in `references/3d/asset-pipeline.md`; the render values in `references/3d/real-object-render.md`.
