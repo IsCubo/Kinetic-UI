@@ -240,7 +240,7 @@ Flutter has no CSS `perspective`: derive one 0..1 progress from the scroll posit
 
 | Job | Flutter API |
 | --- | --- |
-| Progress | `ScrollController` (a `Listenable`) with `position.pixels / position.maxScrollExtent`, or `NotificationListener<ScrollNotification>` reading `notification.metrics`; store it in a `ValueNotifier<double>`. `PageController.page` gives fractional stops |
+| Progress | `ScrollController` (a `Listenable`) with `position.pixels / position.maxScrollExtent`, or `NotificationListener<ScrollNotification>` reading `notification.metrics`; write it into an `AnimationController` used only as a value holder (`controller.value = p`, never `forward()`), so `FadeTransition` and `ScaleTransition` listen to it directly. A `ValueNotifier<double>` cannot drive them; it fits `ValueListenableBuilder` only. `PageController.page` gives fractional stops |
 | Rebuild only the layers | `AnimatedBuilder(animation: progress, child: …, builder: …)`: the `child` is built once, only the transform changes |
 | Z substitute | `Transform` with `Matrix4.identity()..setEntry(3, 2, 0.001)` (perspective term), then `Matrix4.translationValues(0, 0, z)` or a scale; pair with `FadeTransition` for distance fade |
 | Pin | `CustomScrollView` + `SliverPersistentHeader(pinned: true)` whose `maxExtent` is stage height plus travel and `minExtent` is stage height; `shrinkOffset / (maxExtent - minExtent)` is the progress |

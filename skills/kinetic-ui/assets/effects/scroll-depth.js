@@ -20,10 +20,12 @@ const REDUCED_QUERY = '(prefers-reduced-motion: reduce)';
 /**
  * Creates a controller for one stage. Nothing happens until start().
  * @param {HTMLElement} stage The tall element that owns --kui-z-p (the sticky track is its child).
- * @param {{ length?: number }} [options]
+ * @param {{ length?: number | (() => number) }} [options]
  *   length: pinned scroll distance in px, i.e. stage height minus the pinned track height.
  *   Default: measured every frame as stage height minus window.innerHeight. Pass it when the track
  *   height is not 100vh or when mobile toolbars resizing the viewport make the measured value drift.
+ *   Prefer a function, e.g. () => stage.offsetHeight - track.offsetHeight: it is read every frame,
+ *   so it follows rotation, while a fixed number goes stale.
  * @returns {{ start: () => void, stop: () => void, dispose: () => void }}
  *   start/stop are idempotent. stop() freezes the last value; dispose() also clears the property.
  */
@@ -44,7 +46,8 @@ export function createScrollDepth(stage, { length } = {}) {
 
   function progress() {
     const rect = stage.getBoundingClientRect();
-    const span = length > 0 ? length : rect.height - window.innerHeight;
+    const pinned = typeof length === 'function' ? length() : length;
+    const span = pinned > 0 ? pinned : rect.height - window.innerHeight;
     if (!(span > 0)) return 0;
     return Math.min(1, Math.max(0, -rect.top / span));
   }

@@ -145,7 +145,8 @@ import { createScrollDepth } from './scroll-depth.js';
 
 applyMotionTier();
 const stage = document.querySelector('.kui-zdepth');
-const depth = createScrollDepth(stage, { length: 2 * innerHeight }); // optional: pinned px; default measured
+const track = stage.querySelector('.kui-zdepth__track');
+const depth = createScrollDepth(stage, { length: () => stage.offsetHeight - track.offsetHeight }); // follows rotation, ignores toolbar resize
 if (!CSS.supports('animation-timeline: view()')) depth.start();
 // route change or unmount: depth.dispose()
 ```
@@ -190,7 +191,7 @@ When `watchFrameRate()` lowers the tier mid-scroll, the static rules or the lowe
 ## Accessibility
 
 - Every stop is real content in source order, readable by a screen reader without scrolling the scene. Art layers are `aria-hidden="true"` with `alt=""`.
-- Keep links and buttons out of middle stops: a faded layer is still focusable and its focus ring is invisible (WCAG 2.4.7, 2.4.11). Put calls to action after the stage, or in the last stop, which stays opaque.
+- Keep links and buttons out of middle stops: a faded layer is still focusable and its focus ring is invisible (WCAG 2.4.7, 2.4.11). Never make the primary action wait for the whole scene: keep it reachable from the first screen (a persistent header action, or one before the stage) and repeat it after the stage or in the last stop, which stays opaque.
 - Check text contrast at the first and last frame of each stop's opaque range (WCAG 1.4.3) and keep text at scale ≤ 1.25.
 - Scroll is never hijacked: native speed, no snap, no wheel handlers. Add a skip link after the stage when it exceeds about 3 viewports.
 - Provide the in-product "Reduce motion" toggle that forces T0 (WCAG 2.3.3), as in `references/foundations/accessibility-motion.md`.
@@ -213,5 +214,5 @@ When `watchFrameRate()` lowers the tier mid-scroll, the static rules or the lowe
 - `animation-timeline` before the `animation` shorthand: the shorthand resets it to `auto` and progress runs on time.
 - A second writer: the CSS animation overrides inline values, so a running controller beside a supported timeline is wasted work. Start the controller only without support.
 - Unregistered `--kui-z-p`: it interpolates discretely, so the scene jumps between the first and last frame.
-- `100svh` track with a measured `innerHeight` span: toolbar resizing on mobile drifts progress slightly. Pass `length`.
+- `100svh` track with a measured `innerHeight` span: toolbar resizing on mobile drifts progress slightly. Pass `length` as a function of the stage and track heights; a fixed number goes stale on rotation.
 - Dropping `--at` or forgetting to keep it equal to `−z ÷ travel`: a stop fades in at the wrong time and may never be fully opaque.
