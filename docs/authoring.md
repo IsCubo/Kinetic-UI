@@ -17,7 +17,7 @@ Rules for anyone (human or agent) writing files inside `skills/kinetic-ui/`. The
 > Summary: One sentence describing what the file answers.
 ```
 
-Assets use the same two lines as comments (`// Keywords:` / `/* Keywords: */`); JSON uses top-level `"$keywords"` and `"$summary"` strings. `INDEX.md` is generated from these headers: run `npm run index` after adding or renaming files. Never edit `INDEX.md` by hand.
+Assets use the same two lines as comments (`// Keywords:` / `/* Keywords: */`); JSON uses top-level `"$keywords"` and `"$summary"` strings. `INDEX.md` is generated from these headers: run `npm run index` after adding, renaming, or editing a file's `Keywords`/`Summary` line, and commit the regenerated index with that change. Never edit `INDEX.md` by hand.
 
 ## Paths
 
