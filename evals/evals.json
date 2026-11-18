@@ -433,11 +433,11 @@
           }
         },
         {
-          "id": "perspective",
-          "text": "Uses perspective as the main depth cue",
+          "id": "depth-cue",
+          "text": "Sells depth with a named cue: perspective, or scale that changes with a layer distance",
           "check": {
             "type": "regex",
-            "pattern": "\\bperspective\\b"
+            "pattern": "\\bperspective\\b|scal(e|es|ing)[^.\\n]{0,80}(approach|closer|nearer|depth|distance|smaller|bigger|larger|grow)|(approach|closer|near|depth|distance|smaller|emerg)[^.\\n]{0,80}scal(e|es|ing)"
           }
         },
         {
@@ -461,7 +461,7 @@
           "text": "Falls back to a static, readable layout",
           "check": {
             "type": "regex",
-            "pattern": "static (stack|layout|fallback|composition|version)|normal flow"
+            "pattern": "static (stack|layout|fallback|composition|version|sections?|scenes?|list)|normal flow|stacked (static )?(sections|cards|scenes|list)|plain (list|stack|sections|column|VStack|ListView)"
           }
         },
         {

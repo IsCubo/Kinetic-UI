@@ -224,6 +224,18 @@ score the page, not the vocabulary, and to note when you recognized an answer.
   each while leaving the wording to the owner. The aggregate for iteration 2 is
   therefore 29/33 against 17/33, and that pair is not comparable to iteration 1:
   the assertions changed under both variants.
+- `scroll-depth-travel` first ran in a focused `iteration-4` (2026-11-18,
+  OpenCode subagent sessions, `claude-sonnet-5-5` medium, local hide/restore;
+  the baseline output holds no skill vocabulary) and scored 12/12 against 9/12.
+  Reading the outputs changed two assertions post hoc: `static-stack` missed the
+  baseline's "plain stacked sections" wording, and `perspective` tested one
+  implementation instead of behaviour, so it became `depth-cue` (perspective, or
+  scale that changes with distance). Regraded: 12/12 against 11/12; the
+  remaining gap is reading order. The run also exposed three skill defects,
+  fixed afterwards: the primary action waited for the whole scene (the baseline
+  put it in the header), the Flutter section paired a `ValueNotifier` with
+  `FadeTransition`, and a fixed `length` went stale on rotation. The with-skill
+  output predates those fixes.
 - Regex assertions are blunt. A bad answer that uses the right words can pass.
 - Free models give a floor, not a ceiling. A strong model may hide a weak skill.
 - Local hide/restore removes installed copies but not the repository source; a
