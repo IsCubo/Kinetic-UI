@@ -93,7 +93,7 @@ Free structure, but keep the effect template's spine: `## When to use`, the impl
 | --- | --- |
 | `references/foundations/` | `ux-principles.md`, `ui-patterns.md`, `motion-principles.md`, `devices-responsive.md`, `performance-tiers.md`, `accessibility-motion.md` |
 | `references/brand/` | `brand-intake.md`, `emotion-to-style.md` (+ `assets/tokens/brand-tokens.template.json`) |
-| `references/effects/` | `microinteractions.md`, `cursor-pointer.md`, `text-effects.md`, `page-transitions.md`, `ambient-backgrounds.md`, `parallax.md`, `scroll-driven.md`, `depth-layers.md`, `motion-2d.md`, `webgl-3d.md`, `svg-graphics.md` |
+| `references/effects/` | `microinteractions.md`, `cursor-pointer.md`, `text-effects.md`, `page-transitions.md`, `ambient-backgrounds.md`, `parallax.md`, `scroll-driven.md`, `scroll-depth.md`, `depth-layers.md`, `motion-2d.md`, `webgl-3d.md`, `svg-graphics.md` |
 | `references/3d/` | `real-object-render.md`, `asset-pipeline.md`, `inspection-configurator.md`, `platforms-3d.md` |
 | `references/styles/` | `cyberpunk.md`, `glassmorphism.md`, `neo-brutalism.md`, `editorial.md`, `minimal-luxury.md`, `retro-futurism.md`, `organic-soft.md`, `playful-3d.md` |
 | `references/components/` | `buttons.md`, `inputs-forms.md`, `cards.md`, `navigation.md`, `overlays.md`, `feedback.md`, `selection-controls.md`, `carousels-galleries.md`, `hero-sections.md`, `lists-collections.md` |

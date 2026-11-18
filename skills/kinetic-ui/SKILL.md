@@ -39,7 +39,7 @@ Search `INDEX.md` by keyword; open only the listed file.
 | Direction, verify, critique, tooling | `references/workflow/direction.md`, `references/workflow/verify.md`, `references/workflow/critique.md`, `references/workflow/tooling.md` |
 | Micro-interactions | `references/effects/microinteractions.md` |
 | Cursor, text, ambient backgrounds | `references/effects/cursor-pointer.md`, `references/effects/text-effects.md`, `references/effects/ambient-backgrounds.md` |
-| Parallax, scroll, depth | `references/effects/parallax.md`, `references/effects/scroll-driven.md`, `references/effects/depth-layers.md` |
+| Parallax, scroll, depth, Z travel | In `references/effects/`: `parallax.md`, `scroll-driven.md`, `depth-layers.md`, `scroll-depth.md` |
 | 2D, 3D, page transitions | `references/effects/motion-2d.md`, `references/effects/webgl-3d.md`, `references/effects/page-transitions.md` |
 | Real piece 3D: render, glTF, configurator, platforms | `references/3d/` (see `INDEX.md`) |
 | Icons, logos, illustrations, SVG craft | `references/effects/svg-graphics.md` |

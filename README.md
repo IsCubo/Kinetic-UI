@@ -82,7 +82,8 @@ skills/kinetic-ui/
     foundations/              UX laws, UI patterns, motion, devices, tiers, accessibility
     brand/                    brand intake, emotion-to-style proposal
     effects/                  micro-interactions, cursor, text, page transitions,
-                              ambient, parallax, scroll, depth, 2D, 3D/WebGL,
+                              ambient, parallax, scroll, scroll depth (Z travel),
+                              depth, 2D, 3D/WebGL,
                               SVG craft (static icons/logos + motion handoff)
     3d/                       real-object render, asset pipeline, inspection and
                               configurator, platform and engine routing
