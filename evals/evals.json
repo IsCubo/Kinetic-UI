@@ -400,6 +400,111 @@
           }
         }
       ]
+    },
+    {
+      "id": "scroll-depth-travel",
+      "title": "Scroll that feels like flying forward, then native apps",
+      "prompt": "Our travel startup wants the homepage hero to feel like you are flying forward through three destinations as you scroll down: mountains, then a city, then a beach. It has to stay smooth on a cheap Android phone, respect people who get motion sick, and we tell the same story in our Flutter app and our SwiftUI iPad app.",
+      "expected_output": "A pinned scroll-depth stage where one progress value moves layers forward along Z under perspective, three stops paced inside a scroll-length budget, depth cues without animated blur, a static stack for reduced motion, tiered simplification for low-end devices, readable content order, and the Flutter and SwiftUI equivalents.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "z-travel",
+          "text": "Moves content or a camera forward along the Z axis instead of only offsetting planes vertically",
+          "check": {
+            "type": "regex",
+            "pattern": "translateZ|translate3d|translate:\\s*0\\s+0|z[- ]axis|along z|through z|dolly|camera\\.position\\.z"
+          }
+        },
+        {
+          "id": "pinned-stage",
+          "text": "Pins the scene while the page scrolls",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bsticky\\b|\\bpin(ned|ning)?\\b"
+          }
+        },
+        {
+          "id": "one-progress",
+          "text": "Drives the choreography from one scroll progress value or timeline",
+          "check": {
+            "type": "regex",
+            "pattern": "--kui-z-p|animation-timeline|\\bview\\(\\)|\\bscroll\\(\\)|useScroll|scroll progress|progress value"
+          }
+        },
+        {
+          "id": "perspective",
+          "text": "Uses perspective as the main depth cue",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bperspective\\b"
+          }
+        },
+        {
+          "id": "blur-cost",
+          "text": "Treats animated blur as expensive or avoids it",
+          "check": {
+            "type": "regex",
+            "pattern": "(avoid|no|never|without|drop|last resort)[^.\\n]{0,40}blur|blur[^.\\n]{0,60}(expensive|cost|re-?raster|last resort)"
+          }
+        },
+        {
+          "id": "reduced-motion",
+          "text": "Honours the reduced-motion preference",
+          "check": {
+            "type": "regex",
+            "pattern": "prefers-reduced-motion|reduced?[- ]motion|accessibilityReduceMotion|disableAnimations"
+          }
+        },
+        {
+          "id": "static-stack",
+          "text": "Falls back to a static, readable layout",
+          "check": {
+            "type": "regex",
+            "pattern": "static (stack|layout|fallback|composition|version)|normal flow"
+          }
+        },
+        {
+          "id": "tiers",
+          "text": "Simplifies per device capability or motion tier",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bT[0-3]\\b|motion tier|low[- ]end|cheap (android|phone)"
+          }
+        },
+        {
+          "id": "scroll-budget",
+          "text": "Bounds the pinned scroll length or paces the stops",
+          "check": {
+            "type": "regex",
+            "pattern": "\\d{3}\\s?s?vh|viewports? of|per stop|scroll length"
+          }
+        },
+        {
+          "id": "content-order",
+          "text": "Keeps the stops readable in source order for assistive technology",
+          "check": {
+            "type": "regex",
+            "pattern": "source order|screen reader|reading order|skip link"
+          }
+        },
+        {
+          "id": "flutter-equivalent",
+          "text": "Names a real Flutter API for the same effect",
+          "check": {
+            "type": "regex",
+            "pattern": "ScrollController|ScrollNotification|Matrix4|SliverPersistentHeader|AnimatedBuilder"
+          }
+        },
+        {
+          "id": "swiftui-equivalent",
+          "text": "Names a real SwiftUI API for the same effect",
+          "check": {
+            "type": "regex",
+            "pattern": "scrollTransition|visualEffect|onScrollGeometryChange|rotation3DEffect|accessibilityReduceMotion"
+          }
+        }
+      ]
     }
   ]
 }

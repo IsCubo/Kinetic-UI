@@ -1,6 +1,6 @@
 # Jetpack Compose
 
-> Keywords: jetpack compose, android, kotlin, animateFloatAsState, animate*AsState, AnimatedVisibility, AnimatedContent, updateTransition, rememberInfiniteTransition, Animatable, spring, SharedTransitionLayout, sharedElement, MotionDurationScale, animator duration scale, remove animations, CompositionLocal, MaterialTheme, graphicsLayer, RuntimeShader, AGSL, low RAM, battery saver, animaciones android, Shape, Outline.Generic, Path.arcTo, shadowElevation, floating bottom bar, notched bottom bar, concentric arc cutout
+> Keywords: jetpack compose, android, kotlin, animateFloatAsState, animate*AsState, AnimatedVisibility, AnimatedContent, updateTransition, rememberInfiniteTransition, Animatable, spring, SharedTransitionLayout, sharedElement, MotionDurationScale, animator duration scale, remove animations, CompositionLocal, MaterialTheme, graphicsLayer, RuntimeShader, AGSL, low RAM, battery saver, animaciones android, Shape, Outline.Generic, Path.arcTo, shadowElevation, floating bottom bar, notched bottom bar, concentric arc cutout, scroll depth, parallax, z-axis
 > Summary: How to implement kinetic-ui motion in Jetpack Compose: tiers and tokens in a CompositionLocal, which animation API to use per tier, how Compose follows the system animation scale, and low-end fallbacks.
 
 Build every effect from its framework-agnostic file first (`references/effects/`), then translate it with the tables below.
@@ -170,6 +170,24 @@ Box(
 ```
 
 Read the active item's sliding position (`animateFloatAsState`) inside the `graphicsLayer` block, not in composition, so the spring only redraws the layer instead of recomposing the bar.
+
+## Scroll-driven depth
+
+Compose has no z-translation for layers: fake travel with scale and alpha, read inside the draw phase. The cross-platform effect lives in `references/effects/scroll-depth.md`.
+
+| Job | Compose API |
+| --- | --- |
+| Progress, scroll column | `rememberScrollState()` with `derivedStateOf { state.value / state.maxValue.toFloat() }`; `maxValue` is `Int.MAX_VALUE` until layout, so guard it |
+| Progress, list or stops | `LazyListState` (`firstVisibleItemIndex`, `firstVisibleItemScrollOffset`, `layoutInfo`) or `PagerState` (`currentPage` + `currentPageOffsetFraction`) |
+| What moves | `Modifier.graphicsLayer { scaleX = s; scaleY = s; alpha = a }`, reading the progress inside the lambda so scrolling skips recomposition |
+| Perspective | `cameraDistance` on `graphicsLayer` shapes only `rotationX` / `rotationY` tilt, not the scale; set it in pixels (a multiple of `density`) to avoid clipping |
+| Pin | Keep the stage in a `Box` outside the scroller; a transparent `Column(Modifier.verticalScroll(state))` of travel height supplies progress. `stickyHeader` pins list headers only |
+| Reduced motion | The helper in `## Reduced motion` below (`rememberSystemAnimationsEnabled()`) and `ValueAnimator.areAnimatorsEnabled()`: render the stops as a plain column, no `graphicsLayer` travel |
+
+- Scroll-linked layers are not animations, so the animator duration scale does not stop them. Gate them on the reduced-motion check explicitly.
+- Read scroll state in `graphicsLayer { }` or `drawWithContent`, never in composition: composition-time reads recompose the whole stage every frame.
+- `Modifier.blur` is a no-op below API 31 and costs a render effect per layer; at T2 keep scale plus alpha only.
+- `graphicsLayer` does not alter layout: a scaled layer still occupies its original bounds and can overlap neighbours.
 
 ## Reduced motion
 

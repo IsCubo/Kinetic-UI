@@ -1,6 +1,6 @@
 # 3D platforms and libraries
 
-> Keywords: 3d platform, unity 3d, unreal, godot, blender, babylon.js, react three fiber, model-viewer, realitykit, scenekit, filament, sceneview, flutter 3d, impeller, usdz, gltf import, offline render, turntable, motor 3d, unreal engine, diorama, three.js, webgpu, tsl, flutter_scene, model_viewer_plus, ar, keyshot, interchange
+> Keywords: 3d platform, unity 3d, unreal, godot, blender, babylon.js, react three fiber, model-viewer, realitykit, scenekit, filament, sceneview, flutter 3d, impeller, usdz, gltf import, offline render, turntable, motor 3d, unreal engine, diorama, three.js, webgpu, tsl, flutter_scene, model_viewer_plus, ar, keyshot, interchange, scroll depth, dolly, z-axis
 > Summary: Routes each 3D goal to its platform and library (three.js, React Three Fiber, Babylon.js, model-viewer, Unity, Unreal, Godot, RealityKit, Filament, flutter_scene, offline renders), with the glTF interchange contract and what each importer loses.
 
 Use three.js for a real piece on the web; use each other platform's own library and language everywhere else. One glTF master travels between them; the web runtime contract (poster, lazy chunk, tiers, dispose) stays in `references/effects/webgl-3d.md` and is not repeated here. Versions, licences, and sizes live only in `references/libraries.md`. Decide first whether the piece needs interaction: if not, render offline; if yes, use the platform the product already ships on.
@@ -193,6 +193,26 @@ Every importer loses something:
 - Material graphs (Blender nodes, Shader Graph, Unreal materials) do not transfer; only baked PBR maps do.
 - Rebuild materials in the target from reference photos, not from the exporting tool's preview.
 - Keep the master source (CAD or `.blend`) and the reference photos; re-test every export in the target.
+
+## Scroll-driven depth
+
+Travel through Z in 3D is a camera dolly: one normalised 0..1 progress moves the camera along a path, and the scene itself does not move. The web CSS contract lives in `references/effects/scroll-depth.md`; the scene never reads scroll itself.
+
+| Platform | Progress source (UI layer) | Dolly driver |
+| --- | --- | --- |
+| three.js | Page-level value: a CSS-driven property, ScrollTrigger, or a rAF-throttled scroll reader | In the render loop, `camera.position.z = THREE.MathUtils.lerp(zStart, zEnd, p)`; ease with `MathUtils.damp` |
+| React Three Fiber | drei `ScrollControls` + `useScroll().offset`, or a ref written by the page | `useFrame` sets `state.camera.position.z`; with `frameloop="demand"` call `invalidate()` on scroll |
+| Babylon.js | Page-level value | `scene.onBeforeRenderObservable` sets the camera position, or `AnimationGroup.goToFrame` scrubs a baked camera path |
+| model-viewer | Page-level value | Set the element's `cameraOrbit` radius from progress; no free camera path |
+| Unity | `ScrollRect.normalizedPosition`, or a UI slider | `PlayableDirector.time = p * duration`, then `Evaluate()` on a camera Timeline |
+| Unreal | UMG `ScrollBox` offset divided by its end offset | Scrub a Level Sequence's playback position to `p`; do not step it with Tick time |
+| Godot 4 | `ScrollContainer` scroll value over the scroll bar's max | `AnimationPlayer.seek(p * length, true)`, or set `Camera3D.position.z` directly |
+| Native / Flutter | The progress from `references/platforms/swiftui.md`, `references/platforms/jetpack-compose.md`, or `references/platforms/flutter.md` | Move the camera entity or node in the library's camera API from that value |
+
+- Scroll must come from the UI layer or a page-level value, never from inside the engine loop: the scene cannot know the page's scroll length, and a second scroll listener fights the first.
+- Keep the camera path inside the baked content: fog or far-plane clipping reveal the end of the scene. Hold the last pose past `p = 1`.
+- Reduced motion: do not scrub. Render one static pose (the first stop) and stop the loop.
+- Sample progress once per frame and damp it; raw scroll events make the dolly stutter on high-refresh displays.
 
 ## Reduced motion
 
