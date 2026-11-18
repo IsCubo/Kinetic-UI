@@ -29,10 +29,9 @@ function withTemp(fn) {
 test('eval: list prints every case and its assertion count', () => {
   const result = run('list');
   assert.equal(result.code, 0, result.out);
-  assert.match(result.out, /4 cases, \d+ assertions/);
-  for (const id of ['vague-landing', 'operate-dashboard', 'flawed-pricing-critique', 'low-end-3d']) {
-    assert.match(result.out, new RegExp(id));
-  }
+  const pack = JSON.parse(fs.readFileSync(path.join(ROOT, 'evals', 'evals.json'), 'utf8'));
+  assert.match(result.out, new RegExp(`${pack.cases.length} cases, \\d+ assertions`));
+  for (const { id } of pack.cases) assert.match(result.out, new RegExp(id));
 });
 
 test('eval: gradeText applies regex, contains, notContains, and fileExists checks', () => {

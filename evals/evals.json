@@ -303,6 +303,103 @@
           }
         }
       ]
+    },
+    {
+      "id": "real-object-3d",
+      "title": "Photoreal real piece on the web, then other platforms",
+      "prompt": "We sell a machined aluminium espresso tamper. Build the product page section that renders the actual piece with Three.js: it has to look like the real thing, be true to size and colour, work on a low-end phone, and we may reuse the same model in our Unity app and a Flutter app later.",
+      "expected_output": "A three.js render plan for a real piece: metre scale, a camera matched to product photography, a PBR environment and a contact shadow, colour management that preserves the brand colour, a compressed and validated glTF, tiered fallbacks, and a per-platform route for the same model.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "real-scale",
+          "text": "Works in metres or millimetres instead of arbitrary units",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(metres?|meters?|1 unit = 1 m|millimetres?|millimeters?)\\b"
+          }
+        },
+        {
+          "id": "camera-match",
+          "text": "Matches the camera to product photography or names a lens/FOV decision",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(focal( length)?|fov|field of view|lens)\\b"
+          }
+        },
+        {
+          "id": "pbr-environment",
+          "text": "Uses an environment map, HDRI, or PMREM for PBR realism",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(environment map|hdri|pmrem|room ?environment)\\b"
+          }
+        },
+        {
+          "id": "contact-shadow",
+          "text": "Grounds the piece with a contact or grounding shadow",
+          "check": {
+            "type": "regex",
+            "pattern": "contact shadow|ground(ing|ed)? shadow|shadow[- ]only plane"
+          }
+        },
+        {
+          "id": "colour-pipeline",
+          "text": "Names tone mapping, colour space, or an exposure decision",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(tone mapping|tonemapping|outputColorSpace|colour space|color space|sRGB|neutral|agx|aces)\\b"
+          }
+        },
+        {
+          "id": "pbr-values",
+          "text": "Specifies material response with metalness, roughness, clearcoat, or transmission",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(metalness|roughness|clearcoat|transmission|pbr)\\b"
+          }
+        },
+        {
+          "id": "asset-compression",
+          "text": "Compresses and validates the glTF instead of shipping the raw export",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(draco|meshopt|ktx2|basisu|gltf-transform|gltfpack|gltf validat(or|ion))\\b"
+          }
+        },
+        {
+          "id": "tiered-fallback",
+          "text": "Keeps a poster, turntable, or photo-set fallback below the realtime tier",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(poster|pre-rendered turntable|photo set|still set)\\b"
+          }
+        },
+        {
+          "id": "reduced-motion",
+          "text": "Plans reduced-motion behavior",
+          "check": {
+            "type": "regex",
+            "pattern": "prefers-reduced-motion|reduced motion"
+          }
+        },
+        {
+          "id": "platform-route",
+          "text": "Routes the same model to another platform's own library",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(unity|godot|unreal|realitykit|filament|flutter_scene|model-viewer|babylon)\\.?js?\\b"
+          }
+        },
+        {
+          "id": "verification",
+          "text": "Reports verification with PASS and FAIL or BLOCKED results",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bPASS\\b[\\s\\S]{0,200}\\b(FAIL|BLOCKED)\\b|\\b(FAIL|BLOCKED)\\b[\\s\\S]{0,200}\\bPASS\\b"
+          }
+        }
+      ]
     }
   ]
 }
