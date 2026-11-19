@@ -29,7 +29,7 @@ Priority runs top to bottom. When performance or attention is tight, cut from th
 | Element leaving or being dismissed | `--kui-ease-exit` | Accelerates away and frees attention quickly |
 | Scroll-linked motion, progress tied to time or scroll, loops, spinners | `--kui-ease-linear` | The input (scroll position, time) already sets the pace |
 | Short playful pop-in, toggle, badge (no gesture) | `--kui-ease-spring` | ~16% overshoot; playful and energetic personalities only |
-| Press release or small pop on a calm page | `--kui-ease-spring-gentle` | ~1.5% overshoot (ζ 0.8): reads as alive, not as a bounce |
+| Press release or small pop on a calm page | `--kui-ease-spring-gentle` | ~4.6% overshoot and one settle (ζ 0.7): reads as alive, not as a bounce |
 | Release after a drag, fling, or sheet throw | A real spring (library or native API) | Inherits the gesture's velocity and can be interrupted |
 
 Rules:
@@ -132,7 +132,7 @@ Damping ratio ζ = damping / (2 × √(stiffness × mass)). At ζ = 1 the spring
 
 - **Use springs for** gesture releases (drag, fling, swipe to dismiss, bottom sheets), because a spring keeps the gesture's velocity and can be interrupted mid-flight; for pointer followers; for playful toggles and pop-ins.
 - **Do not use springs for** precise or data-dense UI, text, errors, destructive actions, long travel (overshooting a far target looks broken), or T0 and T1 (no JS physics at T1).
-- **CSS has no physical spring.** `--kui-ease-spring` is a fixed `linear()` curve with ~16% overshoot, no velocity, and no interruption. Use it only for short pops at `--kui-duration-md` to `--kui-duration-lg`; it falls back to `--kui-ease-standard` where `linear()` is unsupported. `--kui-ease-spring-gentle` is the same idea at ζ 0.8, about 1.5% overshoot, and falls back to `--kui-ease-enter`: use it when a brief wants life but forbids bounce. For real springs, use a motion library (`references/libraries.md`) or a native API.
+- **CSS has no physical spring.** `--kui-ease-spring` is a fixed `linear()` curve with ~16% overshoot, no velocity, and no interruption. Use it only for short pops at `--kui-duration-md` to `--kui-duration-lg`; it falls back to `--kui-ease-standard` where `linear()` is unsupported. `--kui-ease-spring-gentle` is the same idea at ζ 0.7, about 4.6% overshoot with a single settle, and falls back to `--kui-ease-enter`: use it when a brief wants life but forbids bounce. For real springs, use a motion library (`references/libraries.md`) or a native API.
 
 Native equivalents of the tokens (details in `references/platforms/flutter.md`, `references/platforms/swiftui.md`, `references/platforms/jetpack-compose.md`):
 
@@ -211,7 +211,7 @@ A brief rarely gives numbers. It gives words, a reference, or a feeling, and the
 
 A word that names a motion asks for that motion. "Settles slowly" wants visible settling on what enters, not its removal: calm removes the motion the brief did not name, never the motion it did. The single focal moment in `references/workflow/direction.md` caps choreography; it does not cancel entrances or feedback the brief describes. "Instant" on a state change means zero: the content and its indicator change in the same frame, with no transition on anything the control drives.
 
-When two words pull against each other, the stricter one caps the other, and the answer says so. "Nothing bounces" caps the overshoot of "a little playful" at about 2%, which is `--kui-ease-spring-gentle` and never `--kui-ease-spring`. Measure overshoot as a share of the travel: the peak of a `cubic-bezier` y curve above 1, or the ζ formula above for a spring.
+When two words pull against each other, the stricter one caps the other, and the answer says so. "Nothing bounces" caps the overshoot of "a little playful" at about 5%, which is `--kui-ease-spring-gentle` and never `--kui-ease-spring`; below about 3% the play is no longer seen. Measure overshoot as a share of the travel: the peak of a `cubic-bezier` y curve above 1, or the ζ formula above for a spring. A short travel hides it, because a release from 0.96 moves only 4% of the size: when the play must show, lift to about 1.02 and settle back on the gentle spring instead of raising the overshoot.
 
 Intensity is a multiplier on the preset, not a new preset: "un poco" halves the distance and the stagger, "mucho" multiplies by about 1.5, and beyond that you are changing the personality, so say so.
 

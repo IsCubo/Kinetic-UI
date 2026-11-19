@@ -23,12 +23,12 @@ test('tokens: --kui-ease-spring keeps its documented ~16% overshoot', () => {
   assert.ok(overshoot > 0.14 && overshoot < 0.18, `overshoot ${overshoot.toFixed(3)}`);
 });
 
-test('tokens: --kui-ease-spring-gentle settles with about 1.5% overshoot and no second bounce', () => {
+test('tokens: --kui-ease-spring-gentle settles with a 4-6% overshoot and no second bounce', () => {
   const points = linearPoints('--kui-ease-spring-gentle');
   assert.equal(points[0], 0);
   assert.equal(points.at(-1), 1);
   const overshoot = Math.max(...points) - 1;
-  assert.ok(overshoot >= 0.005 && overshoot <= 0.025, `overshoot ${overshoot.toFixed(3)}`);
+  assert.ok(overshoot >= 0.035 && overshoot <= 0.06, `overshoot ${overshoot.toFixed(3)}`);
   const peak = points.indexOf(Math.max(...points));
   assert.ok(points.slice(peak).every((value) => value >= 0.995), 'never dips visibly below rest after the peak');
 });

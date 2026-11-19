@@ -25,8 +25,8 @@
   --kui-ease-linear: linear;                             /* scroll-linked and looping motion */
   /* Spring-like overshoot (~16%). Playful brands only; use sparingly. */
   --kui-ease-spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1.004 83.8%, 1);
-  /* Gentle spring (damping ratio 0.8, ~1.5% overshoot): life without a visible bounce, for calm pages. */
-  --kui-ease-spring-gentle: linear(0, 0.018 2%, 0.065 4%, 0.13 6%, 0.208 8%, 0.291 10%, 0.417 13%, 0.537 16%, 0.676 20%, 0.81 25%, 0.903 30%, 0.969 36%, 1.004 43%, 1.015 52%, 1.012 60%, 1.006 70%, 1.002 80%, 1 90%, 1);
+  /* Gentle spring (damping ratio 0.7, ~4.6% overshoot, one settle): life without a bounce, for calm pages. */
+  --kui-ease-spring-gentle: linear(0, 0.018 2%, 0.066 4%, 0.135 6%, 0.217 8%, 0.306 10%, 0.443 13%, 0.574 16%, 0.726 20%, 0.871 25%, 0.965 30%, 1.018 35%, 1.042 40%, 1.046 45%, 1.036 52%, 1.02 60%, 1.005 70%, 0.999 80%, 0.998 90%, 1);
 
   /* Distances and scales */
   --kui-distance-sm: 4px;
