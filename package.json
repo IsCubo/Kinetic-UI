@@ -16,6 +16,7 @@
     "eval:blind": "node scripts/eval.mjs blind",
     "eval:unblind": "node scripts/eval.mjs unblind",
     "eval:isolate": "node scripts/eval-isolate.mjs",
+    "capture": "node scripts/capture-frames.mjs",
     "skill:install": "node scripts/install.mjs"
   }
 }

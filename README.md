@@ -135,6 +135,7 @@ node scripts/eval.mjs list
 node scripts/eval.mjs init
 # hand each evals/workspace/iteration-1/<case>/<variant>/RUN.md to a fresh session
 node scripts/eval.mjs grade
+node scripts/capture-frames.mjs --out frames --url <page.html>   # rendered frames to review
 ```
 
 Each case runs twice: with a snapshot of the skill and without any skill.
@@ -156,7 +157,7 @@ node scripts/validate.mjs skills/kinetic-ui      # frontmatter, headers, section
 node scripts/test.mjs                            # validator test suite
 ```
 
-The `npm run index|validate|test` aliases do the same. Use the plain `node` commands when npm runs from a different platform than the repository (for example Windows npm on a WSL UNC path, which falls back to `C:\Windows`).
+The `npm run index|validate|test|capture` aliases do the same. Use the plain `node` commands when npm runs from a different platform than the repository (for example Windows npm on a WSL UNC path, which falls back to `C:\Windows`).
 
 Every reference file starts with `> Keywords:` and `> Summary:` lines; the index is generated from them, and validation fails when it is stale.
 

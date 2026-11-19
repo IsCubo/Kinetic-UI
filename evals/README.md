@@ -2,8 +2,8 @@
 
 Measure whether the skill changes agent behavior. The pack checks protocol
 compliance — does the agent classify the surface, plan reduced motion, use the
-motion tiers, and verify — not taste. Visual quality still needs a blind human
-review.
+motion tiers, and verify — not taste. Visual quality is judged separately, from
+rendered frames (`scripts/capture-frames.mjs`) and a blind review.
 
 ## Cases
 
@@ -157,6 +157,58 @@ Statuses:
 reported in their case but excluded from the totals. `delta` is `null` unless
 both variants have at least one graded case.
 
+## Rendering the outputs
+
+Assertions cannot see. `scripts/capture-frames.mjs` renders a local page and
+writes PNG frames plus `frames.json`, with no npm dependency: it drives a
+headless Chrome over the DevTools Protocol through Node's built-in `WebSocket`
+(Node 22+).
+
+```bash
+node scripts/capture-frames.mjs --out frames --url page.html
+node scripts/capture-frames.mjs --out frames --url demo.html \
+  --viewport 360x800,1440x900 --steps 0,0.25,0.5,0.75,1 --reduced-motion
+```
+
+Each capture records the scroll position, the scroll maximum, the `--kui-*`
+custom properties, the viewport meta, and every JS exception and console error,
+so a blank or frozen frame can be explained instead of guessed at.
+
+The browser comes from `--chrome`, then `CHROME_PATH`, then the usual install
+locations, including the Playwright cache. Under WSL a Linux Chromium may be
+missing system libraries; Chrome for Windows works through interop, but it binds
+the debugging port to Windows `127.0.0.1`, so the script must then run under the
+Windows `node.exe`.
+
+Two failure modes to recognize: a frame captured through Chrome's own
+`--screenshot` flag without CDP comes out blank once scrolled, and a page without
+`<meta name="viewport">` lays out at 980 px inside a phone-sized window (the
+manifest records the missing meta rather than hiding it).
+
+## Visual baseline (iteration 4)
+
+`scroll-depth-travel` was the first case captured and looked at. Frames are in
+`workspace/iteration-4/visual-baseline/`. Neither answer looked good, and the
+skill's own answer made the weaker first impression.
+
+| Frame | with_skill | without_skill |
+| --- | --- | --- |
+| 0%, 1440 px | A 576 px rounded card centred in a dark field: SVG art, headline, about 40% of the viewport empty | Full-bleed mountains, "Above the clouds", header CTA, stop dots, "Scroll to fly" |
+| 50% | City card, but a ghost "WEATHER" label from another stop shows through, and the footer rule enters the pinned view | Layers scaled up and washed out; no readable content left |
+| 100% | The beach stop is clipped by the stage ending, mid-illustration, then the form appears | Over-zoomed flat bands — sky, sea, sand — with a CTA |
+
+What the frames say, in the rubric's terms:
+
+- The flight is invisible in stills: the card keeps its size and stays centred,
+  so forward travel reads as three slides, not as movement through depth.
+- Stop pacing fails at both ends: a stop is clipped before it is legible, and a
+  stop that should be hidden is still painted as a ghost.
+- The reduced-motion stack is the strongest frame in the set — readable cards, no
+  motion — but its copy still says "Scroll to cross three destinations" with
+  nothing to scroll.
+- The baseline's opening frame is the only one that holds attention, which is why
+  the skill cannot claim a visual win yet.
+
 ## Blind review (quality)
 
 Assertions check protocol vocabulary; they cannot say whether a design is good.
@@ -171,7 +223,7 @@ node scripts/eval.mjs unblind --iteration 1 --scores <file>
 `blind` copies the two outputs of every case that has both variants into
 `review/`, assigns them to A and B by a random draw (`--seed N` makes it
 reproducible), and writes the key to `blind-key.json` outside `review/`. The
-reviewer opens only `review/`, scores nine dimensions from 0 to 4 (`null` when
+reviewer opens only `review/`, scores twelve dimensions from 0 to 4 (`null` when
 a dimension does not apply), and runs `unblind`. It rejects scores outside 0-4,
 unknown dimensions, a missing reviewer name, and any answer with no scored
 dimension. Results go to `review-<reviewer>.json` and to a `human_review` section
