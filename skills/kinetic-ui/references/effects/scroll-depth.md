@@ -64,14 +64,20 @@ Support: `@property` is Baseline since 2024-07 (Firefox 128 was the last engine)
 
 ## Composition
 
-A still frame is what most visitors see first; the travel only matters after that frame holds.
+A still frame is what most visitors see first; the travel only matters after that frame holds. Every rule below is checked on a captured frame, not in the CSS.
 
-- The art fills the frame and overscans it by 30% or more. A scene inset in a page of background colour reads as a card, not as a place.
-- One focal subject per stop, big enough to name at a glance, placed off-centre; set the copy in the subject's quiet area instead of stacking everything dead centre.
-- Compose each stop at the moment it is fully opaque and check that frame, not the middle of its transition.
-- The last stop's `--at` leaves it fully visible at p = 1, and the stage ends after its exit. A stop clipped mid-illustration looks broken.
-- The track is exactly one viewport and clips: no stage border, footer rule or next section may show inside the pinned frame.
-- Layered text is the usual ghost. Every layer that is not art needs its own fade window, and windows never overlap.
+| Rule | Why | Fails when |
+| --- | --- | --- |
+| The stage is the viewport: full width, `100svh`, no radius, border, margin, shadow or max-width container | A scene inside a frame reads as a card on a page: the viewer looks at a box, not into a place | The pinned frame shows page background at any edge |
+| One continuous world: a persistent sky, ground and light layer that never fades, with stops as objects inside it | Three separate illustrations fading into each other are three slides; one world is a journey, and it removes both the void between stops and the ghost of the next scene | The sky or horizon changes when a stop changes |
+| Copy sits on the world, never on a plate: no background, no `backdrop-filter`, no panel, no rounded box | A dark box behind text cuts a hole in the scene and becomes the first thing the eye sees | Any hard edge behind the copy |
+| Contrast comes from the scene: put the copy in a quiet area, add one full-stage scrim that follows the art's own light, and a text-shadow | The scrim joins the image instead of sitting on it | The edge of the scrim is locatable |
+| Type carries the frame: display scale (`clamp(2.25rem, 6vw, 5rem)`), one line of support copy, 12 words or fewer | An immersive hero is judged on its first frame; small type in a corner reads as a caption | The headline is smaller than the brand block |
+| One focal subject per stop, off-centre, big enough to name at a glance | The eye needs a destination at every scroll position | The middle of the frame is empty |
+| Stops are sequential, never simultaneous: each owns the slot between its neighbours' midpoints and fades over 8% at each edge | Crossfading two full-frame illustrations paints one scene over the other: that is the ghost | Two scenes are visible at once |
+| The last stop's slot ends at p = 1, and the stage ends after its exit | The scene has to land, not be cut mid-illustration | The last frame shows a stop half-visible |
+
+The track is exactly one viewport and clips: no stage border, footer rule or next section may show inside the pinned frame. Compose each stop at the moment it is fully opaque, and capture that frame.
 
 ## Implementation
 
@@ -80,16 +86,19 @@ A still frame is what most visitors see first; the travel only matters after tha
 ```html
 <section class="kui-zdepth" aria-labelledby="zd-title">
   <div class="kui-zdepth__track">
-    <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -900px" aria-hidden="true"><img src="tunnel.avif" alt="" width="2400" height="1500"></div>
-    <article class="kui-zdepth__layer kui-zdepth__stop" style="--kui-z: 0px; --at: 0"><h2 id="zd-title">Start here</h2><p>First beat.</p></article>
-    <article class="kui-zdepth__layer kui-zdepth__stop" style="--kui-z: -450px; --at: .5"><h3>Then deeper</h3><p>Second beat.</p></article>
-    <article class="kui-zdepth__layer kui-zdepth__stop" style="--kui-z: -810px; --at: .9"><h3>Arrive</h3><p>Final beat.</p></article>
+    <div class="kui-zdepth__world" aria-hidden="true"><img src="world.avif" alt="" width="2400" height="1500"></div>
+    <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -900px; --in: 0; --out: .25" aria-hidden="true"><img src="mountains.avif" alt="" width="2400" height="1500"></div>
+    <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -520px; --in: .25; --out: .7" aria-hidden="true"><img src="city.avif" alt="" width="2400" height="1500"></div>
+    <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -810px; --in: .7; --out: 1" aria-hidden="true"><img src="beach.avif" alt="" width="2400" height="1500"></div>
+    <article class="kui-zdepth__layer kui-zdepth__stop" style="--kui-z: 0px; --at: 0; --in: 0; --out: .25"><h2 id="zd-title">Start here</h2><p>First beat.</p></article>
+    <article class="kui-zdepth__layer kui-zdepth__stop" style="--kui-z: -450px; --at: .5; --in: .25; --out: .7"><h3>Then deeper</h3><p>Second beat.</p></article>
+    <article class="kui-zdepth__layer kui-zdepth__stop" style="--kui-z: -810px; --at: .9; --in: .7; --out: 1"><h3>Arrive</h3><p>Final beat.</p></article>
     <div class="kui-zdepth__veil" aria-hidden="true"></div>
   </div>
 </section>
 ```
 
-`--at` is a unitless local helper (not part of the shared contract): the progress at which the stop reaches the screen plane, `−z ÷ travel` (here travel is 900px). CSS cannot divide a length by a length everywhere yet, so state both and keep them in sync. The last stop uses `--at: .9` so it is still fully visible at p = 1.
+Two numbers per stop, both unitless local helpers (not part of the shared contract). `--at` is the progress at which the stop reaches the screen plane, `−z ÷ travel` (here travel is 900px); CSS cannot divide a length by a length everywhere yet, so state both and keep them in sync. `--in` and `--out` are the slot the stop owns: the midpoints towards its neighbours, with the first starting at 0 and the last ending at 1. The midpoints are what stop the ghost: two stops never share a slot, so two scenes are never both visible.
 
 ### Static stack, then the live scene (CSS-only path, T1+)
 
@@ -100,6 +109,7 @@ A still frame is what most visitors see first; the travel only matters after tha
 .kui-zdepth { position: relative; overflow: clip; isolation: isolate; }
 .kui-zdepth__stop { padding-block: var(--kui-distance-lg); }
 .kui-zdepth__art { display: none; }   /* decorative art appears only in the live scene */
+.kui-zdepth__world { display: none; } /* the one continuous world: sky, ground, light */
 .kui-zdepth__veil { display: none; }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -112,12 +122,15 @@ A still frame is what most visitors see first; the travel only matters after tha
   :root:not([data-motion-tier="0"]) .kui-zdepth__layer {
     grid-area: 1 / 1;
     translate: 0 0 calc(var(--kui-z, 0px) + var(--kui-z-p) * var(--kui-z-travel) * var(--kui-z-speed, 1));
-    /* d = p − at: fade in over d −0.35…−0.10, hold, fade out over d 0.10…0.30 (before the lens) */
+    /* The stop owns the slot [--in, --out] and fades over 8% at each edge: no two scenes are ever visible together. */
     opacity: min(
-      clamp(0, calc((var(--kui-z-p) - var(--at, 0) + 0.35) * 4), 1),
-      clamp(0, calc((0.3 - var(--kui-z-p) + var(--at, 0)) * 5), 1));
+      clamp(0, calc((var(--kui-z-p) - var(--in, 0)) * 12.5), 1),
+      clamp(0, calc((var(--out, 1) - var(--kui-z-p)) * 12.5), 1));
   }
-  :root:not([data-motion-tier="0"]) .kui-zdepth__art { display: block; inline-size: 160%; block-size: 160%; place-self: center; opacity: 1; }   /* overscan; never fades */
+  :root:not([data-motion-tier="0"]) .kui-zdepth__world {
+    display: block; grid-area: 1 / 1; inline-size: 160%; block-size: 160%; place-self: center;
+  }   /* overscan the world once: it never fades, never moves, never changes colour */
+  :root:not([data-motion-tier="0"]) .kui-zdepth__art { display: block; inline-size: 160%; block-size: 160%; place-self: center; }   /* overscan; fades with its slot */
   :root:not([data-motion-tier="0"]) .kui-zdepth__veil {
     display: block; grid-area: 1 / 1; pointer-events: none; z-index: 1;
     background: radial-gradient(closest-side, transparent 55%, var(--brand-surface));
@@ -140,6 +153,7 @@ A still frame is what most visitors see first; the travel only matters after tha
   :root:not([data-motion-tier="2"]):not([data-motion-tier="3"]) .kui-zdepth__track { position: static; block-size: auto; display: block; perspective: none; }
   :root:not([data-motion-tier="2"]):not([data-motion-tier="3"]) .kui-zdepth__layer { translate: none; opacity: 1; }
   :root:not([data-motion-tier="2"]):not([data-motion-tier="3"]) .kui-zdepth__art,
+  :root:not([data-motion-tier="2"]):not([data-motion-tier="3"]) .kui-zdepth__world,
   :root:not([data-motion-tier="2"]):not([data-motion-tier="3"]) .kui-zdepth__veil { display: none; }
 }
 ```
@@ -176,7 +190,7 @@ Framework notes: call `start()` in a mount effect (`useEffect`, `onMounted`, `$e
 Exact T0 behavior:
 
 - The live rules sit inside `prefers-reduced-motion: no-preference` and exclude `data-motion-tier="0"`, so neither applies: no pinning, no perspective, no travel, no timeline.
-- The result is the static stack: stops in normal flow, in source order, at rest, with `translate: none`, `opacity: 1`, and the art and veil hidden.
+- The result is the static stack: stops in normal flow, in source order, at rest, with `translate: none`, `opacity: 1`, and the world, art and veil hidden.
 - The controller never starts, and a switch to T0 or to `reduce` clears `--kui-z-p` and releases the observer.
 - Copy written for the moving scene ("scroll to cross three destinations") is rewritten for the stack: the static path must not ask for a gesture it does not have.
 - No smooth scrolling, no snapping, no replacement animation. An entrance fade of 200ms or less on the whole section is the only allowed motion.
@@ -227,4 +241,5 @@ When `watchFrameRate()` lowers the tier mid-scroll, the static rules or the lowe
 - A second writer: the CSS animation overrides inline values, so a running controller beside a supported timeline is wasted work. Start the controller only without support.
 - Unregistered `--kui-z-p`: it interpolates discretely, so the scene jumps between the first and last frame.
 - `100svh` track with a measured `innerHeight` span: toolbar resizing on mobile drifts progress slightly. Pass `length` as a function of the stage and track heights; a fixed number goes stale on rotation.
-- Dropping `--at` or forgetting to keep it equal to `−z ÷ travel`: a stop fades in at the wrong time and may never be fully opaque.
+- Dropping `--at`, or forgetting to keep it equal to `−z ÷ travel`: a stop fades in at the wrong moment relative to its arrival, and the copy reads over the wrong scene.
+- Slots that overlap, or art layers without `--in`/`--out`: two scenes paint at once and the top one shows as a ghost. Give every layer a slot; the world is the only layer without one.

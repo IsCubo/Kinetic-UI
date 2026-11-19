@@ -73,8 +73,9 @@ It writes one PNG per viewport and scroll fraction plus a `frames.json` holding 
 
 | What a frame shows | Means | Fix |
 | --- | --- | --- |
-| A background void around a small centred card | The scene does not fill its own frame | Full-bleed and overscan the art; one focal subject per stop |
-| Text from another stop faintly visible | Opacity windows overlap, or a layer that is not art never fades | Close each window before the next opens; fade every non-art layer |
+| A background void around a small centred card, or page background at the edges | The scene does not fill its own frame; the hero is framed like a widget | Make the stage the viewport: full width, `100svh`, no radius, border, margin, shadow or max-width |
+| A dark panel, plate or blur behind the copy | The text has a box instead of living in the scene | Remove the background; place the copy in a quiet area over one full-stage scrim plus a text-shadow |
+| Text from another stop faintly visible, or two scenes at once | Opacity windows overlap, or a layer has no slot | Give every layer the slot between its neighbours' midpoints; fade over 8% at each edge |
 | A stop cut mid-illustration, or the next section or a stage border inside the pinned frame | Stop pacing runs short of its exit | Move the last `--at` earlier; end the stage after the exit; clip the track |
 | Two frames at different scroll positions are identical | The travel never ran: timeline, tier or controller | Read `--kui-z-p` in `frames.json`; it must change between frames |
 | Copy still says "scroll" in the reduced-motion frame | The static path kept motion-specific words | Rewrite the static copy |
