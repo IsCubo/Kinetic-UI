@@ -67,6 +67,8 @@ A thesis is one sentence of choreography for the whole surface, built from four 
 
 Priority when the budget is tight is fixed, from the purpose ranking: cut Delight, then Brand, then Continuity, then Focus; Feedback goes last (or is left to `references/foundations/accessibility-motion.md`). Never balance an over-budget moment by adding another.
 
+When the brief describes the feel in words instead of numbers — "suave", "con punch", "como en ese sitio" — record the mapping beside the thesis: the words, the values they produced, and which were inferred. `references/foundations/motion-principles.md` has the word-to-parameter table; this file holds the record, so the next edit does not re-decide the feel.
+
 ## Step 4 — Constraints
 
 Constraints turn taste into commitments. Every constraint row must be checkable by looking at the build.

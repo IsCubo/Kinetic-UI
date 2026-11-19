@@ -192,6 +192,32 @@ Apply a preset after `assets/tokens/motion.css`:
 }
 ```
 
+## From a described feel to parameters
+
+A brief rarely gives numbers. It gives words, a reference, or a feeling, and the agent's job is to turn that into the two or three values that carry it. Translate, do not interview: the user should never have to answer "what cubic-bezier?".
+
+| What they said | Change first | Values that carry it | Leave alone |
+| --- | --- | --- | --- |
+| "suave", "calmado", "elegante" | Duration and tail | `md` 300–350 ms, `lg` 450–500 ms, long soft tail, distance ≤ 8px, no overshoot | Stagger stays short; exits stay quick |
+| "rápido", "snappy", "responsivo" | Duration | `md` 140–200 ms, `lg` 240–280 ms, strong deceleration, distance ≤ 12px | Distance; a snap does not travel far |
+| "energético", "con punch" | Distance and pop | `--kui-distance-lg` 40–56px, scale pop 1.06, spring on pop-ins | Exits: keep them fast, or it feels drunk |
+| "premium", "lujoso" | Fade over travel | Long fades, no pop, distance modest, fewer staggered items | Duration stays long even on small elements |
+| "juguetón", "divertido" | Spring | `--kui-ease-spring`, scale pop 1.08, ζ 0.5–0.7 | Never on errors, destructive actions, or form feedback |
+| "inmersivo", "cinematográfico" | Scroll distance and depth | Longer scene, slower parallax, one focal camera move | Nothing else moves; immersion comes from restraint |
+| "sutil", "no me marees" | Distance | 4–8px travel or opacity alone, no parallax | Duration can stay normal; small and slow is calmer than small and fast |
+
+Intensity is a multiplier on the preset, not a new preset: "un poco" halves the distance and the stagger, "mucho" multiplies by about 1.5, and beyond that you are changing the personality, so say so.
+
+When they name a reference site instead of a word:
+
+1. Watch one interaction twice and write down three numbers: how long it takes, how far it travels, and whether it overshoots.
+2. Match those three, not the site's look. A site can be copied honestly only at the level of timing and travel.
+3. If you cannot measure it, name the trait ("it decelerates hard and does not overshoot") and say the numbers are inferred.
+
+Record the mapping where the next round will read it — the motion thesis in `references/workflow/direction.md`: the words used, the values chosen, and which of them were inferred. A feel that is written down stops being re-litigated, and a feeling that stays in the chat is lost on the next edit.
+
+Two limits hold whatever the brief says: a described feel never overrides `prefers-reduced-motion`, the tier caps, or a 200 ms feedback budget on interaction. "Make it more energetic" is not permission to animate a press for 600 ms.
+
 ## Anti-patterns
 
 | Anti-pattern | Why it hurts | Do instead |
