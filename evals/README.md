@@ -251,6 +251,8 @@ score the page, not the vocabulary, and to note when you recognized an answer.
 | `motion-by-feel` | 8 | sonnet-blind | 3.45 | 2.73 | impact 3 vs 2, motion-fidelity 3 vs 4 |
 | `piece-from-description` | 9 | sonnet-blind-2 | 3.42 | 2.33 | impact 4 vs 3, 3d-fidelity 3 vs 2 |
 | `motion-by-feel` | 9 | sonnet-blind-2 | 3.55 | 2.64 | impact 3 vs 2, motion-fidelity 3 vs 3 |
+| `piece-from-description` | 10 | sonnet-blind-3 | 3.25 | 1.92 | impact 3 vs 2, 3d-fidelity 3 vs 2, hierarchy 3 vs 2 |
+| `motion-by-feel` | 10 | sonnet-blind-3 | 3.18 | 2.36 | impact 2 vs 2, motion-fidelity 3 vs 3 |
 
 Iteration 8 exposed two skill defects: the correct dripper sat small in a
 bordered card beside a larger headline, and "settles slowly" was mapped to the
@@ -260,8 +262,13 @@ iteration 8, because a skill change cannot affect them. The two reviewers
 scored those same baseline pages within 0.1 of each other. Both recognised the
 answers made with the skill from their vocabulary and say so in their notes. One
 reviewer per iteration and one run per cell make this a direction, not a
-measurement. Still open: `motion-fidelity` ties on `motion-by-feel`, and at
-360 px the iteration 9 piece overlaps its own headline.
+measurement. At 360 px the iteration 9 piece overlapped its own headline; the portrait
+framing rule fixed it in iteration 10 (hierarchy 2 vs 3 became 3 vs 2).
+`motion-fidelity` on `motion-by-feel` stayed tied, and the reviewers disagreed
+on why: the iteration 9 reviewer found the 16% spring too bouncy for "nothing
+bounces", the iteration 10 reviewer found the 1.5% gentle spring too faint for
+"a little playful", and both named a 4-6% overshoot as the answer. Still
+frames cannot show timing, so the feel of that case goes to a human judge.
 
 ## Interpreting the result
 
