@@ -15,6 +15,8 @@ rendered frames (`scripts/capture-frames.mjs`) and a blind review.
 | `low-end-3d` | Parallax and 3D on a low-end phone and under reduced motion: fallbacks, `data-motion-tier`, performance budget, verification. |
 | `real-object-3d` | A real piece in three.js: metre scale, a camera matched to photography, environment map, contact shadow, colour pipeline, PBR values, compressed glTF, tiers, reduced motion, a per-platform route, verification. |
 | `scroll-depth-travel` | Scroll that moves the viewer forward through Z: a pinned stage, one progress value, perspective, blur cost, a reduced-motion static stack, tiers, a scroll budget, content order, Flutter and SwiftUI equivalents. |
+| `piece-from-description` | A real piece described in words with no model: metre scale from the stated dimensions, a lathe body, a bent handle, a measured versus invented ledger, a size check, a contact shadow, reduced motion. Reviewed blind on `3d-fidelity`. |
+| `motion-by-feel` | Motion described by feel with a bad precedent: words mapped to written values, an instant switch, a playful press scoped to one action, the side slides replaced, inferred values named, reduced motion. Reviewed blind on `motion-fidelity`. |
 
 `evals/fixtures/flawed-pricing/index.html` is intentionally broken. Do not copy
 it as a template. It contains an infinite pulse with no reduced-motion variant,
@@ -254,7 +256,7 @@ score the page, not the vocabulary, and to note when you recognized an answer.
 
 ## Limits
 
-- Six cases and 56 assertions are a smoke test, not a benchmark. Each cell is a
+- Eight cases and 71 assertions are a smoke test, not a benchmark. Each cell is a
   single run, so variance is unmeasured.
 - Assertions changed after seeing iteration 1 must be logged as post hoc. The
   `3d-fallback` pattern was widened from "3D/WebGL" to the effect ("tilt"),

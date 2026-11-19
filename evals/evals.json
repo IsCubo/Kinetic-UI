@@ -505,6 +505,144 @@
           }
         }
       ]
+    },
+    {
+      "id": "piece-from-description",
+      "title": "A 3D piece from a workshop description, no model",
+      "prompt": "We make a ceramic pour-over coffee dripper and we have no 3D model of it, only the workshop's description: a cone 116 mm across the top rim and 82 mm tall, sitting on a flat foot ring 70 mm wide, one round 14 mm hole at the bottom, twelve straight ribs on the inside wall, a loop handle on one side, and a matte white glaze. Build the product page hero that shows the dripper in 3D in the browser so customers can turn it around. It has to be recognisable at a glance and true to size.",
+      "expected_output": "A browser hero that builds the dripper from its construction: a lathe profile in metres for the cone and foot, a bent handle overlapping the body, ribs on the inner wall, the bottom hole, a ledger of measured versus invented dimensions, a bounding-box check against the brief, a matte ceramic material under one environment map with a contact shadow, user-driven rotation that respects reduced motion, and a still fallback for low tiers.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "metre-scale",
+          "text": "Builds the piece in metres from the stated dimensions",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b0\\.(116|058|082|070?|035|014|007)\\b"
+          }
+        },
+        {
+          "id": "lathe-body",
+          "text": "Turns the cone and foot from a profile instead of stacking primitives",
+          "check": {
+            "type": "regex",
+            "pattern": "LatheGeometry"
+          }
+        },
+        {
+          "id": "handle-part",
+          "text": "Builds the handle as its own bent part",
+          "check": {
+            "type": "regex",
+            "pattern": "TubeGeometry|TorusGeometry|CatmullRomCurve3"
+          }
+        },
+        {
+          "id": "dimension-ledger",
+          "text": "Separates measured dimensions from invented ones",
+          "check": {
+            "type": "regex",
+            "pattern": "\\binvent(ed|s)?\\b"
+          }
+        },
+        {
+          "id": "size-check",
+          "text": "Proves the built size against the brief",
+          "check": {
+            "type": "regex",
+            "pattern": "Box3|bounding box|setFromObject|getSize\\("
+          }
+        },
+        {
+          "id": "contact-shadow",
+          "text": "Grounds the piece with a contact shadow",
+          "check": {
+            "type": "regex",
+            "pattern": "contact shadow|ContactShadows|ShadowMaterial|shadow catcher|ground(ing|ed)? shadow"
+          }
+        },
+        {
+          "id": "reduced-motion",
+          "text": "Keeps rotation user-driven or still under reduced motion",
+          "check": {
+            "type": "regex",
+            "pattern": "prefers-reduced-motion|reduced motion"
+          }
+        },
+        {
+          "id": "browser-page",
+          "text": "Ships a page that opens in a browser",
+          "check": {
+            "type": "fileExists",
+            "pattern": "\\.html$"
+          }
+        }
+      ]
+    },
+    {
+      "id": "motion-by-feel",
+      "title": "Motion described by feel, with a bad precedent",
+      "prompt": "Our meditation app needs its pricing page rebuilt. It should feel calm: things settle slowly and nothing bounces. Switching between monthly and yearly billing has to feel instant, though, and pressing 'Start free' should feel a little playful. Our last developer made every section slide in from the side and people said it felt like a casino.",
+      "expected_output": "A pricing page whose motion values come from the described feel and are written down: a calm global personality (longer durations, soft deceleration, short distances, no overshoot), an instant billing switch, a playful press scoped to the primary action within the feedback budget, entrances that replace the side slides, reduced-motion behaviour, and a statement of which values were inferred from words.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "feel-mapping",
+          "text": "Writes down which words produced which motion values",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(calm|settle|slowly|instant|playful)\\b[^\\n]{0,160}\\b\\d{2,4}\\s?ms\\b"
+          }
+        },
+        {
+          "id": "instant-toggle",
+          "text": "Keeps the billing switch at 200 ms or less",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(toggle|switch|billing|monthly|yearly)\\b[\\s\\S]{0,240}?(\\b([5-9]\\d|1\\d\\d|200)\\s?ms\\b|\\b0?\\.(0[5-9]|1\\d?|2)\\s?s\\b)"
+          }
+        },
+        {
+          "id": "scoped-playful-press",
+          "text": "Keeps the playful motion on the primary action's press",
+          "check": {
+            "type": "regex",
+            "pattern": "(:active|\\bpress(ed)?\\b|pointerdown)[\\s\\S]{0,240}?(spring|overshoot|cubic-bezier\\([^)]*,\\s*1\\.\\d)"
+          }
+        },
+        {
+          "id": "replaces-side-slide",
+          "text": "Replaces the side slide-ins instead of keeping them",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(no|never|instead of|replac\\w*|drop\\w*|remov\\w*|avoid\\w*)\\b[^\\n]{0,80}\\b(slid\\w*|translateX|from the side)"
+          }
+        },
+        {
+          "id": "inferred-values",
+          "text": "Says which values were inferred from the description",
+          "check": {
+            "type": "regex",
+            "pattern": "\\binferred\\b|\\binterpret(ed|ation)\\b"
+          }
+        },
+        {
+          "id": "reduced-motion",
+          "text": "Plans reduced-motion behaviour",
+          "check": {
+            "type": "regex",
+            "pattern": "prefers-reduced-motion|reduced motion"
+          }
+        },
+        {
+          "id": "browser-page",
+          "text": "Ships a page that opens in a browser",
+          "check": {
+            "type": "fileExists",
+            "pattern": "\\.html$"
+          }
+        }
+      ]
     }
   ]
 }
