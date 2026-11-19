@@ -258,6 +258,10 @@ score the page, not the vocabulary, and to note when you recognized an answer.
 
 - Eight cases and 71 assertions are a smoke test, not a benchmark. Each cell is a
   single run, so variance is unmeasured.
+- Post hoc, iteration 8: `metre-scale` in `piece-from-description` only accepted
+  literal metre values such as `0.058`, and missed an answer that builds in
+  metres through `const MM = 0.001`. It now also accepts a millimetre-to-metre
+  constant. The answer that works in millimetres still fails it.
 - Assertions changed after seeing iteration 1 must be logged as post hoc. The
   `3d-fallback` pattern was widened from "3D/WebGL" to the effect ("tilt"),
   because a valid CSS-tilt answer was penalized; the baseline result for that

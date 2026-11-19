@@ -198,13 +198,16 @@ A brief rarely gives numbers. It gives words, a reference, or a feeling, and the
 
 | What they said | Change first | Values that carry it | Leave alone |
 | --- | --- | --- | --- |
-| "suave", "calmado", "elegante" | Duration and tail | `md` 300–350 ms, `lg` 450–500 ms, long soft tail, distance ≤ 8px, no overshoot | Stagger stays short; exits stay quick |
-| "rápido", "snappy", "responsivo" | Duration | `md` 140–200 ms, `lg` 240–280 ms, strong deceleration, distance ≤ 12px | Distance; a snap does not travel far |
-| "energético", "con punch" | Distance and pop | `--kui-distance-lg` 40–56px, scale pop 1.06, spring on pop-ins | Exits: keep them fast, or it feels drunk |
-| "premium", "lujoso" | Fade over travel | Long fades, no pop, distance modest, fewer staggered items | Duration stays long even on small elements |
-| "juguetón", "divertido" | Spring | `--kui-ease-spring`, scale pop 1.08, ζ 0.5–0.7 | Never on errors, destructive actions, or form feedback |
-| "inmersivo", "cinematográfico" | Scroll distance and depth | Longer scene, slower parallax, one focal camera move | Nothing else moves; immersion comes from restraint |
-| "sutil", "no me marees" | Distance | 4–8px travel or opacity alone, no parallax | Duration can stay normal; small and slow is calmer than small and fast |
+| "calm", "smooth", "elegant", "suave", "calmado" | Duration and tail | `md` 300–350 ms, `lg` 450–500 ms, long soft tail, distance ≤ 8px, no overshoot | Stagger stays short; exits stay quick |
+| "settles slowly", "drifts in", "se asienta despacio" | Entrance duration | Entrances at 700–900 ms with a long ease-out tail, 8–16px of travel, no overshoot; every part the brief names settles | Feedback stays under 200 ms; nothing travels sideways |
+| "fast", "snappy", "instant", "rápido", "responsivo" | Duration | `md` 140–200 ms, `lg` 240–280 ms, strong deceleration, distance ≤ 12px | Distance; a snap does not travel far |
+| "energetic", "punchy", "energético", "con punch" | Distance and pop | `--kui-distance-lg` 40–56px, scale pop 1.06, spring on pop-ins | Exits: keep them fast, or it feels drunk |
+| "premium", "luxurious", "lujoso" | Fade over travel | Long fades, no pop, distance modest, fewer staggered items | Duration stays long even on small elements |
+| "playful", "fun", "juguetón", "divertido" | Spring | `--kui-ease-spring`, scale pop 1.08, ζ 0.5–0.7 | Never on errors, destructive actions, or form feedback |
+| "immersive", "cinematic", "inmersivo", "cinematográfico" | Scroll distance and depth | Longer scene, slower parallax, one focal camera move | Nothing else moves; immersion comes from restraint |
+| "subtle", "don't make me dizzy", "sutil", "no me marees" | Distance | 4–8px travel or opacity alone, no parallax | Duration can stay normal; small and slow is calmer than small and fast |
+
+A word that names a motion asks for that motion. "Settles slowly" wants visible settling on what enters, not its removal: calm removes the motion the brief did not name, never the motion it did. The single focal moment in `references/workflow/direction.md` caps choreography; it does not cancel entrances or feedback the brief describes. "Instant" on a state change means the content swaps in the same frame, with at most a 120 ms indicator.
 
 Intensity is a multiplier on the preset, not a new preset: "un poco" halves the distance and the stagger, "mucho" multiplies by about 1.5, and beyond that you are changing the personality, so say so.
 

@@ -518,7 +518,7 @@
           "text": "Builds the piece in metres from the stated dimensions",
           "check": {
             "type": "regex",
-            "pattern": "\\b0\\.(116|058|082|070?|035|014|007)\\b"
+            "pattern": "\\b0\\.(116|058|082|070?|035|014|007)\\b|\\b(MM|mm|MILLI\\w*|M_PER_MM|MM_TO_M|mmToM)\\s*=\\s*0?\\.001\\b"
           }
         },
         {

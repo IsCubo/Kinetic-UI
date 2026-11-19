@@ -74,6 +74,7 @@ It writes one PNG per viewport and scroll fraction plus a `frames.json` holding 
 | What a frame shows | Means | Fix |
 | --- | --- | --- |
 | A background void around a small centred card, or page background at the edges | The scene does not fill its own frame; the hero is framed like a widget | Make the stage the viewport: full width, `100svh`, no radius, border, margin, shadow or max-width |
+| The hero subject (a 3D piece, product or scene) sits in a bordered card or fills less than half the frame height | The subject is framed like a widget, so the headline wins the first frame | Make the canvas full-bleed behind the copy, frame the subject to at least half the viewport height, float the controls over the scene |
 | A dark panel, plate or blur behind the copy | The text has a box instead of living in the scene | Remove the background; place the copy in a quiet area over one full-stage scrim plus a text-shadow |
 | Text from another stop faintly visible, or two scenes at once | Opacity windows overlap, or a layer has no slot | Give every layer the slot between its neighbours' midpoints; fade over 8% at each edge |
 | A stop cut mid-illustration, or the next section or a stage border inside the pinned frame | Stop pacing runs short of its exit | Move the last `--at` earlier; end the stage after the exit; clip the track |
