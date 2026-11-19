@@ -14,8 +14,6 @@ Scrolling moves a pinned camera forward along Z. Layers sit at fixed depths, per
 | Editorial or portfolio opener that should feel immersive | Desktop and mobile, T1+ |
 | Reuse of layered art already drawn at several depths | Overscan the art |
 
-Which file do I open:
-
 | You want | Open |
 | --- | --- |
 | The viewer travels forward through stops as they scroll | This file |
@@ -27,8 +25,7 @@ Which file do I open:
 ## When not to use
 
 - Product UI, dashboards, forms, checkout, documentation, and long reading pages.
-- More than one per page, or a scene longer than 6 stops. Fatigue and scroll cost grow with length.
-- Content the user must read at their own pace, or that holds forms and many links.
+- More than one per page, a scene longer than 6 stops, or content read at its own pace (forms, many links).
 - When text would sit on a layer that is fading or scaling: contrast and legibility change every frame.
 - As the only carrier of meaning. Every stop must also read as plain content in the static stack.
 
@@ -90,15 +87,17 @@ The track is exactly one viewport and clips: no stage border, footer rule or nex
     <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -900px; --in: 0; --out: .25" aria-hidden="true"><img src="mountains.avif" alt="" width="2400" height="1500"></div>
     <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -520px; --in: .25; --out: .7" aria-hidden="true"><img src="city.avif" alt="" width="2400" height="1500"></div>
     <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -810px; --in: .7; --out: 1" aria-hidden="true"><img src="beach.avif" alt="" width="2400" height="1500"></div>
-    <article class="kui-zdepth__layer kui-zdepth__stop" style="--kui-z: 0px; --at: 0; --in: 0; --out: .25"><h2 id="zd-title">Start here</h2><p>First beat.</p></article>
-    <article class="kui-zdepth__layer kui-zdepth__stop" style="--kui-z: -450px; --at: .5; --in: .25; --out: .7"><h3>Then deeper</h3><p>Second beat.</p></article>
-    <article class="kui-zdepth__layer kui-zdepth__stop" style="--kui-z: -810px; --at: .9; --in: .7; --out: 1"><h3>Arrive</h3><p>Final beat.</p></article>
+    <article class="kui-zdepth__stop" style="--in: 0; --out: .25"><h2 id="zd-title">Start here</h2><p>First beat.</p></article>
+    <article class="kui-zdepth__stop" style="--in: .25; --out: .7"><h3>Then deeper</h3><p>Second beat.</p></article>
+    <article class="kui-zdepth__stop" style="--in: .7; --out: 1"><h3>Arrive</h3><p>Final beat.</p></article>
     <div class="kui-zdepth__veil" aria-hidden="true"></div>
   </div>
 </section>
 ```
 
-Two numbers per stop, both unitless local helpers (not part of the shared contract). `--at` is the progress at which the stop reaches the screen plane, `−z ÷ travel` (here travel is 900px); CSS cannot divide a length by a length everywhere yet, so state both and keep them in sync. `--in` and `--out` are the slot the stop owns: the midpoints towards its neighbours, with the first starting at 0 and the last ending at 1. The midpoints are what stop the ghost: two stops never share a slot, so two scenes are never both visible.
+Two unitless local helpers per layer (not part of the shared contract). `--in` and `--out` are the slot that layer owns: the midpoints towards its neighbours, the first starting at 0 and the last ending at 1. The midpoints are what stop the ghost: no two scenes share a slot, so two scenes are never both visible. The art keeps a `--kui-z`; the copy does not travel at all, which is why it sits outside the perspective (see the live rules).
+
+The stop's copy and its art share one slot. The copy fades with the scene, but never translates, so type stays locked to the viewport while the world moves behind it.
 
 ### Static stack, then the live scene (CSS-only path, T1+)
 
@@ -130,6 +129,13 @@ Two numbers per stop, both unitless local helpers (not part of the shared contra
   :root:not([data-motion-tier="0"]) .kui-zdepth__world {
     display: block; grid-area: 1 / 1; inline-size: 160%; block-size: 160%; place-self: center;
   }   /* overscan the world once: it never fades, never moves, never changes colour */
+  :root:not([data-motion-tier="0"]) .kui-zdepth__stop {
+    grid-area: 1 / 1; align-self: end; z-index: 2; translate: none;
+    /* Same slot, no travel: type stays locked to the viewport while the world moves behind it. */
+    opacity: min(
+      clamp(0, calc((var(--kui-z-p) - var(--in, 0)) * 12.5), 1),
+      clamp(0, calc((var(--out, 1) - var(--kui-z-p)) * 12.5), 1));
+  }
   :root:not([data-motion-tier="0"]) .kui-zdepth__art { display: block; inline-size: 160%; block-size: 160%; place-self: center; }   /* overscan; fades with its slot */
   :root:not([data-motion-tier="0"]) .kui-zdepth__veil {
     display: block; grid-area: 1 / 1; pointer-events: none; z-index: 1;
@@ -241,5 +247,4 @@ When `watchFrameRate()` lowers the tier mid-scroll, the static rules or the lowe
 - A second writer: the CSS animation overrides inline values, so a running controller beside a supported timeline is wasted work. Start the controller only without support.
 - Unregistered `--kui-z-p`: it interpolates discretely, so the scene jumps between the first and last frame.
 - `100svh` track with a measured `innerHeight` span: toolbar resizing on mobile drifts progress slightly. Pass `length` as a function of the stage and track heights; a fixed number goes stale on rotation.
-- Dropping `--at`, or forgetting to keep it equal to `−z ÷ travel`: a stop fades in at the wrong moment relative to its arrival, and the copy reads over the wrong scene.
 - Slots that overlap, or art layers without `--in`/`--out`: two scenes paint at once and the top one shows as a ghost. Give every layer a slot; the world is the only layer without one.
