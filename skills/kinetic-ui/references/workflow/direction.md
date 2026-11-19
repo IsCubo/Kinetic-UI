@@ -58,7 +58,7 @@ Fix the focal subject last: what owns the first frame, whether a scene, a produc
 
 ## Step 3 — Motion thesis
 
-A thesis is one sentence of choreography for the whole surface, built from four decisions. A generic fade-and-rise or scroll reveal is not a thesis: if the focal moment could be pasted into a different product with only a color changed, it is decoration — tie it to this subject's data, content, or the defining action instead.
+A thesis is one sentence of choreography for the whole surface, built from four decisions. A generic fade-and-rise or scroll reveal is not a thesis unless the brief asks for it ("things settle slowly"), and then the thesis states its pace. Otherwise, if the focal moment could be pasted into a different product with only a color changed, it is decoration — tie it to this subject's data, content, or the defining action instead.
 
 | Element | Decide | Passes when |
 | --- | --- | --- |
