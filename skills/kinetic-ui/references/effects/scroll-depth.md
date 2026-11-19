@@ -84,20 +84,18 @@ The track is exactly one viewport and clips: no stage border, footer rule or nex
 <section class="kui-zdepth" aria-labelledby="zd-title">
   <div class="kui-zdepth__track">
     <div class="kui-zdepth__world" aria-hidden="true"><img src="world.avif" alt="" width="2400" height="1500"></div>
-    <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -900px; --in: 0; --out: .25" aria-hidden="true"><img src="mountains.avif" alt="" width="2400" height="1500"></div>
+    <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -900px; --in: -.08; --out: .25" aria-hidden="true"><img src="mountains.avif" alt="" width="2400" height="1500"></div>
     <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -520px; --in: .25; --out: .7" aria-hidden="true"><img src="city.avif" alt="" width="2400" height="1500"></div>
-    <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -810px; --in: .7; --out: 1" aria-hidden="true"><img src="beach.avif" alt="" width="2400" height="1500"></div>
-    <article class="kui-zdepth__stop" style="--in: 0; --out: .25"><h2 id="zd-title">Start here</h2><p>First beat.</p></article>
+    <div class="kui-zdepth__layer kui-zdepth__art" style="--kui-z: -810px; --in: .7; --out: 1.08" aria-hidden="true"><img src="beach.avif" alt="" width="2400" height="1500"></div>
+    <article class="kui-zdepth__stop" style="--in: -.08; --out: .25"><h2 id="zd-title">Start here</h2><p>First beat.</p></article>
     <article class="kui-zdepth__stop" style="--in: .25; --out: .7"><h3>Then deeper</h3><p>Second beat.</p></article>
-    <article class="kui-zdepth__stop" style="--in: .7; --out: 1"><h3>Arrive</h3><p>Final beat.</p></article>
+    <article class="kui-zdepth__stop" style="--in: .7; --out: 1.08"><h3>Arrive</h3><p>Final beat.</p></article>
     <div class="kui-zdepth__veil" aria-hidden="true"></div>
   </div>
 </section>
 ```
 
-Two unitless local helpers per layer (not part of the shared contract). `--in` and `--out` are the slot that layer owns: the midpoints towards its neighbours, the first starting at 0 and the last ending at 1. The midpoints are what stop the ghost: no two scenes share a slot, so two scenes are never both visible. The art keeps a `--kui-z`; the copy does not travel at all, which is why it sits outside the perspective (see the live rules).
-
-The stop's copy and its art share one slot. The copy fades with the scene, but never translates, so type stays locked to the viewport while the world moves behind it.
+Two unitless local helpers per layer (not part of the shared contract). `--in` and `--out` are the slot that layer owns: the midpoints towards its neighbours, with the outer two pushed past the stage. The midpoints are what stop the ghost: no two scenes share a slot, so two scenes are never both visible. Extend the outer edges past the stage (`-.08` first, `1.08` last) because the ramp lives inside the slot: starting at 0 leaves the first frame empty, and ending at 1 fades the last stop out exactly when it must land. Each stop's copy shares its art's slot but never translates, so type stays locked to the viewport while the world moves.
 
 ### Static stack, then the live scene (CSS-only path, T1+)
 
