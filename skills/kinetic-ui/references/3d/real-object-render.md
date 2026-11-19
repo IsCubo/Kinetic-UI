@@ -63,7 +63,7 @@ Photographers compress a product with long lenses; a wide FOV stretches the near
 - Preset views: 3/4 hero, front, side, top, and one detail. Change one thing per transition.
 - Engineering views are orthographic; hero views are perspective. Mixing them in one scene confuses the read.
 - To align with a reference photo, move the camera with `camera.setViewOffset` instead of shifting the model; the render then shares the photo's frame.
-- In a page hero the piece is the subject of the first frame: the canvas is full-bleed behind the copy, the piece fills at least half the viewport height at 1440 px, and it never sits in a bordered card beside a larger headline. Controls float over the scene.
+- In a page hero the piece is the subject of the first frame and never sits in a bordered card beside a larger headline. On wide screens the canvas is full-bleed behind the copy, the piece fills at least half the viewport height, and the controls float over the scene. On portrait the piece owns the top of the frame (shift it with `setViewOffset` or confine the canvas), the copy owns the bottom, and the controls join the flow below the copy: nothing the piece or a control covers may be text.
 
 ## Light like a studio
 

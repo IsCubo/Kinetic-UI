@@ -82,7 +82,7 @@ The body is 75 mm across and the bottle 300 mm tall, the usual 750 ml Bordeaux s
 3. Run the recognition test: with the text hidden, can the object be named from the three-quarter frame alone? If not, the silhouette is wrong, and more material work will not help.
 4. Check the light and shadow: a piece with no contact shadow floats (`references/3d/real-object-render.md`).
 5. State which dimensions were measured, inferred and invented, and what the piece cannot do (for example, no interior bore).
-6. Check the first frame at 1440 px: the piece is the subject, at least half the viewport tall on a full-bleed canvas, not a small model inside a bordered card beside a bigger headline. A correct piece that loses the frame to its own copy has still failed the hero.
+6. Check the first frame at 1440 px: the piece is the subject, at least half the viewport tall on a full-bleed canvas, not a small model inside a bordered card beside a bigger headline. Then check 360 px: the piece takes the top of the frame and neither it nor a control covers any text. A correct piece that loses the frame to its own copy, or covers it, has still failed the hero.
 
 ## Reduced motion
 
