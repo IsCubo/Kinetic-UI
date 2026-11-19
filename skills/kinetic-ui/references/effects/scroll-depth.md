@@ -62,6 +62,17 @@ Pacing: give each stop about 80–120svh of scroll. Stage height is `100svh + (s
 
 Support: `@property` is Baseline since 2024-07 (Firefox 128 was the last engine); the individual `translate` property is older. Without registration `--kui-z-p` does not interpolate, so the static stack must stay the default. Scroll-driven animations are Limited availability as of 2026-10 (Chrome 115, Safari 26, Firefox 159 due 2026-10-27). Wrap them in `@supports` and treat the static composition as the default.
 
+## Composition
+
+A still frame is what most visitors see first; the travel only matters after that frame holds.
+
+- The art fills the frame and overscans it by 30% or more. A scene inset in a page of background colour reads as a card, not as a place.
+- One focal subject per stop, big enough to name at a glance, placed off-centre; set the copy in the subject's quiet area instead of stacking everything dead centre.
+- Compose each stop at the moment it is fully opaque and check that frame, not the middle of its transition.
+- The last stop's `--at` leaves it fully visible at p = 1, and the stage ends after its exit. A stop clipped mid-illustration looks broken.
+- The track is exactly one viewport and clips: no stage border, footer rule or next section may show inside the pinned frame.
+- Layered text is the usual ghost. Every layer that is not art needs its own fade window, and windows never overlap.
+
 ## Implementation
 
 ### HTML
@@ -167,6 +178,7 @@ Exact T0 behavior:
 - The live rules sit inside `prefers-reduced-motion: no-preference` and exclude `data-motion-tier="0"`, so neither applies: no pinning, no perspective, no travel, no timeline.
 - The result is the static stack: stops in normal flow, in source order, at rest, with `translate: none`, `opacity: 1`, and the art and veil hidden.
 - The controller never starts, and a switch to T0 or to `reduce` clears `--kui-z-p` and releases the observer.
+- Copy written for the moving scene ("scroll to cross three destinations") is rewritten for the stack: the static path must not ask for a gesture it does not have.
 - No smooth scrolling, no snapping, no replacement animation. An entrance fade of 200ms or less on the whole section is the only allowed motion.
 
 ## Low-end fallback

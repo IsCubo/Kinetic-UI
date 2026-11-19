@@ -59,6 +59,28 @@ Run the rows in cost order: console audit, reduced motion, tiers, keyboard, layo
 
 Rows that need a recorder, a screen reader, or physical hardware stay in the table as BLOCKED with the reason. Deleting a row to get a clean report is the one thing this matrix exists to prevent.
 
+## Frame pass
+
+Composition is invisible in the DOM. Capture the rendered page and look at it before reporting a visual build as done: a page can pass every row above and still look wrong.
+
+Copy `assets/snippets/capture-frames.mjs` into the project (Node 22+, no dependency) and run:
+
+```bash
+node capture-frames.mjs --out frames/ --url page.html --reduced-motion
+```
+
+It writes one PNG per viewport and scroll fraction plus a `frames.json` holding the scroll position, the `--kui-*` values and every page error. Capture the stops the brief names — the start, the hold and the end of a scene — at 360 and 1440 CSS px, and once more with reduced motion. Read the frames against the brief, not against your memory of the code.
+
+| What a frame shows | Means | Fix |
+| --- | --- | --- |
+| A background void around a small centred card | The scene does not fill its own frame | Full-bleed and overscan the art; one focal subject per stop |
+| Text from another stop faintly visible | Opacity windows overlap, or a layer that is not art never fades | Close each window before the next opens; fade every non-art layer |
+| A stop cut mid-illustration, or the next section or a stage border inside the pinned frame | Stop pacing runs short of its exit | Move the last `--at` earlier; end the stage after the exit; clip the track |
+| Two frames at different scroll positions are identical | The travel never ran: timeline, tier or controller | Read `--kui-z-p` in `frames.json`; it must change between frames |
+| Copy still says "scroll" in the reduced-motion frame | The static path kept motion-specific words | Rewrite the static copy |
+
+Two rounds maximum: capture, fix what is visibly wrong, capture again, and record the second set. With no browser available, write the composition row as BLOCKED with the reason; never imply it passed. Record frame file names in the report the same way screenshots are recorded above.
+
 ## Tools
 
 Which of these your runtime actually exposes, how to invoke it, and what to do when it is absent is in `references/workflow/tooling.md`. Run its capability check before the first row; a missing tool produces BLOCKED, not a downgraded pass.

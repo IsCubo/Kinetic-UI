@@ -25,7 +25,7 @@ Most UI work fails in the same three places: motion that ignores `prefers-reduce
 - **Reduced motion is not optional.** Every effect and component file carries a `## Reduced motion` section with its exact tier-0 behavior, enforced by the validator.
 - **Every effect has a budget.** Motion tiers T0–T3 (`references/foundations/performance-tiers.md`) decide what runs on a low-end phone, and each file states its `## Low-end fallback`.
 - **Brand first, style second.** A provided brand maps into nine `--brand-*` tokens; with no brand, the agent proposes a style from page type and intended emotion, and labels it a proposal.
-- **Real pieces render as themselves.** A 3D product goes through metre scale, product-photography camera matching, one PBR environment, a contact shadow, and colour management before any scene code; the same glTF then routes to each platform's own library (`references/3d/`).
+- **Real pieces render as themselves.** A 3D product goes through metre scale, product-photography camera matching, one PBR environment, a contact shadow, and colour management before any scene code; with no asset, the piece is built from its real construction and its dimensions instead of improvised (`references/3d/procedural-piece.md`); the same glTF then routes to each platform's own library (`references/3d/`).
 - **Direction before code, critique after it.** A short brief fixes the surface mode, visual world, and focal motion moment; the critique scores the rendered result and reports located findings by severity.
 - **Verification is a report, not a claim.** A matrix of checks — keyboard, screen reader, contrast, reduced motion, tiers, LCP/INP/CLS, zoom — each with a PASS/FAIL/BLOCKED result and evidence, plus a console audit you can run.
 

@@ -21,7 +21,7 @@ When not to use:
 
 - Stylised or abstract 3D: that is a visual world, use `references/styles/playful-3d.md` and the direction stage.
 - Decorative depth behind content: `references/effects/parallax.md` or `references/effects/depth-layers.md` cost a fraction.
-- No measured source: a render that invents size or finish is a defect in commerce, not a taste choice. Use photography.
+- No measured source: a render that invents size or finish is a defect in commerce, not a taste choice. Use photography, or build the piece from its real construction and name which dimensions were invented (`references/3d/procedural-piece.md`).
 - Copy, price, or controls inside the scene: they stay in the DOM.
 
 ## Real inputs before code
