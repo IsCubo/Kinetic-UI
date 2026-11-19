@@ -77,6 +77,7 @@ It writes one PNG per viewport and scroll fraction plus a `frames.json` holding 
 | A dark panel, plate or blur behind the copy | The text has a box instead of living in the scene | Remove the background; place the copy in a quiet area over one full-stage scrim plus a text-shadow |
 | Text from another stop faintly visible, or two scenes at once | Opacity windows overlap, or a layer has no slot | Give every layer the slot between its neighbours' midpoints; fade over 8% at each edge |
 | A stop cut mid-illustration, or the next section or a stage border inside the pinned frame | Stop pacing runs short of its exit | Move the last `--at` earlier; end the stage after the exit; clip the track |
+| A ground, water or sky shape ends in a straight cut inside the frame | The shape stops at its own path or viewBox instead of running off-frame | Extend ground, water and sky past the overscan edge, or end them in a taper |
 | Two frames at different scroll positions are identical | The travel never ran: timeline, tier or controller | Read `--kui-z-p` in `frames.json`; it must change between frames |
 | Copy still says "scroll" in the reduced-motion frame | The static path kept motion-specific words | Rewrite the static copy |
 
