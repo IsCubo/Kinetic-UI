@@ -17,7 +17,7 @@ Objective: let the eval runner measure the rendered page instead of searching th
 
 ## Tasks
 
-- T1 — the capturer exposes a reusable browser session (`withBrowser`) and `captureAll` runs on it (S1). Route: inline. Status: pending.
+- T1 — the capturer exposes a reusable browser session (`withBrowser`) and `captureAll` runs on it (S1). Route: inline. Status: done (`34f41c9`); RED: withBrowser not exported; GREEN 9/9; differential identical in normal, reduced-motion and frozen runs.
 - T2 — `render` check type, the probe library and fixture tests, one passing and one failing page per probe (S1–S5). Route: inline. Status: pending.
 - T3 — migrate `motion-by-feel`, add the S2–S4 checks, regrade, write the post hoc log and the docs (S5–S7). Route: inline. Status: pending.
 - T4 — independent verification, then merge to `main`. Route: delegated verifier. Status: pending.
