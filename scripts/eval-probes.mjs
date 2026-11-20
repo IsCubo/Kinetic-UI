@@ -2,8 +2,9 @@
 // and resolves to { metrics: { name: number }, detail: string }. A metric the probe could not
 // measure is null, and the check that expects it fails.
 //
-// Colour and geometry are read from computed styles and layout boxes in the first screen
-// unless a probe says otherwise, so the numbers describe what a person sees, not the source.
+// Colour and geometry are read from computed styles and layout boxes, so the numbers describe
+// what a person sees, not the source. Rules that hold "per view" (one filled action, one
+// accent hue) are measured in every screen down the page and report the busiest one.
 
 /** Shared in-page helpers, installed once per page as window.__kuiProbe. */
 const LIB = `(() => {
@@ -60,76 +61,150 @@ const LIB = `(() => {
   const priceElements = () => [...document.querySelectorAll('body *')].filter((el) =>
     PRICE.test(el.textContent) && ![...el.children].some((c) => PRICE.test(c.textContent)));
   const ACTION = 'button, [role=button], a[href], input[type=submit], input[type=button]';
-  return (window.__kuiProbe = { rgba, contrast, oklch, visible, inFirstScreen, behind, label, ownText, PRICE, priceElements, ACTION });
+  const inView = (r) => {
+    const w = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0));
+    const h = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
+    return r.width > 0 && r.height > 0 && w * h >= 0.5 * r.width * r.height;
+  };
+  // Shared area of two boxes, relative to the smaller one.
+  const overlap = (a, b) => {
+    const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+    const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+    return (w * h) / Math.max(1, Math.min(a.width * a.height, b.width * b.height));
+  };
+  return (window.__kuiProbe = { rgba, contrast, oklch, visible, inFirstScreen, inView, overlap, behind, label, ownText, PRICE, priceElements, ACTION });
 })()`;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Filled actions in the first screen: background contrast of 3:1 or more against what is behind. */
-async function filledActions(browser) {
-  return browser.evaluate(`(() => {
-    const k = ${LIB};
-    scrollTo(0, 0);
-    const selector = k.ACTION + ', [aria-pressed=true], [aria-selected=true], [aria-checked=true], ' +
-      'input:checked + *, label:has(> input:checked)';
-    const overlap = (a, b) => {
-      const w = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
-      const h = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
-      return (w * h) / Math.max(1, Math.min(a.width * a.height, b.width * b.height));
-    };
-    const filled = [];
-    for (const el of document.querySelectorAll(selector)) {
-      if (!k.visible(el) || !k.inFirstScreen(el)) continue;
-      const cs = getComputedStyle(el);
-      const bg = k.rgba(cs.backgroundColor);
-      const strong = cs.backgroundImage.includes('gradient') || (bg.a >= 0.5 && k.contrast(bg, k.behind(el)) >= 3);
-      if (!strong) continue;
-      const box = el.getBoundingClientRect();
-      if (filled.some((f) => overlap(f.box, box) > 0.8)) continue;
-      filled.push({ box, name: k.label(el) || el.tagName.toLowerCase() });
-    }
-    return { metrics: { filled: filled.length }, detail: filled.map((f) => f.name).join(', ') };
-  })()`);
+/** Wait after each scroll for entrance animations to finish before a view is measured. */
+const VIEW_SETTLE_MS = 1000;
+
+/**
+ * Scroll down half a screen at a time and measure each view with `expression`, which
+ * resolves to { count, items }. Resolves to the busiest view and the scroll offset it was at.
+ */
+async function busiestView(browser, expression) {
+  const max = await browser.evaluate('Math.max(0, document.documentElement.scrollHeight - innerHeight)');
+  const step = Math.max(200, Math.round((await browser.evaluate('innerHeight')) * 0.5));
+  let best = null;
+  for (let y = 0; ; y += step) {
+    const at = Math.min(y, max);
+    await browser.evaluate(`(async () => {
+      scrollTo(0, ${at});
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    })()`);
+    if (at > 0) await sleep(VIEW_SETTLE_MS);
+    const view = await browser.evaluate(expression);
+    if (!best || view.count > best.count) best = { ...view, at };
+    if (at >= max) break;
+  }
+  return best;
 }
 
-/** Distinct saturated hues (OKLCH chroma >= 0.08, clusters 40 degrees apart) in the first screen. */
+/**
+ * A filled action is a strong fill (3:1 or more against what is behind it, or a gradient) the
+ * size of a control, lying on an interactive element: the button itself, the checked span in
+ * a label, or a sliding indicator under the selected segment.
+ */
+const FILLED_VIEW = `(() => {
+  const k = ${LIB};
+  const INTERACTIVE = k.ACTION + ', input, label, select, summary, [role=radio], [role=tab], [role=switch], ' +
+    '[role=option], [aria-pressed], [aria-selected], [aria-checked]';
+  const controls = [...document.querySelectorAll(INTERACTIVE)]
+    .filter((el) => k.visible(el))
+    .map((el) => ({ el, box: el.getBoundingClientRect() }))
+    .filter((c) => k.inView(c.box));
+  // Boxes that can carry a fill: every element, plus the absolutely positioned ::before and
+  // ::after of a positioned element (a common way to draw a segmented control's indicator).
+  const surfaces = [];
+  for (const el of document.querySelectorAll('body *')) {
+    if (!k.visible(el)) continue;
+    const cs = getComputedStyle(el);
+    surfaces.push({ box: el.getBoundingClientRect(), style: cs, behind: () => k.behind(el) });
+    if (cs.position === 'static') continue;
+    const host = el.getBoundingClientRect();
+    for (const which of ['::before', '::after']) {
+      const ps = getComputedStyle(el, which);
+      if (ps.content === 'none' || ps.content === 'normal' || ps.display === 'none') continue;
+      if (ps.position !== 'absolute' || Number(ps.opacity) <= 0.05) continue;
+      const [w, h, left, top] = [ps.width, ps.height, ps.left, ps.top].map(parseFloat);
+      if (![w, h, left, top].every(Number.isFinite)) continue;
+      const m = new DOMMatrixReadOnly(ps.transform === 'none' ? undefined : ps.transform);
+      const x = host.left + parseFloat(cs.borderLeftWidth) + left + m.m41;
+      const y = host.top + parseFloat(cs.borderTopWidth) + top + m.m42;
+      // The pseudo-element paints over its host, so the host's own background is what is behind it.
+      const hostBg = k.rgba(cs.backgroundColor);
+      surfaces.push({ box: new DOMRect(x, y, w, h), style: ps, behind: () => (hostBg.a >= 0.5 ? hostBg : k.behind(el)) });
+    }
+  }
+  const fills = [];
+  for (const { box, style: cs, behind } of surfaces) {
+    if (box.height < 16 || box.height > 120 || box.width < 24 || box.width > 640) continue;
+    if (!k.inView(box)) continue;
+    const bg = k.rgba(cs.backgroundColor);
+    if (!(cs.backgroundImage.includes('gradient') || (bg.a >= 0.5 && k.contrast(bg, behind()) >= 3))) continue;
+    // The fill must sit on a control and not dwarf it: a dark card around a text link is not a filled action.
+    const area = box.width * box.height;
+    const control = controls.find((c) => k.overlap(c.box, box) >= 0.5 && area <= 3 * c.box.width * c.box.height);
+    if (!control || fills.some((f) => k.overlap(f.box, box) > 0.8)) continue;
+    fills.push({ box, name: k.label(control.el) || control.el.tagName.toLowerCase() });
+  }
+  return { count: fills.length, items: fills.map((f) => f.name) };
+})()`;
+
+/** The most filled actions in any one view of the page. */
+async function filledActions(browser) {
+  const view = await busiestView(browser, FILLED_VIEW);
+  return {
+    metrics: { filled: view.count },
+    detail: view.count ? `${view.items.join(', ')} (view at ${view.at}px)` : 'no filled action',
+  };
+}
+
+/**
+ * Distinct hues in one view: colours of OKLCH chroma 0.05 or more (a muted brand green counts,
+ * a pale tint or a tinted grey does not), grouped when closer than 40 degrees, across
+ * backgrounds, text and thick borders.
+ */
+const HUES_VIEW = `(() => {
+  const k = ${LIB};
+  const seen = [];
+  const add = (color, el, where) => {
+    const c = k.rgba(color);
+    if (c.a < 0.5) return;
+    const o = k.oklch(c);
+    if (o.C >= 0.05) seen.push({ h: o.h, where: (k.label(el) || el.tagName.toLowerCase()) + ' ' + where });
+  };
+  for (const el of document.querySelectorAll('body, body *')) {
+    const box = el.getBoundingClientRect();
+    if (!k.visible(el) || !(el === document.body || k.inView(box))) continue;
+    const cs = getComputedStyle(el);
+    if (box.width * box.height >= 200) add(cs.backgroundColor, el, 'background');
+    if (k.ownText(el)) add(cs.color, el, 'text');
+    for (const side of ['Top', 'Right', 'Bottom', 'Left']) {
+      if (parseFloat(cs['border' + side + 'Width']) >= 2) add(cs['border' + side + 'Color'], el, 'border');
+    }
+  }
+  if (!seen.length) return { count: 0, items: [] };
+  seen.sort((a, b) => a.h - b.h);
+  // On the hue circle, every gap wider than 40 degrees separates two clusters.
+  const clusters = [[seen[0]]];
+  for (let i = 1; i < seen.length; i++) {
+    if (seen[i].h - seen[i - 1].h > 40) clusters.push([]);
+    clusters[clusters.length - 1].push(seen[i]);
+  }
+  if (clusters.length > 1 && seen[0].h + 360 - seen[seen.length - 1].h <= 40) clusters[0].push(...clusters.pop());
+  return { count: clusters.length, items: clusters.map((c) => Math.round(c[0].h) + '° ' + c[0].where) };
+})()`;
+
+/** The most distinct saturated hues in any one view of the page. */
 async function saturatedHues(browser) {
-  return browser.evaluate(`(() => {
-    const k = ${LIB};
-    scrollTo(0, 0);
-    const seen = [];
-    const add = (color, el, where) => {
-      const c = k.rgba(color);
-      if (c.a < 0.5) return;
-      const o = k.oklch(c);
-      if (o.C >= 0.08) seen.push({ h: o.h, where: (k.label(el) || el.tagName.toLowerCase()) + ' ' + where });
-    };
-    for (const el of document.querySelectorAll('body, body *')) {
-      if (!k.visible(el) || !k.inFirstScreen(el)) continue;
-      const cs = getComputedStyle(el);
-      const box = el.getBoundingClientRect();
-      if (box.width * box.height >= 200) add(cs.backgroundColor, el, 'background');
-      if (k.ownText(el)) add(cs.color, el, 'text');
-      for (const side of ['Top', 'Right', 'Bottom', 'Left']) {
-        if (parseFloat(cs['border' + side + 'Width']) >= 2) add(cs['border' + side + 'Color'], el, 'border');
-      }
-    }
-    if (!seen.length) return { metrics: { hues: 0 }, detail: 'no saturated colour' };
-    seen.sort((a, b) => a.h - b.h);
-    // On the hue circle, every gap wider than 40 degrees separates two clusters.
-    const clusters = [[seen[0]]];
-    for (let i = 1; i < seen.length; i++) {
-      if (seen[i].h - seen[i - 1].h > 40) clusters.push([]);
-      clusters[clusters.length - 1].push(seen[i]);
-    }
-    if (clusters.length > 1 && seen[0].h + 360 - seen[seen.length - 1].h <= 40) {
-      clusters[0].push(...clusters.pop());
-    }
-    return {
-      metrics: { hues: clusters.length },
-      detail: clusters.map((c) => Math.round(c[0].h) + '° ' + c[0].where).join(', '),
-    };
-  })()`);
+  const view = await busiestView(browser, HUES_VIEW);
+  return {
+    metrics: { hues: view.count },
+    detail: view.count ? `${view.items.join(', ')} (view at ${view.at}px)` : 'no saturated colour',
+  };
 }
 
 /** Option cards (the smallest blocks holding a price and an action) and how many end below the first screen. */
@@ -169,7 +244,8 @@ async function switchLatency(browser) {
   return browser.evaluate(`(async () => {
     const k = ${LIB};
     scrollTo(0, 0);
-    const PERIOD = /\\b(year(ly)?|annual(ly)?|month(ly)?|anual|mensual)\\b/i;
+    // No boundary after the word: a badge set flush after it reads "YearlySave 25%".
+    const PERIOD = /\\b(year|annual|month|anual|mensual)/i;
     const YEAR = /year|annual|anual/i;
     const nameOf = (el) => el.matches('input')
       ? [...(el.labels ?? [])].map((l) => l.textContent).join(' ') + ' ' + (el.getAttribute('aria-label') ?? '')
@@ -182,7 +258,8 @@ async function switchLatency(browser) {
       : ['aria-pressed', 'aria-checked', 'aria-selected'].some((a) => el.getAttribute(a) === 'true');
     const target = controls.find((el) => !selected(el) && YEAR.test(nameOf(el)))
       ?? controls.find((el) => !selected(el)) ?? controls.find((el) => YEAR.test(nameOf(el))) ?? controls[0];
-    const prices = () => k.priceElements().map((el) => el.textContent.replace(/\\s+/g, ' ').trim()).join(' | ');
+    // Only the prices a person can see: a CSS-only switch keeps both sets in the DOM.
+    const prices = () => k.priceElements().filter(k.visible).map((el) => el.textContent.replace(/\\s+/g, ' ').trim()).join(' | ');
     const finite = (a) => a.effect?.getComputedTiming().endTime !== Infinity;
     const before = prices();
     const known = new Set(document.getAnimations());

@@ -62,7 +62,54 @@ test('render filledActions: one filled action and a raised light segment pass', 
   assert.match(r.evidence, /filled=1 \(max 1\)/);
 });
 
+test('render filledActions: a dark sliding indicator under the selected label counts as a fill', async (t) => {
+  const thumb = '<div class="seg" style="position:relative;display:inline-flex;background:#ececec;padding:4px;border-radius:12px">' +
+    '<i style="position:absolute;left:4px;top:4px;width:96px;height:36px;border-radius:9px;background:#1f4d3a"></i>' +
+    '<button style="position:relative;width:96px;height:36px;border:0;background:none;color:#fff" aria-pressed="false">Monthly</button>' +
+    '<button style="position:relative;width:96px;height:36px;border:0;background:none" aria-pressed="false">Yearly</button></div>';
+  const r = await grade(page(`${thumb}<button class="fill">Start free</button>`, BTN + FILL),
+    { probe: 'filledActions', expect: { filled: { max: 1 } } });
+  if (!r) return t.skip('no working browser');
+  assert.equal(r.passed, false, r.evidence);
+  assert.match(r.evidence, /filled=2 \(max 1\)/);
+  assert.match(r.evidence, /Monthly/);
+});
+
+test('render filledActions: a ::before indicator filled with the primary counts as a fill', async (t) => {
+  const group = '<div class="period" role="group" aria-label="Billing period">' +
+    '<button aria-pressed="true">Monthly</button><button aria-pressed="false">Yearly</button></div>';
+  const css = '.period{display:inline-grid;grid-template-columns:1fr 1fr;position:relative;padding:4px;background:#fff;border:1px solid #ddd;border-radius:999px}' +
+    '.period::before{content:"";position:absolute;inset:4px auto 4px 4px;width:calc(50% - 4px);background:#1f4d3a;border-radius:999px}' +
+    '.period button{position:relative;z-index:1;padding:10px 22px;border:0;background:none;color:#fff}';
+  const r = await grade(page(`${group}<button class="fill">Start free</button>`, BTN + FILL + css),
+    { probe: 'filledActions', expect: { filled: { max: 1 } } });
+  if (!r) return t.skip('no working browser');
+  assert.equal(r.passed, false, r.evidence);
+  assert.match(r.evidence, /filled=2 \(max 1\)/);
+  assert.match(r.evidence, /Monthly/);
+});
+
+test('render filledActions: competing fills further down the page count, not only the first screen', async (t) => {
+  const plans = '<section style="display:flex;gap:24px">' +
+    '<article><h3>Plus</h3><button class="fill">Choose Plus</button></article>' +
+    '<article><h3>Family</h3><button class="fill">Choose Family</button></article></section>';
+  const r = await grade(page(`<header style="height:1100px"><button class="fill">Start free</button></header>${plans}<div style="height:600px"></div>`, BTN + FILL),
+    { probe: 'filledActions', expect: { filled: { max: 1 } } });
+  if (!r) return t.skip('no working browser');
+  assert.equal(r.passed, false, r.evidence);
+  assert.match(r.evidence, /filled=2 \(max 1\)/);
+  assert.match(r.evidence, /Choose Plus/);
+});
+
 const CHIP = '.chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:13px}';
+
+test('render saturatedHues: a dark, muted brand green is a hue, so a red chip beside it is a second one', async (t) => {
+  const r = await grade(page('<span class="chip" style="background:#fde8e8;color:#c0392b">Save 33%</span><button style="background:#1f5f4a;color:#fff">Start free</button>', BTN + CHIP),
+    { probe: 'saturatedHues', expect: { hues: { max: 1 } } });
+  if (!r) return t.skip('no working browser');
+  assert.equal(r.passed, false, r.evidence);
+  assert.match(r.evidence, /hues=2 \(max 1\)/);
+});
 
 test('render saturatedHues: a red discount chip beside a green action is a second hue', async (t) => {
   const r = await grade(page('<span class="chip" style="background:#fde8e8;color:#c0392b">Save 33%</span><button class="fill">Start free</button>', BTN + FILL + CHIP),
@@ -147,6 +194,30 @@ test('render switchLatency: a 600 ms transition after the click is too long', as
   assert.equal(r.passed, false, r.evidence);
   const ms = Number(/motionMs=(\d+)/.exec(r.evidence)?.[1]);
   assert.ok(ms >= 500 && ms <= 900, r.evidence);
+});
+
+test('render switchLatency: a CSS-only switch that shows the other written prices is instant', async (t) => {
+  const html = page(
+    '<fieldset class="seg"><label><input type="radio" name="b" checked> Monthly</label><label><input type="radio" name="b" id="y"> Yearly</label></fieldset>' +
+    '<p><span class="m">$12/mo</span><span class="y">$9/mo</span></p><p><span class="m">$20/mo</span><span class="y">$15/mo</span></p>',
+    '.y{display:none} body:has(#y:checked) .y{display:inline} body:has(#y:checked) .m{display:none}');
+  const r = await grade(html, SWITCH);
+  if (!r) return t.skip('no working browser');
+  assert.equal(r.passed, true, r.evidence);
+  assert.match(r.evidence, /pricesChangedMs=0 \(max 50\)/);
+});
+
+test('render switchLatency: finds "Yearly" even when a badge follows it with no space', async (t) => {
+  const html = page(
+    '<label><input type="radio" name="b" value="m" checked><span>Monthly</span></label>' +
+    '<label><input type="radio" name="b" value="y"><span>Yearly<b>Save 25%</b></span></label>' +
+    '<p class="price" data-m="$8" data-y="$6">$8</p>' +
+    '<script>document.querySelectorAll("input[name=b]").forEach((i) => i.addEventListener("change", () => {' +
+    'document.querySelectorAll(".price").forEach((p) => { p.textContent = p.dataset[i.value]; }); }));</script>');
+  const r = await grade(html, SWITCH);
+  if (!r) return t.skip('no working browser');
+  assert.equal(r.passed, true, r.evidence);
+  assert.match(r.evidence, /clicked "YearlySave 25%"/);
 });
 
 test('render switchLatency: a page with no billing period control fails and says so', async (t) => {
