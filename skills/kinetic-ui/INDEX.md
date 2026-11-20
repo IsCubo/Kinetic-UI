@@ -16,6 +16,7 @@ Keyword catalog of every reference and asset. Search this file for a keyword, th
 | Path | Summary | Keywords |
 | --- | --- | --- |
 | `assets/snippets/motion-tier.js` | Detects the motion tier (T0–T3) from user preferences and device signals, exposes it as data-motion-tier, and downgrades once on sustained jank. | motion tier, device capability, low-end detection, reduced motion, save-data, deviceMemory, fps downgrade, progressive enhancement |
+| `assets/snippets/three-product-scene.js` | Starter three.js product scene for a real piece: sets the colour pipeline, builds a PMREM studio environment, fits the camera from the bounding sphere, grounds the piece with a contact shadow, warns when the asset is not in metres, and returns the { start, stop, resize, dispose } contract used by assets/effects/webgl-3d.js. | three.js product scene, real object, metre scale, auto frame, neutral tone mapping, pmrem environment, room environment, contact shadow, render on demand, dispose, glossary: producto real, render 3d |
 | `assets/snippets/verify-motion.js` | Browser audit that returns { summary, findings } for motion tier, reduced motion, looping or long animations, autoplay media, layout-shift and naming risks. | verification, motion audit, console audit, reduced motion check, motion tier check, infinite animation, pause control, long animation, autoplay audio, will-change, CLS, accessible name, focusable, DevTools |
 
 ## assets/tokens
@@ -29,7 +30,16 @@ Keyword catalog of every reference and asset. Search this file for a keyword, th
 
 | Path | Summary | Keywords |
 | --- | --- | --- |
-| `references/libraries.md` | Verified catalog of proven animation, scroll, 2D, and 3D libraries with license, maintenance status, caveats, and which need and tier each one fits. | libraries, animation library, three.js, react three fiber, gsap, motion, framer motion, lenis, anime.js, pixi, ogl, lottie, dotlottie, rive, auto-animate, tresjs, threlte, postprocessing, tilt, flutter animation, license, versions |
+| `references/libraries.md` | Verified catalog of proven animation, scroll, 2D, 3D, and 3D-asset libraries with license, maintenance status, caveats, and which need and tier each one fits. | libraries, animation library, three.js, react three fiber, gsap, motion, framer motion, lenis, anime.js, pixi, ogl, lottie, dotlottie, rive, auto-animate, tresjs, threlte, postprocessing, tilt, flutter animation, babylon.js, model-viewer, gltf-transform, meshoptimizer, gltfpack, ktx2, gltf validator, three-mesh-bvh, license, versions |
+
+## references/3d
+
+| Path | Summary | Keywords |
+| --- | --- | --- |
+| `references/3d/asset-pipeline.md` | Turns a real object (CAD, scan, photo set, vendor model) into a budgeted, validated, compressed glTF 2.0 `.glb` plus the poster and turntable fallbacks the tiers require. | real object, product scan, cad, step, iges, photogrammetry, laser scan, retopology, decimation, uv, baking, texel density, gltf, glb, draco, meshopt, ktx2, basis, uastc, etc1s, pbr maps, lod, instancing, asset budget, glTF validator, optimizacion 3d, objeto real, escaneo, modelo 3d |
+| `references/3d/inspection-configurator.md` | Interaction design for a real object in 3D: orbit semantics and limits, preset views, exploded and scroll-linked views, hotspots, material variants, real dimension overlays, AR handoff, and the keyboard and photo-set equivalents that keep every answer available without WebGL. | 360 viewer, product viewer, configurator, orbit controls, zoom to cursor, preset views, exploded view, hotspots, annotations, material variants, khr_materials_variants, dimension overlay, measurement, ar handoff, model-viewer ar, quick look, scene viewer, webxr, turntable, inspection, keyboard orbit, configurador, pieza real, medidas, despiece |
+| `references/3d/platforms-3d.md` | Routes each 3D goal to its platform and library (three.js, React Three Fiber, Babylon.js, model-viewer, Unity, Unreal, Godot, RealityKit, Filament, flutter_scene, offline renders), with the glTF interchange contract and what each importer loses. | 3d platform, unity 3d, unreal, godot, blender, babylon.js, react three fiber, model-viewer, realitykit, scenekit, filament, sceneview, flutter 3d, impeller, usdz, gltf import, offline render, turntable, motor 3d, unreal engine, diorama, three.js, webgpu, tsl, flutter_scene, model_viewer_plus, ar, keyshot, interchange |
+| `references/3d/real-object-render.md` | How to make a real piece read as itself in three.js: measured scale, a camera matched to product photography, one environment plus key/fill/rim, PBR values per material, a contact shadow, colour management, and a readback checklist that catches the usual "it looks CGI" failures. | photoreal product render, real object, three.js, metre scale, focal length, fov, camera match, product photography, environment map, hdri, pmrem, room environment, pbr, metalness, roughness, clearcoat, transmission, sheen, anisotropy, contact shadow, tone mapping, neutral tone mapping, agx, aces, colour management, srgb, texel density, render on demand, producto real, render 3d, fidelidad, pieza real |
 
 ## references/brand
 

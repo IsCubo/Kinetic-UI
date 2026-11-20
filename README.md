@@ -25,6 +25,7 @@ Most UI work fails in the same three places: motion that ignores `prefers-reduce
 - **Reduced motion is not optional.** Every effect and component file carries a `## Reduced motion` section with its exact tier-0 behavior, enforced by the validator.
 - **Every effect has a budget.** Motion tiers T0–T3 (`references/foundations/performance-tiers.md`) decide what runs on a low-end phone, and each file states its `## Low-end fallback`.
 - **Brand first, style second.** A provided brand maps into nine `--brand-*` tokens; with no brand, the agent proposes a style from page type and intended emotion, and labels it a proposal.
+- **Real pieces render as themselves.** A 3D product goes through metre scale, product-photography camera matching, one PBR environment, a contact shadow, and colour management before any scene code; the same glTF then routes to each platform's own library (`references/3d/`).
 - **Direction before code, critique after it.** A short brief fixes the surface mode, visual world, and focal motion moment; the critique scores the rendered result and reports located findings by severity.
 - **Verification is a report, not a claim.** A matrix of checks — keyboard, screen reader, contrast, reduced motion, tiers, LCP/INP/CLS, zoom — each with a PASS/FAIL/BLOCKED result and evidence, plus a console audit you can run.
 
@@ -83,6 +84,8 @@ skills/kinetic-ui/
     effects/                  micro-interactions, cursor, text, page transitions,
                               ambient, parallax, scroll, depth, 2D, 3D/WebGL,
                               SVG craft (static icons/logos + motion handoff)
+    3d/                       real-object render, asset pipeline, inspection and
+                              configurator, platform and engine routing
     styles/                   cyberpunk, glassmorphism, neo-brutalism, editorial,
                               minimal luxury, retro-futurism, organic soft, playful 3D
     components/               buttons, forms, cards, navigation, overlays, feedback,
@@ -95,6 +98,7 @@ skills/kinetic-ui/
     tokens/brand-tokens.template.json
     snippets/motion-tier.js   detection and tier application
     snippets/verify-motion.js console audit: tiers, loops, reduced motion, a11y red flags
+    snippets/three-product-scene.js  metre-scale product scene: environment, framing, contact shadow
     effects/                  effect-specific CSS/JS
 ```
 

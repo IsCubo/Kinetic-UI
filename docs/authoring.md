@@ -70,6 +70,10 @@ The two marked sections are mandatory for every workflow file and validated.
 
 Free structure, but keep the header, tables over prose, and link the effect/component files they inform.
 
+### 3D (`references/3d/`)
+
+Free structure, but keep the effect template's spine: `## When to use`, the implementation detail, `## Reduced motion`, `## Low-end fallback`, `## Performance budget`, `## Accessibility`, `## Libraries`, `## Pitfalls`. Rendering, the asset pipeline, interaction, and per-platform routing are separate files; link them instead of repeating the scene contract in `references/effects/webgl-3d.md`.
+
 ## Shared invariants (do not redefine)
 
 | Invariant | Definition |
@@ -89,13 +93,14 @@ Free structure, but keep the header, tables over prose, and link the effect/comp
 | --- | --- |
 | `references/foundations/` | `ux-principles.md`, `ui-patterns.md`, `motion-principles.md`, `devices-responsive.md`, `performance-tiers.md`, `accessibility-motion.md` |
 | `references/brand/` | `brand-intake.md`, `emotion-to-style.md` (+ `assets/tokens/brand-tokens.template.json`) |
-| `references/effects/` | `microinteractions.md`, `cursor-pointer.md`, `text-effects.md`, `page-transitions.md`, `ambient-backgrounds.md`, `parallax.md`, `scroll-driven.md`, `depth-layers.md`, `motion-2d.md`, `webgl-3d.md` |
+| `references/effects/` | `microinteractions.md`, `cursor-pointer.md`, `text-effects.md`, `page-transitions.md`, `ambient-backgrounds.md`, `parallax.md`, `scroll-driven.md`, `depth-layers.md`, `motion-2d.md`, `webgl-3d.md`, `svg-graphics.md` |
+| `references/3d/` | `real-object-render.md`, `asset-pipeline.md`, `inspection-configurator.md`, `platforms-3d.md` |
 | `references/styles/` | `cyberpunk.md`, `glassmorphism.md`, `neo-brutalism.md`, `editorial.md`, `minimal-luxury.md`, `retro-futurism.md`, `organic-soft.md`, `playful-3d.md` |
 | `references/components/` | `buttons.md`, `inputs-forms.md`, `cards.md`, `navigation.md`, `overlays.md`, `feedback.md`, `selection-controls.md`, `carousels-galleries.md`, `hero-sections.md`, `lists-collections.md` |
 | `references/platforms/` | `web-frameworks.md`, `flutter.md`, `swiftui.md`, `jetpack-compose.md` |
 | `references/workflow/` | `loop.md`, `direction.md`, `verify.md`, `critique.md` |
 | `references/` | `libraries.md` |
-| `assets/` | `tokens/motion.css`, `snippets/motion-tier.js`, `snippets/verify-motion.js`; effect-specific assets go in `assets/effects/<effect-name>.{css,js}` |
+| `assets/` | `tokens/motion.css`, `snippets/motion-tier.js`, `snippets/verify-motion.js`, `snippets/three-product-scene.js`; effect-specific assets go in `assets/effects/<effect-name>.{css,js}` |
 
 ## Workflow
 

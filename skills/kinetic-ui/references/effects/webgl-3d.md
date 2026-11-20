@@ -22,6 +22,18 @@ Realtime 3D is this skill's most expensive effect: a large lazy chunk, megabytes
 - Below the fold with low scroll-through: the chunk only pays rent when users reach it.
 - Several scenes per page: one WebGL context per page; cards and grids get posters.
 
+## Real-world product pipeline
+
+Rendering a physical piece goes deeper than mounting a scene: measured scale, a camera matched to product photography, PBR values from the material spec, one environment map, colour management, and a readback checklist. That depth lives in dedicated files; this file stays the runtime contract (poster, lazy chunk, tiers, visibility, context loss, disposal).
+
+| Need | Open |
+| --- | --- |
+| Photoreal render of a real piece in three.js | `references/3d/real-object-render.md` |
+| CAD or scan to a compressed, budgeted glTF | `references/3d/asset-pipeline.md` |
+| 360 inspection, configurator, variants, dimensions, AR | `references/3d/inspection-configurator.md` |
+| Unity, Unreal, Godot, Apple, Android, Flutter, offline stills | `references/3d/platforms-3d.md` |
+| Runnable product-scene starter | `assets/snippets/three-product-scene.js` |
+
 ## How it works
 
 Scene anatomy:
