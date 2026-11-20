@@ -36,17 +36,19 @@ Anatomy: **container** (hit area ≥24×24 CSS px, 44×44 on touch) · **label**
 | Rest | — | Base fill, border, label | — | — |
 | Hover | Pointer enters (`hover: hover` only) | State layer opacity 0 → 0.08 | `--kui-duration-xs` | `--kui-ease-standard` |
 | Pressed | `:active` / pointerdown | Scale to `--kui-scale-press`, state layer 0.12 | `--kui-duration-xs` | `--kui-ease-standard` |
-| Released | Pointer up | Scale back to 1 | `--kui-duration-sm` | `--kui-ease-enter` (playful brands: `--kui-ease-spring`) |
+| Released | Pointer up | Scale back to 1; a playful brief lifts to about 1.06 and settles once | `--kui-duration-sm`; a playful settle 400–550 ms | `--kui-ease-enter` (playful: `--kui-ease-spring-gentle`; loud brands: `--kui-ease-spring`) |
 | Focus-visible | Keyboard focus | 2px outline, 2px offset, appears instantly | none (instant) | — |
 | Disabled | `disabled` or `aria-disabled="true"` | Muted colors, no hover/press | none (instant) | — |
 | Loading | Async start | Label fades out, spinner fades in, width locked | `--kui-duration-sm` | `--kui-ease-standard` |
 | Success | Async resolves | Check icon pops (`--kui-scale-pop`), label returns after ~1.5 s | `--kui-duration-md` | `--kui-ease-spring` |
-| Toggled on | Click, Enter, or Space | Fill switches to `--brand-primary`, icon swaps | `--kui-duration-sm` | `--kui-ease-standard` |
+| Toggled on | Click, Enter, or Space | Fill switches to a tint of `--brand-primary` with a primary border (never the primary-action fill), icon swaps | `--kui-duration-sm` | `--kui-ease-standard` |
 | FAB enter/exit | Screen load / scroll direction | Scale from `--kui-scale-press` + fade; extended FAB collapses its label on scroll down | `--kui-duration-md` | `--kui-ease-enter` / `--kui-ease-exit` |
 | Magnetic pull | Pointer near the CTA | Button translates toward the pointer, capped at ~12px | per frame | — |
 | Magnetic release | Pointer leaves | Returns to rest | `--kui-duration-md` | `--kui-ease-spring` |
 
 Give feedback within one frame of pointerdown: the press state must never wait for the action's work.
+
+Buttons that sit side by side share one motion family: when one has hover and press motion, every sibling has it too. The primary stands out by fill and position, not by being the only one that moves; a single moving button among inert siblings reads as half-built. Only the action a brief names adds its own release on top.
 
 ## Implementation
 
@@ -77,7 +79,7 @@ Give feedback within one frame of pointerdown: the press state must never wait f
 .btn--secondary { background: transparent; color: var(--brand-primary); border-color: currentColor; }
 .btn--ghost, .btn--icon, .btn--toggle { background: transparent; color: var(--brand-on-surface); }
 .btn--icon { min-inline-size: 44px; padding: 0; }
-.btn[aria-pressed="true"] { background: var(--brand-primary); color: var(--brand-on-primary); }
+.btn[aria-pressed="true"] { background: color-mix(in oklab, var(--brand-primary) 14%, var(--brand-surface)); color: var(--brand-on-surface); border-color: var(--brand-primary); }
 .btn::before {                                 /* state layer */
   content: ""; position: absolute; inset: 0; z-index: -1;
   border-radius: inherit; background: currentColor; opacity: 0; pointer-events: none;

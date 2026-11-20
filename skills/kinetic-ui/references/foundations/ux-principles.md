@@ -46,7 +46,7 @@ Rank the levers from strongest to weakest and use the strong ones sparingly:
 | Motion | Strongest; overrides every static cue | Move only what must win attention, one focal motion at a time |
 | Size and scale | Strong | Use a type scale with clear steps; the primary heading is visibly larger, not marginally larger |
 | Contrast and weight | Strong | Primary text and actions get the highest contrast; secondary content steps down while still meeting 4.5:1 |
-| Color | Medium; fails alone for color-blind users | Reserve `--brand-primary` for the primary action and the active state; pair color with shape, icon, or text |
+| Color | Medium; fails alone for color-blind users | Reserve the `--brand-primary` fill for the one primary action; mark active and selected states with a raised surface, an outline or weight, never the same fill. Badges and labels (a discount, "most chosen") take a tint of the primary or neutral ink, never a second saturated hue; red means error or destruction. Pair color with shape, icon, or text |
 | Position | Medium | Put the most important content first in reading order: top, then the start side (mirrored in RTL). Text-heavy pages are scanned in an F shape, sparse pages in a Z shape |
 | Whitespace | Medium | Isolate the primary element with space; tighten space inside groups |
 | Depth (elevation, shadow, blur) | Medium | Raise only what floats above the flow: menus, dialogs, sticky bars |

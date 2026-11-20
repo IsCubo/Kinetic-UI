@@ -142,7 +142,7 @@ document.addEventListener('change', async (event) => {
 });
 ```
 
-Segmented control. Radios in a group; the raised surface marks the checked item. The sliding surface is a T2 enhancement measured once per change.
+Segmented control. Radios in a group; the raised surface marks the checked item. The sliding surface is a T2 enhancement measured once per change. Keep the checked surface low-contrast: a primary-action fill on a segment competes with the page's one primary button, and a dark fill jumping sides reads as abrupt. When the choice changes what the page shows (prices, a view), update the values in the same frame and fade them in from about 0.4 opacity over `--kui-duration-sm`.
 
 ```html
 <fieldset class="segmented">
@@ -154,15 +154,17 @@ Segmented control. Radios in a group; the raised surface marks the checked item.
 
 ```css
 .segmented { display: inline-flex; gap: var(--kui-distance-sm); margin: 0; padding: var(--kui-distance-sm);
-  border: 1px solid var(--brand-muted); border-radius: var(--brand-radius); }
+  border: 1px solid var(--brand-muted); border-radius: var(--brand-radius);
+  background: color-mix(in oklab, var(--brand-on-surface) 6%, var(--brand-surface)); }
 .segmented label { position: relative; display: flex; }
 .segmented input { position: absolute; inset: 0; margin: 0; opacity: 0; }
 .segmented span { padding: 0.4rem 1rem; border-radius: calc(var(--brand-radius) - var(--kui-distance-sm)); }
-.segmented input:checked + span { background: var(--brand-primary); color: var(--brand-on-primary); }
+.segmented input:checked + span { background: var(--brand-surface); color: var(--brand-on-surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.14); }   /* a raised surface, never the primary-action fill */
 .segmented input:focus-visible + span { outline: 2px solid var(--brand-accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: no-preference) {
   .segmented span { transition: background-color var(--kui-duration-sm) var(--kui-ease-standard),
-    color var(--kui-duration-sm) var(--kui-ease-standard); }
+    color var(--kui-duration-sm) var(--kui-ease-standard), box-shadow var(--kui-duration-sm) var(--kui-ease-standard); }
 }
 ```
 
