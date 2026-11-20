@@ -33,9 +33,9 @@ Branch: `feat/3d-depth` · Delivery: `ask-on-risk` · Test runner: `node --test 
 - T9 — generalise the hero composition and fix the feel table (S2, S6, from the iteration 8 blind review). Route: inline. Status: done (`d9e3634`).
 - T10 — portrait framing for the hero subject (S2, from the iteration 9 review at 360 px). Route: inline. Status: done (`6bdaa1e`): iteration 10 hierarchy 3 vs 2.
 - T11 — a gentle spring and the rule that the stricter word caps the other; "instant" means zero (S6). Route: inline, test first (`tests/tokens.test.mjs`, RED then GREEN). Status: done (`4447868`, calibrated in `150cd7f` to zeta 0.7). User blind verdict: lost to the baseline in iterations 11 and 12 (L17, L18).
-- T12 — the switch: "instant" as latency, a sliding low-contrast indicator, the segmented snippet fixed (S10). Route: inline. Status: pending.
-- T13 — buttons: one motion family for siblings, the latency budget split from the release (S9). Route: inline. Status: pending.
-- T14 — focus and colour hierarchy: primary fill for one action, badges without a second hue, frame-pass rows (S11, S12). Route: inline. Status: pending.
+- T12 — the switch: "instant" as latency, a sliding low-contrast indicator, the segmented snippet fixed (S10). Route: inline. Status: done (`3267154`); passive reference edits, structural checks only (validate OK, 49/49).
+- T13 — buttons: one motion family for siblings, the latency budget split from the release (S9). Route: inline. Status: done (`3267154`); passive reference edits, structural checks only (validate OK, 49/49).
+- T14 — focus and colour hierarchy: primary fill for one action, badges without a second hue, frame-pass rows (S11, S12). Route: inline. Status: done (`3267154`); passive reference edits, structural checks only (validate OK, 49/49).
 - T15 — iteration 13 and the user's blind verdict (S13). Route: delegated run, human judge. Status: pending.
 
 ## Log
