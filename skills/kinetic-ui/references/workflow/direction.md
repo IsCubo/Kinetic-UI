@@ -54,7 +54,7 @@ Add 2–3 concrete references: named sites, films, posters, books, or physical o
 
 The Avoid list needs at least three entries: at least one from the generic-default table in `references/brand/emotion-to-style.md` (section "Avoid generic AI defaults" — purple-to-blue gradient hero, fade-and-rise on every section, cards inside cards, and the like), and at least one subject-specific refusal ("no celebration animation on money values"). If your Avoid list would pass unchanged for a different subject, add the subject-specific entry.
 
-Fix the focal subject last: what owns the first frame, whether a scene, a product or a piece. It is full-bleed and at least half the viewport tall at 1440 px, with the copy set on it, never on a plate. No card, border or inset frame holds it, and the headline does not outweigh it. On portrait the subject takes the top of the frame and the copy the bottom; they never overlap.
+Fix the focal subject last: what owns the first frame, whether a scene, a product or a piece. It is full-bleed and at least half the viewport tall at 1440 px, with the copy set on it, never on a plate. No card, border or inset frame holds it, and the headline does not outweigh it. On portrait the subject takes the top of the frame and the copy the bottom; they never overlap. On a decision page (pricing, a plan picker, checkout) the decision is the subject: at 1440x900 the first screen holds a short headline, the period switch and every option with its action. A hero band with its own call to action above the options spends the first screen twice; drop it or fold it into the headline.
 
 ## Step 3 — Motion thesis
 
