@@ -13,6 +13,7 @@ Parallax moves decorative planes at different speeds so a flat section reads as 
 | Illustrations already drawn as separate planes (sky, hills, foreground) | Scroll-linked |
 | Desktop hero that should answer the cursor | Pointer-linked, fine pointer only |
 | A 3D scene that needs camera depth | Use `references/effects/webgl-3d.md` instead |
+| Scrolling should feel like moving forward through stops | Use `references/effects/scroll-depth.md` instead |
 
 ## When not to use
 

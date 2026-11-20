@@ -18,6 +18,7 @@ Depth tells users what sits above what and what they can touch. Build it from st
 - Text-heavy cards: rotated text blurs and is harder to read.
 - Device-orientation tilt as a default: it surprises users and needs a permission prompt on iOS.
 - Tilt as the only affordance that something is clickable.
+- Moving the viewer forward through content on scroll: use `references/effects/scroll-depth.md`.
 
 ## How it works
 

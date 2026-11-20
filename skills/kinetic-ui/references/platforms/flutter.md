@@ -1,6 +1,6 @@
 # Flutter
 
-> Keywords: flutter, dart, implicit animations, AnimatedContainer, AnimatedOpacity, TweenAnimationBuilder, AnimationController, AnimatedSwitcher, Hero, page transitions, PageTransitionsTheme, spring, physics, SpringSimulation, Rive, Lottie, flutter_animate, fragment shader, FragmentProgram, Impeller, RepaintBoundary, ThemeExtension, disableAnimations, reduceMotion, animaciones flutter, CustomClipper, PhysicalShape, Path.arcTo, floating bottom bar, notched bottom bar, concentric arc cutout
+> Keywords: flutter, dart, implicit animations, AnimatedContainer, AnimatedOpacity, TweenAnimationBuilder, AnimationController, AnimatedSwitcher, Hero, page transitions, PageTransitionsTheme, spring, physics, SpringSimulation, Rive, Lottie, flutter_animate, fragment shader, FragmentProgram, Impeller, RepaintBoundary, ThemeExtension, disableAnimations, reduceMotion, animaciones flutter, CustomClipper, PhysicalShape, Path.arcTo, floating bottom bar, notched bottom bar, concentric arc cutout, scroll depth, parallax, z-axis
 > Summary: How to implement kinetic-ui motion in Flutter: tiers and tokens as a ThemeExtension, which animation API to use per tier, reduced motion on iOS and Android, shaders, and low-end performance.
 
 Build every effect from its framework-agnostic file first (`references/effects/`), then translate it with the tables below.
@@ -233,6 +233,24 @@ PhysicalShape(
 ```
 
 Clamp `cageRadius` near the bar's rounded corners the same way as the generic pattern (`min(cageRadius, centerX - corner, barWidth - corner - centerX)`), and drive `centerX`/`cageRadius` from an `AnimationController`/`Tween` read in `build`, not recomputed per-frame in `setState`, so the slide only repaints this one clipped layer.
+
+## Scroll-driven depth
+
+Flutter has no CSS `perspective`: derive one 0..1 progress from the scroll position and feed it into a perspective `Matrix4`. The cross-platform effect lives in `references/effects/scroll-depth.md`.
+
+| Job | Flutter API |
+| --- | --- |
+| Progress | `ScrollController` (a `Listenable`) with `position.pixels / position.maxScrollExtent`, or `NotificationListener<ScrollNotification>` reading `notification.metrics`; write it into an `AnimationController` used only as a value holder (`controller.value = p`, never `forward()`), so `FadeTransition` and `ScaleTransition` listen to it directly. A `ValueNotifier<double>` cannot drive them; it fits `ValueListenableBuilder` only. `PageController.page` gives fractional stops |
+| Rebuild only the layers | `AnimatedBuilder(animation: progress, child: …, builder: …)`: the `child` is built once, only the transform changes |
+| Z substitute | `Transform` with `Matrix4.identity()..setEntry(3, 2, 0.001)` (perspective term), then `Matrix4.translationValues(0, 0, z)` or a scale; pair with `FadeTransition` for distance fade |
+| Pin | `CustomScrollView` + `SliverPersistentHeader(pinned: true)` whose `maxExtent` is stage height plus travel and `minExtent` is stage height; `shrinkOffset / (maxExtent - minExtent)` is the progress |
+| Reduced motion | `MediaQuery.disableAnimationsOf(context)` and `PlatformDispatcher.accessibilityFeatures.reduceMotion`: render the stops as a plain `ListView`, no `Transform` |
+| Cost | Transform and opacity changes repaint without relayout; put each moving layer in a `RepaintBoundary` |
+
+- Scroll-linked transforms are not tweens: the system "Remove animations" setting does not stop them. Gate on the flags above yourself.
+- Never call `setState` per scroll tick; listen through `AnimatedBuilder` or `ValueListenableBuilder` so only the layers rebuild.
+- `maxScrollExtent` is not available before the first layout, and a zero extent divides by zero: guard with `hasClients` and `hasContentDimensions`, then clamp the result to 0..1.
+- The `Opacity` widget can force an offscreen layer on every frame; prefer `FadeTransition` on a layer that animates.
 
 ## Reduced motion
 

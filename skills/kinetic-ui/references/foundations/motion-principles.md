@@ -29,6 +29,7 @@ Priority runs top to bottom. When performance or attention is tight, cut from th
 | Element leaving or being dismissed | `--kui-ease-exit` | Accelerates away and frees attention quickly |
 | Scroll-linked motion, progress tied to time or scroll, loops, spinners | `--kui-ease-linear` | The input (scroll position, time) already sets the pace |
 | Short playful pop-in, toggle, badge (no gesture) | `--kui-ease-spring` | ~16% overshoot; playful and energetic personalities only |
+| Press release or small pop on a calm page | `--kui-ease-spring-gentle` | ~4.6% overshoot and one settle (ζ 0.7): reads as alive, not as a bounce |
 | Release after a drag, fling, or sheet throw | A real spring (library or native API) | Inherits the gesture's velocity and can be interrupted |
 
 Rules:
@@ -127,11 +128,11 @@ A spring has no fixed duration: stiffness, damping, and mass decide how it moves
 | Damping | Oscillate less and settle sooner | Set it through the damping ratio |
 | Mass | Heavier, slower, with more momentum | Keep it at 1 and tune stiffness instead |
 
-Damping ratio ζ = damping / (2 × √(stiffness × mass)). At ζ = 1 the spring settles with no overshoot; 0.7 to 0.9 adds a slight settle (UI default, heuristic); 0.4 to 0.6 bounces visibly (playful only).
+Damping ratio ζ = damping / (2 × √(stiffness × mass)). At ζ = 1 the spring settles with no overshoot; 0.7 to 0.9 adds a slight settle (UI default, heuristic); 0.4 to 0.6 bounces visibly (playful only). Overshoot as a share of the travel is `e^(−ζπ/√(1−ζ²))`: ζ 0.5 gives 16%, 0.7 gives 4.6%, 0.8 gives 1.5%, 0.9 gives 0.2%.
 
 - **Use springs for** gesture releases (drag, fling, swipe to dismiss, bottom sheets), because a spring keeps the gesture's velocity and can be interrupted mid-flight; for pointer followers; for playful toggles and pop-ins.
 - **Do not use springs for** precise or data-dense UI, text, errors, destructive actions, long travel (overshooting a far target looks broken), or T0 and T1 (no JS physics at T1).
-- **CSS has no physical spring.** `--kui-ease-spring` is a fixed `linear()` curve with ~16% overshoot, no velocity, and no interruption. Use it only for short pops at `--kui-duration-md` to `--kui-duration-lg`; it falls back to `--kui-ease-standard` where `linear()` is unsupported. For real springs, use a motion library (`references/libraries.md`) or a native API.
+- **CSS has no physical spring.** `--kui-ease-spring` is a fixed `linear()` curve with ~16% overshoot, no velocity, and no interruption. Use it only for short pops at `--kui-duration-md` to `--kui-duration-lg`; it falls back to `--kui-ease-standard` where `linear()` is unsupported. `--kui-ease-spring-gentle` is the same idea at ζ 0.7, about 4.6% overshoot with a single settle, and falls back to `--kui-ease-enter`: use it when a brief wants life but forbids bounce. For real springs, use a motion library (`references/libraries.md`) or a native API.
 
 Native equivalents of the tokens (details in `references/platforms/flutter.md`, `references/platforms/swiftui.md`, `references/platforms/jetpack-compose.md`):
 
@@ -191,6 +192,39 @@ Apply a preset after `assets/tokens/motion.css`:
   }
 }
 ```
+
+## From a described feel to parameters
+
+A brief rarely gives numbers. It gives words, a reference, or a feeling, and the agent's job is to turn that into the two or three values that carry it. Translate, do not interview: the user should never have to answer "what cubic-bezier?".
+
+| What they said | Change first | Values that carry it | Leave alone |
+| --- | --- | --- | --- |
+| "calm", "smooth", "elegant", "suave", "calmado" | Duration and tail | `md` 300–350 ms, `lg` 450–500 ms, long soft tail, distance ≤ 8px, no overshoot | Stagger stays short; exits stay quick |
+| "settles slowly", "drifts in", "se asienta despacio" | Entrance duration and cascade | Each section settles once as it enters the viewport, not only what is on screen at load: 800–900 ms, long ease-out tail, 12–16px vertical, stagger 100–150 ms, no overshoot | Feedback stays under 200 ms; nothing travels sideways |
+| "fast", "snappy", "rápido", "responsivo" | Duration | `md` 140–200 ms, `lg` 240–280 ms, strong deceleration, distance ≤ 12px | Distance; a snap does not travel far |
+| "instant", "instantáneo" (a state change) | Latency | The response starts in the same frame, with no delay; the indicator slides over 150–200 ms on `--kui-ease-standard`; changed values fade in from about 0.4 opacity over 150 ms | Contrast: a hard cut of a dark fill reads as abrupt, not instant |
+| "energetic", "punchy", "energético", "con punch" | Distance and pop | `--kui-distance-lg` 40–56px, scale pop 1.06, spring on pop-ins | Exits: keep them fast, or it feels drunk |
+| "premium", "luxurious", "lujoso" | Fade over travel | Long fades, no pop, distance modest, fewer staggered items | Duration stays long even on small elements |
+| "playful", "fun", "juguetón", "divertido" | Spring | `--kui-ease-spring`, scale pop 1.08, ζ 0.5–0.7 | Never on errors, destructive actions, or form feedback |
+| "a little playful", "un poco juguetón" | Hover, press and release | Every sibling button shares the hover lift (−2px with a soft shadow) and the press (0.95–0.96); the named action adds a release that lifts to about 1.06 and settles once over 400–550 ms on `--kui-ease-spring-gentle` | Errors, forms and the page's own motion keep the page's personality |
+| "immersive", "cinematic", "inmersivo", "cinematográfico" | Scroll distance and depth | Longer scene, slower parallax, one focal camera move | Nothing else moves; immersion comes from restraint |
+| "subtle", "don't make me dizzy", "sutil", "no me marees" | Distance | 4–8px travel or opacity alone, no parallax | Duration can stay normal; small and slow is calmer than small and fast |
+
+A word that names a motion asks for that motion. "Settles slowly" wants visible settling on what enters, not its removal: calm removes the motion the brief did not name, never the motion it did. The single focal moment in `references/workflow/direction.md` caps choreography; it does not cancel entrances or feedback the brief describes. A brief that asks for settling also overrides the generic "fade-and-rise on everything" Avoid entry: what makes it the brief and not the default is the slow pace, the short vertical travel and the absence of overshoot. "Instant" is about latency, not duration: the response starts in the same frame as the input. A hard cut, above all of a high-contrast fill, reads as abrupt ("brusco"), not as instant; a 150–200 ms slide that starts at once reads as both instant and calm.
+
+When two words seem to pull against each other, check what each one is about before capping anything. A word about the page ("calm", "nothing bounces") governs the page's own motion; a word about one interaction ("pressing Start free feels a little playful") governs that interaction, and the page word does not cap it. Only words about the same thing cap each other, and then the stricter one wins and the answer says so. An interaction word covers every control with that label or role, not one instance. The play shows through the target, not the curve: a release from 0.95 moves 5% of the size, so an overshoot on that travel goes unseen; lift to about 1.06 and settle once. Measure overshoot as a share of the travel: the peak of a `cubic-bezier` y curve above 1, or the ζ formula above for a spring.
+
+Intensity is a multiplier on the preset, not a new preset: "un poco" halves the distance and the stagger, "mucho" multiplies by about 1.5, and beyond that you are changing the personality, so say so.
+
+When they name a reference site instead of a word:
+
+1. Watch one interaction twice and write down three numbers: how long it takes, how far it travels, and whether it overshoots.
+2. Match those three, not the site's look. A site can be copied honestly only at the level of timing and travel.
+3. If you cannot measure it, name the trait ("it decelerates hard and does not overshoot") and say the numbers are inferred.
+
+Record the mapping where the next round will read it — the motion thesis in `references/workflow/direction.md`: the words used, the values chosen, and which of them were inferred. A feel that is written down stops being re-litigated, and a feeling that stays in the chat is lost on the next edit.
+
+Two limits hold whatever the brief says: a described feel never overrides `prefers-reduced-motion`, the tier caps, or the feedback latency budget: a press starts in the same frame and reaches its pressed state within about 150 ms. The budget covers the response, not the release: a settle after pointer up may run 400–550 ms, because nothing waits for it. "Make it more energetic" is still not permission to slow the press itself.
 
 ## Anti-patterns
 

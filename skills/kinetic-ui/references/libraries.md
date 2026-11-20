@@ -76,7 +76,7 @@ Snapshot verified on **2026-10-22** against the npm and pub.dev registries, web-
 | View Transitions, same-document | Newly available | 111 | 18 | 144 | Feature-check `document.startViewTransition` |
 | View Transitions, cross-document | Limited | 126 | 18.2 | — | Progressive enhancement only |
 | `@starting-style` | Newly available | 117 | 17.5 | 129 | Entry animations |
-| `linear()` easing | Widely available | 113 | 17.2 | 112 | `--kui-ease-spring` |
+| `linear()` easing | Widely available | 113 | 17.2 | 112 | `--kui-ease-spring`, `--kui-ease-spring-gentle` |
 | `prefers-reduced-motion` | Widely available | 74 | 10.1 | 63 | Mandatory everywhere |
 | `prefers-reduced-transparency` | Limited | 118 | — | Behind a flag | Glass fallback |
 | WebGPU (`navigator.gpu`) | Limited | Desktop; Android 121 | 26 | 141 (Windows) | WebGPURenderer with WebGL 2 fallback |

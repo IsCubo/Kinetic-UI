@@ -17,7 +17,7 @@ const REPO = path.resolve(HERE, '..');
 const EVALS_FILE = path.join(REPO, 'evals', 'evals.json');
 const SKILL_DIR = path.join(REPO, 'skills', 'kinetic-ui');
 const DEFAULT_WORKSPACE = path.join(REPO, 'evals', 'workspace');
-const TEXT_EXT = new Set(['.md', '.txt', '.html', '.css', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.json', '.svg']);
+const TEXT_EXT = new Set(['.md', '.txt', '.html', '.css', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.json', '.svg', '.dart', '.swift', '.kt', '.kts', '.java']);
 const VARIANTS = ['with_skill', 'without_skill'];
 export const DIMENSIONS = [
   'brief-specificity',
@@ -26,6 +26,9 @@ export const DIMENSIONS = [
   'typography',
   'color',
   'motion-purpose',
+  'impact',
+  'motion-fidelity',
+  '3d-fidelity',
   'reduced-motion',
   'low-end-restraint',
   'evidence-honesty',

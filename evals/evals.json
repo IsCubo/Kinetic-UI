@@ -400,6 +400,249 @@
           }
         }
       ]
+    },
+    {
+      "id": "scroll-depth-travel",
+      "title": "Scroll that feels like flying forward, then native apps",
+      "prompt": "Our travel startup wants the homepage hero to feel like you are flying forward through three destinations as you scroll down: mountains, then a city, then a beach. It has to stay smooth on a cheap Android phone, respect people who get motion sick, and we tell the same story in our Flutter app and our SwiftUI iPad app.",
+      "expected_output": "A pinned scroll-depth stage where one progress value moves layers forward along Z under perspective, three stops paced inside a scroll-length budget, depth cues without animated blur, a static stack for reduced motion, tiered simplification for low-end devices, readable content order, and the Flutter and SwiftUI equivalents.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "z-travel",
+          "text": "Moves content or a camera forward along the Z axis instead of only offsetting planes vertically",
+          "check": {
+            "type": "regex",
+            "pattern": "translateZ|translate3d|translate:\\s*0\\s+0|z[- ]axis|along z|through z|dolly|camera\\.position\\.z"
+          }
+        },
+        {
+          "id": "pinned-stage",
+          "text": "Pins the scene while the page scrolls",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bsticky\\b|\\bpin(ned|ning)?\\b"
+          }
+        },
+        {
+          "id": "one-progress",
+          "text": "Drives the choreography from one scroll progress value or timeline",
+          "check": {
+            "type": "regex",
+            "pattern": "--kui-z-p|animation-timeline|\\bview\\(\\)|\\bscroll\\(\\)|useScroll|scroll progress|progress value"
+          }
+        },
+        {
+          "id": "depth-cue",
+          "text": "Sells depth with a named cue: perspective, or scale that changes with a layer distance",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bperspective\\b|scal(e|es|ing)[^.\\n]{0,80}(approach|closer|nearer|depth|distance|smaller|bigger|larger|grow)|(approach|closer|near|depth|distance|smaller|emerg)[^.\\n]{0,80}scal(e|es|ing)"
+          }
+        },
+        {
+          "id": "blur-cost",
+          "text": "Treats animated blur as expensive or avoids it",
+          "check": {
+            "type": "regex",
+            "pattern": "(avoid|no|never|without|drop|last resort)[^.\\n]{0,40}blur|blur[^.\\n]{0,60}(expensive|cost|re-?raster|last resort)"
+          }
+        },
+        {
+          "id": "reduced-motion",
+          "text": "Honours the reduced-motion preference",
+          "check": {
+            "type": "regex",
+            "pattern": "prefers-reduced-motion|reduced?[- ]motion|accessibilityReduceMotion|disableAnimations"
+          }
+        },
+        {
+          "id": "static-stack",
+          "text": "Falls back to a static, readable layout",
+          "check": {
+            "type": "regex",
+            "pattern": "static (stack|layout|fallback|composition|version|sections?|scenes?|list)|normal flow|stacked (static )?(sections|cards|scenes|list)|plain (list|stack|sections|column|VStack|ListView)"
+          }
+        },
+        {
+          "id": "tiers",
+          "text": "Simplifies per device capability or motion tier",
+          "check": {
+            "type": "regex",
+            "pattern": "\\bT[0-3]\\b|motion tier|low[- ]end"
+          }
+        },
+        {
+          "id": "scroll-budget",
+          "text": "Bounds the pinned scroll length or paces the stops",
+          "check": {
+            "type": "regex",
+            "pattern": "\\d{3}\\s?s?vh|viewports? of|per stop|scroll length"
+          }
+        },
+        {
+          "id": "content-order",
+          "text": "Keeps the stops readable in source order for assistive technology",
+          "check": {
+            "type": "regex",
+            "pattern": "source order|screen reader|reading order|skip link"
+          }
+        },
+        {
+          "id": "flutter-equivalent",
+          "text": "Names a real Flutter API for the same effect",
+          "check": {
+            "type": "regex",
+            "pattern": "ScrollController|ScrollNotification|Matrix4|SliverPersistentHeader|AnimatedBuilder"
+          }
+        },
+        {
+          "id": "swiftui-equivalent",
+          "text": "Names a real SwiftUI API for the same effect",
+          "check": {
+            "type": "regex",
+            "pattern": "scrollTransition|visualEffect|onScrollGeometryChange|rotation3DEffect|accessibilityReduceMotion"
+          }
+        }
+      ]
+    },
+    {
+      "id": "piece-from-description",
+      "title": "A 3D piece from a workshop description, no model",
+      "prompt": "We make a ceramic pour-over coffee dripper and we have no 3D model of it, only the workshop's description: a cone 116 mm across the top rim and 82 mm tall, sitting on a flat foot ring 70 mm wide, one round 14 mm hole at the bottom, twelve straight ribs on the inside wall, a loop handle on one side, and a matte white glaze. Build the product page hero that shows the dripper in 3D in the browser so customers can turn it around. It has to be recognisable at a glance and true to size.",
+      "expected_output": "A browser hero that builds the dripper from its construction: a lathe profile in metres for the cone and foot, a bent handle overlapping the body, ribs on the inner wall, the bottom hole, a ledger of measured versus invented dimensions, a bounding-box check against the brief, a matte ceramic material under one environment map with a contact shadow, user-driven rotation that respects reduced motion, and a still fallback for low tiers.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "metre-scale",
+          "text": "Builds the piece in metres from the stated dimensions",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b0\\.(116|058|082|070?|035|014|007)\\b|\\b(MM|mm|MILLI\\w*|M_PER_MM|MM_TO_M|mmToM)\\s*=\\s*0?\\.001\\b"
+          }
+        },
+        {
+          "id": "lathe-body",
+          "text": "Turns the cone and foot from a profile instead of stacking primitives",
+          "check": {
+            "type": "regex",
+            "pattern": "LatheGeometry"
+          }
+        },
+        {
+          "id": "handle-part",
+          "text": "Builds the handle as its own bent part",
+          "check": {
+            "type": "regex",
+            "pattern": "TubeGeometry|TorusGeometry|CatmullRomCurve3"
+          }
+        },
+        {
+          "id": "dimension-ledger",
+          "text": "Separates measured dimensions from invented ones",
+          "check": {
+            "type": "regex",
+            "pattern": "\\binvent(ed|s)?\\b"
+          }
+        },
+        {
+          "id": "size-check",
+          "text": "Proves the built size against the brief",
+          "check": {
+            "type": "regex",
+            "pattern": "Box3|bounding box|setFromObject|getSize\\("
+          }
+        },
+        {
+          "id": "contact-shadow",
+          "text": "Grounds the piece with a contact shadow",
+          "check": {
+            "type": "regex",
+            "pattern": "contact shadow|ContactShadows|ShadowMaterial|shadow catcher|ground(ing|ed)? shadow"
+          }
+        },
+        {
+          "id": "reduced-motion",
+          "text": "Keeps rotation user-driven or still under reduced motion",
+          "check": {
+            "type": "regex",
+            "pattern": "prefers-reduced-motion|reduced motion"
+          }
+        },
+        {
+          "id": "browser-page",
+          "text": "Ships a page that opens in a browser",
+          "check": {
+            "type": "fileExists",
+            "pattern": "\\.html$"
+          }
+        }
+      ]
+    },
+    {
+      "id": "motion-by-feel",
+      "title": "Motion described by feel, with a bad precedent",
+      "prompt": "Our meditation app needs its pricing page rebuilt. It should feel calm: things settle slowly and nothing bounces. Switching between monthly and yearly billing has to feel instant, though, and pressing 'Start free' should feel a little playful. Our last developer made every section slide in from the side and people said it felt like a casino.",
+      "expected_output": "A pricing page whose motion values come from the described feel and are written down: a calm global personality (longer durations, soft deceleration, short distances, no overshoot), an instant billing switch, a playful press scoped to the primary action within the feedback budget, entrances that replace the side slides, reduced-motion behaviour, and a statement of which values were inferred from words.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "feel-mapping",
+          "text": "Writes down which words produced which motion values",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(calm|settle|slowly|instant|playful)\\b[^\\n]{0,160}\\b\\d{2,4}\\s?ms\\b"
+          }
+        },
+        {
+          "id": "instant-toggle",
+          "text": "Keeps the billing switch at 200 ms or less",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(toggle|switch|billing|monthly|yearly)\\b[\\s\\S]{0,240}?(\\b([5-9]\\d|1\\d\\d|200)\\s?ms\\b|\\b0?\\.(0[5-9]|1\\d?|2)\\s?s\\b)|\\b(toggle|switch|billing|monthly|yearly)\\b[\\s\\S]{0,240}?(transition:\\s*none|\\b0\\s?ms\\b|same frame|synchronous(ly)?|no animation)"
+          }
+        },
+        {
+          "id": "scoped-playful-press",
+          "text": "Keeps the playful motion on the primary action's press",
+          "check": {
+            "type": "regex",
+            "pattern": "(:active|\\bpress(ed)?\\b|pointerdown)[\\s\\S]{0,240}?(spring|overshoot|cubic-bezier\\([^)]*,\\s*1\\.\\d)"
+          }
+        },
+        {
+          "id": "replaces-side-slide",
+          "text": "Replaces the side slide-ins instead of keeping them",
+          "check": {
+            "type": "regex",
+            "pattern": "\\b(no|never|instead of|replac\\w*|drop\\w*|remov\\w*|avoid\\w*)\\b[^\\n]{0,80}\\b(slid\\w*|translateX|from the side|sideways|horizontal(ly)?)"
+          }
+        },
+        {
+          "id": "inferred-values",
+          "text": "Says which values were inferred from the description",
+          "check": {
+            "type": "regex",
+            "pattern": "\\binferred\\b|\\binterpret(ed|ation)\\b"
+          }
+        },
+        {
+          "id": "reduced-motion",
+          "text": "Plans reduced-motion behaviour",
+          "check": {
+            "type": "regex",
+            "pattern": "prefers-reduced-motion|reduced motion"
+          }
+        },
+        {
+          "id": "browser-page",
+          "text": "Ships a page that opens in a browser",
+          "check": {
+            "type": "fileExists",
+            "pattern": "\\.html$"
+          }
+        }
+      ]
     }
   ]
 }

@@ -17,7 +17,7 @@ Rules for anyone (human or agent) writing files inside `skills/kinetic-ui/`. The
 > Summary: One sentence describing what the file answers.
 ```
 
-Assets use the same two lines as comments (`// Keywords:` / `/* Keywords: */`); JSON uses top-level `"$keywords"` and `"$summary"` strings. `INDEX.md` is generated from these headers: run `npm run index` after adding or renaming files. Never edit `INDEX.md` by hand.
+Assets use the same two lines as comments (`// Keywords:` / `/* Keywords: */`); JSON uses top-level `"$keywords"` and `"$summary"` strings. `INDEX.md` is generated from these headers: run `npm run index` after adding, renaming, or editing a file's `Keywords`/`Summary` line, and commit the regenerated index with that change. Never edit `INDEX.md` by hand.
 
 ## Paths
 
@@ -72,7 +72,7 @@ Free structure, but keep the header, tables over prose, and link the effect/comp
 
 ### 3D (`references/3d/`)
 
-Free structure, but keep the effect template's spine: `## When to use`, the implementation detail, `## Reduced motion`, `## Low-end fallback`, `## Performance budget`, `## Accessibility`, `## Libraries`, `## Pitfalls`. Rendering, the asset pipeline, interaction, and per-platform routing are separate files; link them instead of repeating the scene contract in `references/effects/webgl-3d.md`.
+Free structure, but keep the effect template's spine: `## When to use`, the implementation detail, `## Reduced motion`, `## Low-end fallback`, `## Performance budget`, `## Accessibility`, `## Libraries`, `## Pitfalls`. Rendering, building a piece with no asset, the asset pipeline, interaction, and per-platform routing are separate files; link them instead of repeating the scene contract in `references/effects/webgl-3d.md`.
 
 ## Shared invariants (do not redefine)
 
@@ -81,7 +81,7 @@ Free structure, but keep the effect template's spine: `## When to use`, the impl
 | Motion tiers | T0 Reduced, T1 Essential (CSS only), T2 Enhanced (JS motion), T3 Immersive (GPU/3D). Source of truth: `references/foundations/performance-tiers.md` |
 | Tier attribute | `<html data-motion-tier="0..3">`, set by `assets/snippets/motion-tier.js` (`applyMotionTier`, `watchFrameRate`, event `kui:motiontierchange`) |
 | Tier utilities | `data-kui-min-tier="N"` / `data-kui-max-tier="N"` from `assets/tokens/motion.css` |
-| Motion tokens | `--kui-duration-{xs,sm,md,lg,xl}`, `--kui-ease-{standard,enter,exit,linear,spring}`, `--kui-distance-{sm,md,lg}`, `--kui-scale-{press,pop}`, `--kui-stagger`, `--kui-parallax-strength` from `assets/tokens/motion.css` |
+| Motion tokens | `--kui-duration-{xs,sm,md,lg,xl}`, `--kui-ease-{standard,enter,exit,linear,spring,spring-gentle}`, `--kui-distance-{sm,md,lg}`, `--kui-scale-{press,pop}`, `--kui-stagger`, `--kui-parallax-strength` from `assets/tokens/motion.css` |
 | Brand tokens | `--brand-primary`, `--brand-on-primary`, `--brand-accent`, `--brand-surface`, `--brand-on-surface`, `--brand-muted`, `--brand-font-display`, `--brand-font-body`, `--brand-radius`. Derived tint/shade scales are project-local suffixes (`--brand-primary-50` … `--brand-primary-950`, see `references/brand/brand-intake.md`); the nine tokens stay the shared API |
 | Motion personalities | Calm, Precise, Energetic, Playful, Luxurious, defined in `references/foundations/motion-principles.md`. Overrides load after `assets/tokens/motion.css` inside `@media (prefers-reduced-motion: no-preference)` so they never cancel the reduced-motion collapse |
 | Accessibility | `references/foundations/accessibility-motion.md`: reduced motion keeps fades ≤200ms and removes travel; no more than 3 flashes per second; pause for motion over 5 s |
@@ -93,14 +93,14 @@ Free structure, but keep the effect template's spine: `## When to use`, the impl
 | --- | --- |
 | `references/foundations/` | `ux-principles.md`, `ui-patterns.md`, `motion-principles.md`, `devices-responsive.md`, `performance-tiers.md`, `accessibility-motion.md` |
 | `references/brand/` | `brand-intake.md`, `emotion-to-style.md` (+ `assets/tokens/brand-tokens.template.json`) |
-| `references/effects/` | `microinteractions.md`, `cursor-pointer.md`, `text-effects.md`, `page-transitions.md`, `ambient-backgrounds.md`, `parallax.md`, `scroll-driven.md`, `depth-layers.md`, `motion-2d.md`, `webgl-3d.md`, `svg-graphics.md` |
-| `references/3d/` | `real-object-render.md`, `asset-pipeline.md`, `inspection-configurator.md`, `platforms-3d.md` |
+| `references/effects/` | `microinteractions.md`, `cursor-pointer.md`, `text-effects.md`, `page-transitions.md`, `ambient-backgrounds.md`, `parallax.md`, `scroll-driven.md`, `scroll-depth.md`, `depth-layers.md`, `motion-2d.md`, `webgl-3d.md`, `svg-graphics.md` |
+| `references/3d/` | `real-object-render.md`, `procedural-piece.md`, `asset-pipeline.md`, `inspection-configurator.md`, `platforms-3d.md` |
 | `references/styles/` | `cyberpunk.md`, `glassmorphism.md`, `neo-brutalism.md`, `editorial.md`, `minimal-luxury.md`, `retro-futurism.md`, `organic-soft.md`, `playful-3d.md` |
 | `references/components/` | `buttons.md`, `inputs-forms.md`, `cards.md`, `navigation.md`, `overlays.md`, `feedback.md`, `selection-controls.md`, `carousels-galleries.md`, `hero-sections.md`, `lists-collections.md` |
 | `references/platforms/` | `web-frameworks.md`, `flutter.md`, `swiftui.md`, `jetpack-compose.md` |
 | `references/workflow/` | `loop.md`, `direction.md`, `verify.md`, `critique.md` |
 | `references/` | `libraries.md` |
-| `assets/` | `tokens/motion.css`, `snippets/motion-tier.js`, `snippets/verify-motion.js`, `snippets/three-product-scene.js`; effect-specific assets go in `assets/effects/<effect-name>.{css,js}` |
+| `assets/` | `tokens/motion.css`, `snippets/motion-tier.js`, `snippets/verify-motion.js`, `snippets/three-product-scene.js`, `snippets/capture-frames.mjs`; effect-specific assets go in `assets/effects/<effect-name>.{css,js}` |
 
 ## Workflow
 

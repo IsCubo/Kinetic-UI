@@ -32,6 +32,7 @@ Tool names differ across server versions. Match the capability and the artifact,
 | Capability | Preferred | Look for | Fallback | BLOCKED when |
 | --- | --- | --- | --- | --- |
 | Load, render, screenshot | Playwright MCP | `browser_navigate`, `browser_take_screenshot`, `browser_snapshot` | Chrome DevTools MCP `navigate_page`, `take_screenshot`, `take_snapshot`; a native browser; manual browser plus OS screenshot | Nothing can load the built page |
+| Frames along a scroll scene | `assets/snippets/capture-frames.mjs` (ship it with the page) | PNG per viewport and scroll fraction, plus `frames.json` with scroll position, `--kui-*` values and page errors | Playwright `page.evaluate` to scroll, then `page.screenshot` per step | Nothing can render the page |
 | DOM and computed styles | Playwright MCP | `browser_evaluate` | Chrome DevTools MCP `evaluate_script`; the DevTools console | No scriptable page and no console |
 | Accessibility tree | Chrome DevTools MCP | `take_snapshot` | Playwright role and aria snapshot; DevTools Accessibility pane | No tree and no DOM access |
 | Keyboard path | Playwright MCP | `browser_press_key` in a loop | Chrome DevTools MCP `press_key`; a manual Tab pass | No browser and no way to send keys |
@@ -133,6 +134,8 @@ Every row names the input and the artifact. A row with a tool name and no artifa
 - The accessibility tree is treated as screen-reader output: it proves names and roles, not announcement order or verbosity.
 - An emulated phone is treated as a low-end device: frame rate, thermals, and touch latency remain unproven.
 - A tool's output contains tokens, cookies, or private URLs: redact before attaching it, and keep artifacts in the run directory rather than the repository.
+- A frame captured through Chrome's own `--screenshot` flag after a programmatic scroll comes out blank: the paint is tied to the initial layout viewport. Drive the scroll through the DevTools Protocol instead, as `scripts/capture-frames.mjs` does.
+- Frames captured without `<meta name="viewport">` lay the page out at 980 px inside a phone-sized window: record the missing meta rather than presenting the frame as a phone view.
 
 ## Handoff
 

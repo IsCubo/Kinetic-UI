@@ -12,6 +12,7 @@ Scroll position becomes the clock: the user controls speed and direction, so the
 - Scrollytelling: a pinned visual that changes while text steps scroll past.
 - A horizontal gallery or timeline inside a vertical page.
 - Feeding scroll progress to a canvas or 3D scene (`references/effects/webgl-3d.md`).
+- Travel forward through content along Z: the choreography lives in `references/effects/scroll-depth.md`; this file supplies the timeline.
 
 ## When not to use
 

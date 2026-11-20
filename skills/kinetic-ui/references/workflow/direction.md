@@ -54,9 +54,13 @@ Add 2–3 concrete references: named sites, films, posters, books, or physical o
 
 The Avoid list needs at least three entries: at least one from the generic-default table in `references/brand/emotion-to-style.md` (section "Avoid generic AI defaults" — purple-to-blue gradient hero, fade-and-rise on every section, cards inside cards, and the like), and at least one subject-specific refusal ("no celebration animation on money values"). If your Avoid list would pass unchanged for a different subject, add the subject-specific entry.
 
+Fix the focal subject last: what owns the first frame, whether a scene, a product or a piece. It is full-bleed and at least half the viewport tall at 1440 px, with the copy set on it, never on a plate. No card, border or inset frame holds it, and the headline does not outweigh it. On portrait the subject takes the top of the frame and the copy the bottom; they never overlap. On a decision page (pricing, a plan picker, checkout) the decision is the subject: at 1440x900 the first screen holds a short headline, the period switch and every option with its action. A hero band with its own call to action above the options spends the first screen twice; drop it or fold it into the headline.
+
+Give each hue one job before choosing any. The primary fill marks the one primary action and nothing else: a selected segment, tab or toggle is a raised surface or an outline, never that fill, because a dark fill jumping between segments reads as abrupt and competes with the action. Badges and labels ("most chosen", a discount) take a tint of the primary or neutral ink, never a second saturated hue; red is for errors and destructive actions.
+
 ## Step 3 — Motion thesis
 
-A thesis is one sentence of choreography for the whole surface, built from four decisions. A generic fade-and-rise or scroll reveal is not a thesis: if the focal moment could be pasted into a different product with only a color changed, it is decoration — tie it to this subject's data, content, or the defining action instead.
+A thesis is one sentence of choreography for the whole surface, built from four decisions. A generic fade-and-rise or scroll reveal is not a thesis unless the brief asks for it ("things settle slowly"), and then the thesis states its pace. Otherwise, if the focal moment could be pasted into a different product with only a color changed, it is decoration — tie it to this subject's data, content, or the defining action instead.
 
 | Element | Decide | Passes when |
 | --- | --- | --- |
@@ -66,6 +70,8 @@ A thesis is one sentence of choreography for the whole surface, built from four 
 | Budget | How many animated moments per view, counted in moments, not effects | The count fits the Mode's tier ceiling and the page-type guardrails in `references/brand/emotion-to-style.md`; at T0 only feedback and progress survive |
 
 Priority when the budget is tight is fixed, from the purpose ranking: cut Delight, then Brand, then Continuity, then Focus; Feedback goes last (or is left to `references/foundations/accessibility-motion.md`). Never balance an over-budget moment by adding another.
+
+When the brief describes the feel in words instead of numbers — "suave", "con punch", "como en ese sitio" — record the mapping beside the thesis: the words, the values they produced, and which were inferred. `references/foundations/motion-principles.md` has the word-to-parameter table; this file holds the record, so the next edit does not re-decide the feel.
 
 ## Step 4 — Constraints
 

@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { DIMENSIONS, gradeText } from '../scripts/eval.mjs';
+import { DIMENSIONS, collectText, gradeText } from '../scripts/eval.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const EVAL = path.join(ROOT, 'scripts', 'eval.mjs');
@@ -48,6 +48,20 @@ test('eval: gradeText applies regex, contains, notContains, and fileExists check
 
   const failing = gradeText(testCase, 'parallax everywhere', []);
   assert.deepEqual(failing.map((result) => result.passed), [false, false, false, false]);
+});
+
+test('eval: collectText reads native platform sources, not only web files', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kui-collect-'));
+  try {
+    fs.mkdirSync(path.join(dir, 'flutter'));
+    fs.writeFileSync(path.join(dir, 'flutter', 'hero.dart'), 'final controller = ScrollController();');
+    fs.writeFileSync(path.join(dir, 'SwiftUIHero.swift'), 'withAnimation { };');
+    const { text, files } = collectText(dir);
+    assert.deepEqual(files, ['SwiftUIHero.swift', 'flutter/hero.dart']);
+    assert.match(text, /ScrollController/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('eval: init writes a snapshot, both variants, and a RUN.md per run', () => {

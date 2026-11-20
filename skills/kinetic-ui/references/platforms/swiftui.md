@@ -1,6 +1,6 @@
 # SwiftUI
 
-> Keywords: swiftui, ios, ipados, macos, visionos, withAnimation, spring, bounce, matchedGeometryEffect, PhaseAnimator, KeyframeAnimator, scrollTransition, visualEffect, TimelineView, accessibilityReduceMotion, accessibilityReduceTransparency, ProMotion, 120 Hz, Low Power Mode, thermal state, EnvironmentValues, Metal shader, animaciones swiftui, Shape, addArc, floating bottom bar, notched bottom bar, concentric arc cutout
+> Keywords: swiftui, ios, ipados, macos, visionos, withAnimation, spring, bounce, matchedGeometryEffect, PhaseAnimator, KeyframeAnimator, scrollTransition, visualEffect, TimelineView, accessibilityReduceMotion, accessibilityReduceTransparency, ProMotion, 120 Hz, Low Power Mode, thermal state, EnvironmentValues, Metal shader, animaciones swiftui, Shape, addArc, floating bottom bar, notched bottom bar, concentric arc cutout, scroll depth, parallax, z-axis
 > Summary: How to implement kinetic-ui motion in SwiftUI: tiers and tokens through the environment, which animation API to use per tier and OS version, reduced motion and transparency, ProMotion, and low-end fallbacks.
 
 Build every effect from its framework-agnostic file first (`references/effects/`), then translate it with the tables below.
@@ -197,6 +197,24 @@ NotchBarShape(corner: 10, centerX: centerX, circleCenterY: circleCenterY, cageRa
 ```
 
 Clamp `cageRadius` near the bar's rounded corners the same way as the generic pattern (`min(cageRadius, centerX - corner, barWidth - corner - centerX)`), and drive `centerX` with `withAnimation(.spring(...))` on the selection change; `animatableData` makes the shape itself interpolate, so SwiftUI redraws the shape each frame without re-running the view's `body`.
+
+## Scroll-driven depth
+
+SwiftUI has no `translateZ`: fake travel with scale, opacity, and optional `rotation3DEffect`, driven by scroll geometry. The cross-platform effect lives in `references/effects/scroll-depth.md`.
+
+| Job | SwiftUI API |
+| --- | --- |
+| Per-stop progress | `.scrollTransition { content, phase in … }` (iOS 17+): `phase.value` runs −1…1 as a view enters and leaves; apply `scaleEffect` and `opacity` to `content` |
+| Whole-track progress | `.onScrollGeometryChange(for:of:action:)` (iOS 18+): derive `contentOffset.y / (contentSize.height - containerSize.height)` into a `CGFloat`; on iOS 17, a `GeometryReader` on a named coordinate space |
+| Per-layer parallax | `.visualEffect { content, proxy in … }` (iOS 17+) with `proxy.frame(in: .scrollView)`: reads geometry without invalidating `body` |
+| Pin | Keep the stage outside the `ScrollView` in a `ZStack`; the scroll view holds a clear spacer of travel height and only supplies progress. `LazyVStack(pinnedViews:)` pins section headers only |
+| Stops | `.scrollTargetLayout()` with `.scrollTargetBehavior(.viewAligned)` or `.paging` (iOS 17+) |
+| Perspective | `rotation3DEffect(_:axis:anchor:anchorZ:perspective:)`; on visionOS, `offset(z:)` is real depth |
+| Reduced motion | `@Environment(\.accessibilityReduceMotion)`: show the stops in a plain `VStack`, no scale or 3D rotation |
+
+- Writing progress into `@State` on every scroll frame re-evaluates `body`; prefer `.scrollTransition` or `.visualEffect`, and keep the `@State` for the stage only.
+- `.blur(radius:)` per layer is the expensive depth cue; at T2 drop it and keep scale plus opacity. `.drawingGroup()` flattens a static layer stack.
+- `.scrollTransition` and `.visualEffect` need iOS 17+: below that, ship the static stack instead of imitating them with `GeometryReader`.
 
 ## Reduced motion
 

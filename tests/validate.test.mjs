@@ -184,6 +184,31 @@ test('build-index --check: exit 0 when fresh, exit 1 when stale, without rewriti
   }
 });
 
+test('index-fresh: a CRLF checkout of INDEX.md is still fresh', () => {
+  const s = makeSkill();
+  try {
+    const indexPath = path.join(s.dir, 'INDEX.md');
+    fs.writeFileSync(indexPath, fs.readFileSync(indexPath, 'utf8').replace(/\n/g, '\r\n'));
+    const r = run(VALIDATE, s.dir);
+    assert.equal(r.code, 0, r.out);
+  } finally {
+    s.cleanup();
+  }
+});
+
+test('build-index --check: a CRLF checkout of INDEX.md reports current', () => {
+  const s = makeSkill();
+  try {
+    const indexPath = path.join(s.dir, 'INDEX.md');
+    fs.writeFileSync(indexPath, fs.readFileSync(indexPath, 'utf8').replace(/\n/g, '\r\n'));
+    const r = run(BUILD_INDEX, s.dir, '--check');
+    assert.equal(r.code, 0, r.out);
+    assert.match(r.out, /is current/);
+  } finally {
+    s.cleanup();
+  }
+});
+
 test('missing skill directory argument exits 2 with usage', () => {
   const r = run(VALIDATE);
   assert.equal(r.code, 2);

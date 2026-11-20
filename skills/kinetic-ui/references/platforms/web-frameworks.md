@@ -1,6 +1,6 @@
 # Web frameworks
 
-> Keywords: react, next.js, nextjs, vue, nuxt, svelte, sveltekit, angular, astro, islands, vanilla js, ssr, hydration, client component, use client, useEffect cleanup, onMounted, onMount, afterNextRender, dispose, unmount, react three fiber, tresjs, threlte, motion, gsap, frameworks web
+> Keywords: react, next.js, nextjs, vue, nuxt, svelte, sveltekit, angular, astro, islands, vanilla js, ssr, hydration, client component, use client, useEffect cleanup, onMounted, onMount, afterNextRender, dispose, unmount, react three fiber, tresjs, threlte, motion, gsap, frameworks web, scroll depth, parallax, z-axis
 > Summary: How to wire the motion tokens, the tier snippet, and effects into vanilla JS, React/Next.js, Vue/Nuxt, Svelte/SvelteKit, Angular, and Astro without SSR or lifecycle bugs.
 
 Effects in this skill are framework-agnostic: CSS tokens plus `assets/snippets/motion-tier.js`. A framework only decides **when** an effect mounts and **how** it is cleaned up. Keep that split.
@@ -203,6 +203,24 @@ export class MotionTier {
 - Static Astro output is already T1. Hydrate motion islands with `client:visible` (below the fold) or `client:idle`.
 - `client:media="(prefers-reduced-motion: no-preference)"` never hydrates the island for reduced-motion users: its server HTML is the T0 version, so make that HTML complete.
 - Re-run effect setup on `astro:page-load`; tear it down on `astro:before-swap`.
+
+## Scroll-driven depth
+
+Travel through Z is one 0..1 progress value that moves layers on a pinned stage; the recipe and the `--kui-z-p` contract live in `references/effects/scroll-depth.md`. A framework only decides who writes the progress and who cleans it up.
+
+| Job | Web API |
+| --- | --- |
+| Progress, T1 | CSS `animation-timeline: scroll()` or `view()` on keyframes that animate the registered `@property --kui-z-p`; wrap in `@supports (animation-timeline: scroll())`, static stack otherwise |
+| Progress, T2 | Motion `useScroll({ target, offset })` returns `scrollYProgress`; shape it with `useTransform` into scale, opacity, and z. Vanilla/Vue/Svelte: an IntersectionObserver-gated rAF loop |
+| Pin | A `position: sticky` track inside a tall stage; GSAP ScrollTrigger `pin` with `scrub` when each stop needs exact start and end |
+| What moves | `transform` (3D translate under the pinned track's `perspective`, or scale) and `opacity`; never `top`, `filter`, or `box-shadow` |
+| WebGL | R3F: read progress in `useFrame` from a ref and set `camera.position.z`; drei `ScrollControls` exposes `useScroll().offset` |
+| Reduced motion | Tier 0 or `prefers-reduced-motion`: render the stack in normal flow, mount no writer; `gsap.matchMedia()` and `MotionConfig reducedMotion="user"` as in `## Reduced motion` |
+
+- SSR: server HTML is the static stack (T1). Start the progress writer in the client-only hook; kill ScrollTrigger instances (`ctx.revert()` on a `gsap.context`) and observers in the cleanup.
+- Never route progress through React, Vue, or Svelte state: it re-renders every frame. Use a MotionValue, a ref, or the CSS property.
+- Lenis or any smooth-scroll library hijacks native scrolling: T2+ only, and only on pages that need it.
+- `translateZ` without a `perspective` ancestor does nothing visible; the perspective belongs on the pinned track, not on the tall stage (its vanishing point would drift) or on each layer.
 
 ## Reduced motion
 

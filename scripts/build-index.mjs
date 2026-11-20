@@ -3,7 +3,7 @@
 // With --check, only reports whether INDEX.md is current (exit 1 when stale) and writes nothing.
 import fs from 'node:fs';
 import path from 'node:path';
-import { buildIndex, INDEX_FILE } from './lib/skill.mjs';
+import { buildIndex, indexFreshness, INDEX_FILE } from './lib/skill.mjs';
 
 const args = process.argv.slice(2);
 const check = args.includes('--check');
@@ -14,11 +14,9 @@ if (!dir || !fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
 }
 
 const target = path.join(dir, INDEX_FILE);
-const next = buildIndex(dir);
-const current = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : null;
 
 if (check) {
-  if (current === next) {
+  if (indexFreshness(dir) === 'fresh') {
     console.log(`OK: ${INDEX_FILE} is current`);
     process.exit(0);
   }
@@ -26,5 +24,6 @@ if (check) {
   process.exit(1);
 }
 
+const next = buildIndex(dir);
 fs.writeFileSync(target, next);
 console.log(`WROTE: ${target}`);

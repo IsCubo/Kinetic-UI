@@ -2,8 +2,8 @@
 
 Measure whether the skill changes agent behavior. The pack checks protocol
 compliance — does the agent classify the surface, plan reduced motion, use the
-motion tiers, and verify — not taste. Visual quality still needs a blind human
-review.
+motion tiers, and verify — not taste. Visual quality is judged separately, from
+rendered frames (`scripts/capture-frames.mjs`) and a blind review.
 
 ## Cases
 
@@ -13,6 +13,10 @@ review.
 | `operate-dashboard` | Operate mode: density and scanability, keyboard/focus, restraint, T0, verification. |
 | `flawed-pricing-critique` | A static critique of a deliberately flawed page: located findings, severity, verdict, honesty when rendering is unavailable. |
 | `low-end-3d` | Parallax and 3D on a low-end phone and under reduced motion: fallbacks, `data-motion-tier`, performance budget, verification. |
+| `real-object-3d` | A real piece in three.js: metre scale, a camera matched to photography, environment map, contact shadow, colour pipeline, PBR values, compressed glTF, tiers, reduced motion, a per-platform route, verification. |
+| `scroll-depth-travel` | Scroll that moves the viewer forward through Z: a pinned stage, one progress value, perspective, blur cost, a reduced-motion static stack, tiers, a scroll budget, content order, Flutter and SwiftUI equivalents. |
+| `piece-from-description` | A real piece described in words with no model: metre scale from the stated dimensions, a lathe body, a bent handle, a measured versus invented ledger, a size check, a contact shadow, reduced motion. Reviewed blind on `3d-fidelity`. |
+| `motion-by-feel` | Motion described by feel with a bad precedent: words mapped to written values, an instant switch, a playful press scoped to one action, the side slides replaced, inferred values named, reduced motion. Reviewed blind on `motion-fidelity`. |
 
 `evals/fixtures/flawed-pricing/index.html` is intentionally broken. Do not copy
 it as a template. It contains an infinite pulse with no reduced-motion variant,
@@ -155,6 +159,58 @@ Statuses:
 reported in their case but excluded from the totals. `delta` is `null` unless
 both variants have at least one graded case.
 
+## Rendering the outputs
+
+Assertions cannot see. `scripts/capture-frames.mjs` renders a local page and
+writes PNG frames plus `frames.json`, with no npm dependency: it drives a
+headless Chrome over the DevTools Protocol through Node's built-in `WebSocket`
+(Node 22+).
+
+```bash
+node scripts/capture-frames.mjs --out frames --url page.html
+node scripts/capture-frames.mjs --out frames --url demo.html \
+  --viewport 360x800,1440x900 --steps 0,0.25,0.5,0.75,1 --reduced-motion
+```
+
+Each capture records the scroll position, the scroll maximum, the `--kui-*`
+custom properties, the viewport meta, and every JS exception and console error,
+so a blank or frozen frame can be explained instead of guessed at.
+
+The browser comes from `--chrome`, then `CHROME_PATH`, then the usual install
+locations, including the Playwright cache. Under WSL a Linux Chromium may be
+missing system libraries; Chrome for Windows works through interop, but it binds
+the debugging port to Windows `127.0.0.1`, so the script must then run under the
+Windows `node.exe`.
+
+Two failure modes to recognize: a frame captured through Chrome's own
+`--screenshot` flag without CDP comes out blank once scrolled, and a page without
+`<meta name="viewport">` lays out at 980 px inside a phone-sized window (the
+manifest records the missing meta rather than hiding it).
+
+## Visual baseline (iteration 4)
+
+`scroll-depth-travel` was the first case captured and looked at. Frames are in
+`workspace/iteration-4/visual-baseline/`. Neither answer looked good, and the
+skill's own answer made the weaker first impression.
+
+| Frame | with_skill | without_skill |
+| --- | --- | --- |
+| 0%, 1440 px | A 576 px rounded card centred in a dark field: SVG art, headline, about 40% of the viewport empty | Full-bleed mountains, "Above the clouds", header CTA, stop dots, "Scroll to fly" |
+| 50% | City card, but a ghost "WEATHER" label from another stop shows through, and the footer rule enters the pinned view | Layers scaled up and washed out; no readable content left |
+| 100% | The beach stop is clipped by the stage ending, mid-illustration, then the form appears | Over-zoomed flat bands — sky, sea, sand — with a CTA |
+
+What the frames say, in the rubric's terms:
+
+- The flight is invisible in stills: the card keeps its size and stays centred,
+  so forward travel reads as three slides, not as movement through depth.
+- Stop pacing fails at both ends: a stop is clipped before it is legible, and a
+  stop that should be hidden is still painted as a ghost.
+- The reduced-motion stack is the strongest frame in the set — readable cards, no
+  motion — but its copy still says "Scroll to cross three destinations" with
+  nothing to scroll.
+- The baseline's opening frame is the only one that holds attention, which is why
+  the skill cannot claim a visual win yet.
+
 ## Blind review (quality)
 
 Assertions check protocol vocabulary; they cannot say whether a design is good.
@@ -169,7 +225,7 @@ node scripts/eval.mjs unblind --iteration 1 --scores <file>
 `blind` copies the two outputs of every case that has both variants into
 `review/`, assigns them to A and B by a random draw (`--seed N` makes it
 reproducible), and writes the key to `blind-key.json` outside `review/`. The
-reviewer opens only `review/`, scores nine dimensions from 0 to 4 (`null` when
+reviewer opens only `review/`, scores twelve dimensions from 0 to 4 (`null` when
 a dimension does not apply), and runs `unblind`. It rejects scores outside 0-4,
 unknown dimensions, a missing reviewer name, and any answer with no scored
 dimension. Results go to `review-<reviewer>.json` and to a `human_review` section
@@ -187,6 +243,52 @@ Blinding is imperfect. Answers made with the skill use its vocabulary and vendor
 its snippets, so a reviewer can often tell which is which. `rubric.md` says to
 score the page, not the vocabulary, and to note when you recognized an answer.
 
+## Blind results (iterations 8 and 9)
+
+| Case | Iteration | Reviewer | with_skill | without_skill | Key dimensions, with vs without |
+| --- | --- | --- | --- | --- | --- |
+| `piece-from-description` | 8 | sonnet-blind | 3.17 | 2.25 | impact 2 vs 3, 3d-fidelity 3 vs 2 |
+| `motion-by-feel` | 8 | sonnet-blind | 3.45 | 2.73 | impact 3 vs 2, motion-fidelity 3 vs 4 |
+| `piece-from-description` | 9 | sonnet-blind-2 | 3.42 | 2.33 | impact 4 vs 3, 3d-fidelity 3 vs 2 |
+| `motion-by-feel` | 9 | sonnet-blind-2 | 3.55 | 2.64 | impact 3 vs 2, motion-fidelity 3 vs 3 |
+| `piece-from-description` | 10 | sonnet-blind-3 | 3.25 | 1.92 | impact 3 vs 2, 3d-fidelity 3 vs 2, hierarchy 3 vs 2 |
+| `motion-by-feel` | 10 | sonnet-blind-3 | 3.18 | 2.36 | impact 2 vs 2, motion-fidelity 3 vs 3 |
+
+Iteration 8 exposed two skill defects: the correct dripper sat small in a
+bordered card beside a larger headline, and "settles slowly" was mapped to the
+calm preset and then to no entrances at all. Both were fixed before iteration 9,
+which re-ran only `with_skill`; the `without_skill` outputs were copied from
+iteration 8, because a skill change cannot affect them. The two reviewers
+scored those same baseline pages within 0.1 of each other. Both recognised the
+answers made with the skill from their vocabulary and say so in their notes. One
+reviewer per iteration and one run per cell make this a direction, not a
+measurement. At 360 px the iteration 9 piece overlapped its own headline; the portrait
+framing rule fixed it in iteration 10 (hierarchy 2 vs 3 became 3 vs 2).
+`motion-fidelity` on `motion-by-feel` stayed tied, and the reviewers disagreed
+on why: the iteration 9 reviewer found the 16% spring too bouncy for "nothing
+bounces", the iteration 10 reviewer found the 1.5% gentle spring too faint for
+"a little playful", and both named a 4-6% overshoot as the answer. Still
+frames cannot show timing, so the feel of that case went to a human judge.
+
+Human blind verdicts on `motion-by-feel`, judged live in Chrome: iteration 11
+(seed 113) and iteration 12 (seed 127) both preferred `without_skill`. After
+iteration 11 the judge named the baseline's scroll settling, slower cascade,
+more playful buttons and look; the skill's motion rules were changed for the
+first three, and iteration 12 still lost. One visible difference remains: at
+1440x900 the baseline fits the headline, switch and all three plans in one
+screen, while the skill's page pushes the plans below the fold. That is an
+observation, not a confirmed cause.
+
+Three people then judged the pages and named what lost: the button motion, the
+focus hierarchy, a billing switch that looked abrupt, and a red-tinted "-33%"
+chip that broke the colour hierarchy. Each traced to a skill rule ("instant"
+meant zero, the segmented snippet filled the checked segment with the primary,
+the release was squeezed into a 200 ms budget, active states took the primary
+fill, badges could take a second hue). After those rules were fixed, and the
+hue and first-screen rules moved into `direction.md` because a build does not
+always open the files that held them, iteration 15 (seed 151) won the human
+blind verdict: the user preferred `with_skill`.
+
 ## Interpreting the result
 
 - High with-skill, low baseline: evidence the skill changes behavior.
@@ -200,8 +302,24 @@ score the page, not the vocabulary, and to note when you recognized an answer.
 
 ## Limits
 
-- Four cases and 33 assertions are a smoke test, not a benchmark. Each cell is a
+- Eight cases and 71 assertions are a smoke test, not a benchmark. Each cell is a
   single run, so variance is unmeasured.
+- Post hoc, iteration 8: `metre-scale` in `piece-from-description` only accepted
+  literal metre values such as `0.058`, and missed an answer that builds in
+  metres through `const MM = 0.001`. It now also accepts a millimetre-to-metre
+  constant. The answer that works in millimetres still fails it.
+- Post hoc, iteration 12: `instant-toggle` in `motion-by-feel` required a
+  50-200 ms duration near the switch, so it failed an answer that makes the
+  switch truly instant with no transition at all. It now also accepts
+  `transition: none`, `0ms`, "same frame", "synchronous" or "no animation" near
+  the switch. A generic `transition: all 0.3s` toggle still fails it.
+- Post hoc, iteration 13: `replaces-side-slide` in `motion-by-feel` only
+  recognised "slide", `translateX` or "from the side", and failed an answer that
+  says "No sideways entrances" and "nothing here moves horizontally". It now also
+  accepts "sideways" and "horizontal(ly)" after a negation. An answer that keeps
+  the side slides still fails it. Three of the seven assertions in this case have
+  now needed a post hoc fix, so its protocol score is weak evidence; the human
+  blind verdict is the gate.
 - Assertions changed after seeing iteration 1 must be logged as post hoc. The
   `3d-fallback` pattern was widened from "3D/WebGL" to the effect ("tilt"),
   because a valid CSS-tilt answer was penalized; the baseline result for that
@@ -222,6 +340,18 @@ score the page, not the vocabulary, and to note when you recognized an answer.
   each while leaving the wording to the owner. The aggregate for iteration 2 is
   therefore 29/33 against 17/33, and that pair is not comparable to iteration 1:
   the assertions changed under both variants.
+- `scroll-depth-travel` first ran in a focused `iteration-4` (2026-11-18,
+  OpenCode subagent sessions, `claude-sonnet-5-5` medium, local hide/restore;
+  the baseline output holds no skill vocabulary) and scored 12/12 against 9/12.
+  Reading the outputs changed two assertions post hoc: `static-stack` missed the
+  baseline's "plain stacked sections" wording, and `perspective` tested one
+  implementation instead of behaviour, so it became `depth-cue` (perspective, or
+  scale that changes with distance). Regraded: 12/12 against 11/12; the
+  remaining gap is reading order. The run also exposed three skill defects,
+  fixed afterwards: the primary action waited for the whole scene (the baseline
+  put it in the header), the Flutter section paired a `ValueNotifier` with
+  `FadeTransition`, and a fixed `length` went stale on rotation. The with-skill
+  output predates those fixes.
 - Regex assertions are blunt. A bad answer that uses the right words can pass.
 - Free models give a floor, not a ceiling. A strong model may hide a weak skill.
 - Local hide/restore removes installed copies but not the repository source; a
