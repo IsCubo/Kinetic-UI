@@ -6,7 +6,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CAPTURE = path.join(ROOT, 'skills', 'kinetic-ui', 'assets', 'snippets', 'capture-frames.mjs');
@@ -217,6 +217,46 @@ test('a missing page stops Chrome and removes its profile after the pages before
     assert.ok(await waitUntil(() => chromeProcesses(result.pid) === 0, 5000),
       `${chromeProcesses(result.pid)} Chrome processes outlived the capture`);
     assert.equal(fs.existsSync(profileOf(result.pid)), false, 'the Chrome profile was left behind');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('withBrowser loads a page, evaluates in it, and leaves nothing behind', async (t) => {
+  const { withBrowser } = await import(pathToFileURL(CAPTURE).href);
+  assert.equal(typeof withBrowser, 'function', 'withBrowser is not exported');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kinetic-ui-capture-'));
+  const listeners = () => ['SIGINT', 'SIGTERM', 'SIGHUP', 'exit'].map((e) => process.listenerCount(e));
+  const before = listeners();
+  try {
+    const page = writePage(dir, 'probe.html', '<h1 id="h">Hello</h1><script>console.error("page-said")</script>');
+    let result;
+    try {
+      result = await withBrowser(async (browser) => {
+        await browser.load(pathToFileURL(page).href, { width: 1440, height: 900 });
+        const thrown = await browser.evaluate('(() => { throw new Error("probe-broke"); })()').then(() => 'resolved', (e) => e.message);
+        return {
+          title: await browser.evaluate('document.querySelector("#h").textContent'),
+          width: await browser.evaluate('innerWidth'),
+          later: await browser.evaluate('new Promise((r) => setTimeout(() => r(42), 20))'),
+          thrown,
+          errors: browser.errors.map((e) => e.text),
+        };
+      }, { timeout: 10000 });
+    } catch (error) {
+      if (NO_BROWSER.test(error.message)) return t.skip('no working browser');
+      throw error;
+    }
+    assert.equal(result.title, 'Hello');
+    assert.equal(result.width, 1440);
+    assert.equal(result.later, 42);
+    assert.match(result.thrown, /probe-broke/);
+    assert.deepEqual(result.errors, ['page-said']);
+    assert.deepEqual(listeners(), before, 'withBrowser left process listeners behind');
+    if (process.platform !== 'win32') {
+      assert.equal(chromeProcesses(process.pid), 0, 'Chrome outlived withBrowser');
+      assert.equal(fs.existsSync(profileOf(process.pid)), false, 'the Chrome profile was left behind');
+    }
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

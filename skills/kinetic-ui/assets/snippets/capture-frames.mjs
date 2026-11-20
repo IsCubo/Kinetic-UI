@@ -77,8 +77,8 @@ function parseViewport(text) {
   return { width: Number(m[1]), height: Number(m[2]) };
 }
 
-/** Find a browser binary: explicit flag, env var, then the usual install locations. */
-function resolveChrome(explicit) {
+/** Find a browser binary: explicit flag, env var, then the usual install locations; null if none. */
+function findChrome(explicit) {
   const candidates = [];
   if (explicit) candidates.push(explicit);
   if (process.env.CHROME_PATH) candidates.push(process.env.CHROME_PATH);
@@ -101,8 +101,14 @@ function resolveChrome(explicit) {
       }
     }
   }
-  const found = candidates.find((p) => p && fs.existsSync(p));
-  if (!found) fail('no browser found; pass --chrome <path> or set CHROME_PATH');
+  return candidates.find((p) => p && fs.existsSync(p)) ?? null;
+}
+
+const NO_BROWSER = 'no browser found; pass --chrome <path> or set CHROME_PATH';
+
+function resolveChrome(explicit) {
+  const found = findChrome(explicit);
+  if (!found) fail(NO_BROWSER);
   return found;
 }
 
@@ -307,101 +313,87 @@ async function openTab(cdp) {
   return { targetId, sessionId };
 }
 
-async function captureAll(opts, chrome) {
-  const outDir = path.resolve(opts.out);
-  fs.mkdirSync(outDir, { recursive: true });
+/**
+ * Run `fn` with one headless browser, then close it, with the same launch, per-call timeout
+ * and cleanup as a capture run. Resolves to what `fn` returns. The browser `fn` receives:
+ *   load(url, { width, height }, { reducedMotion, settle })  navigate; wait for fonts and images
+ *   evaluate(expression)  the value of an expression or promise; rejects if the page throws
+ *   screenshot()          a PNG Buffer of the viewport
+ *   replaceTab()          a fresh tab, after a page stopped answering and wedged this one
+ *   errors                what the page complained about; assign a new array to start over
+ */
+export async function withBrowser(fn, { chrome, timeout = 30000 } = {}) {
+  const binary = chrome ?? findChrome();
+  if (!binary) throw new Error(NO_BROWSER);
   const profileDir = path.join(os.tmpdir(), `kui-capture-${process.pid}`);
-  const manifest = { generatedAt: new Date().toISOString(), chrome, steps: opts.steps, captures: [] };
-  const { child, endpoint, guarded } = await launch(chrome, profileDir);
+  const { child, endpoint, guarded } = await launch(binary, profileDir);
   let cdp;
-  let failures = 0;
 
   try {
-    cdp = await connect(endpoint, opts.timeout);
-    let { targetId, sessionId } = await openTab(cdp);
+    cdp = await connect(endpoint, timeout);
+    let tab = await openTab(cdp);
+    const browser = {
+      errors: [],
+      async load(url, viewport, { reducedMotion = false, settle = 0 } = {}) {
+        await cdp.send('Emulation.setDeviceMetricsOverride', {
+          width: viewport.width,
+          height: viewport.height,
+          deviceScaleFactor: 1,
+          mobile: false,
+        }, tab.sessionId);
+        await cdp.send('Emulation.setEmulatedMedia', {
+          features: [{ name: 'prefers-reduced-motion', value: reducedMotion ? 'reduce' : 'no-preference' }],
+        }, tab.sessionId);
+        const loaded = cdp.waitFor('Page.loadEventFired', tab.sessionId);
+        await cdp.send('Page.navigate', { url }, tab.sessionId);
+        await loaded;
+        await cdp.send('Runtime.evaluate', {
+          expression: ready(Math.min(5000, Math.floor(timeout / 2))),
+          awaitPromise: true,
+        }, tab.sessionId);
+        await new Promise((r) => setTimeout(r, settle));
+      },
+      // strict: false keeps a capture going when the page throws inside a read.
+      async evaluate(expression, { strict = true } = {}) {
+        const response = await cdp.send('Runtime.evaluate', {
+          expression,
+          awaitPromise: true,
+          returnByValue: true,
+        }, tab.sessionId);
+        const thrown = response.exceptionDetails;
+        if (strict && thrown) throw new Error(`page threw: ${thrown.exception?.description ?? thrown.text}`);
+        return response.result?.value;
+      },
+      async screenshot() {
+        const shot = await cdp.send('Page.captureScreenshot', {
+          format: 'png',
+          fromSurface: true,
+          captureBeyondViewport: false,
+        }, tab.sessionId);
+        return Buffer.from(shot.data, 'base64');
+      },
+      async replaceTab() {
+        await cdp.send('Target.closeTarget', { targetId: tab.targetId }).catch(() => {});
+        tab = await openTab(cdp);
+      },
+    };
 
     // Everything the page complained about, newest last. Recorded, never fatal.
-    let errors = [];
     cdp.on('Runtime.exceptionThrown', (params) => {
       const detail = params.exceptionDetails;
-      errors.push({ type: 'exception', text: detail?.exception?.description ?? detail?.text ?? 'unknown' });
+      browser.errors.push({ type: 'exception', text: detail?.exception?.description ?? detail?.text ?? 'unknown' });
     });
     cdp.on('Runtime.consoleAPICalled', (params) => {
       if (params.type !== 'error' && params.type !== 'warning') return;
       const text = (params.args ?? []).map((a) => a.value ?? a.description ?? a.type).join(' ');
-      errors.push({ type: params.type, text });
+      browser.errors.push({ type: params.type, text });
     });
     cdp.on('Log.entryAdded', (params) => {
       if (params.entry?.level !== 'error') return;
-      errors.push({ type: 'log', text: params.entry.text });
+      browser.errors.push({ type: 'log', text: params.entry.text });
     });
 
-    for (const raw of opts.urls) {
-      const page = resolveUrl(raw);
-      const prefix = opts.name ? path.basename(opts.name, path.extname(opts.name)) : page.name;
-      for (const viewport of opts.viewports) {
-        const passes = opts.reducedMotion ? [false, true] : [false];
-        for (const reduced of passes) {
-          const label = `${viewport.width}x${viewport.height}`;
-          const entry = { url: page.url, viewport: label, reducedMotion: reduced, frames: [], errors: [] };
-          errors = entry.errors;
-          const started = Date.now();
-          try {
-            await cdp.send('Emulation.setDeviceMetricsOverride', {
-              width: viewport.width,
-              height: viewport.height,
-              deviceScaleFactor: 1,
-              mobile: false,
-            }, sessionId);
-            await cdp.send('Emulation.setEmulatedMedia', {
-              features: [{ name: 'prefers-reduced-motion', value: reduced ? 'reduce' : 'no-preference' }],
-            }, sessionId);
-            const loaded = cdp.waitFor('Page.loadEventFired', sessionId);
-            await cdp.send('Page.navigate', { url: page.url }, sessionId);
-            await loaded;
-            await cdp.send('Runtime.evaluate', {
-              expression: ready(Math.min(5000, Math.floor(opts.timeout / 2))),
-              awaitPromise: true,
-            }, sessionId);
-            await new Promise((r) => setTimeout(r, opts.settle));
-            // A missing viewport meta is the page's defect, not the capture's: record it so
-            // the reviewer knows the layout below is not what a phone would show.
-            const meta = await cdp.send('Runtime.evaluate', {
-              expression: 'document.querySelector("meta[name=viewport]")?.content ?? null',
-              returnByValue: true,
-            }, sessionId);
-            entry.viewportMeta = meta.result.value;
-
-            for (const step of opts.steps) {
-              await cdp.send('Runtime.evaluate', { expression: scrollTo(step), awaitPromise: true }, sessionId);
-              await new Promise((r) => setTimeout(r, opts.settle));
-              const { result } = await cdp.send('Runtime.evaluate', {
-                expression: READ_STATE,
-                returnByValue: true,
-              }, sessionId);
-              const shot = await cdp.send('Page.captureScreenshot', {
-                format: 'png',
-                fromSurface: true,
-                captureBeyondViewport: false,
-              }, sessionId);
-              const file = `${prefix}-${label}-${padPct(step)}${reduced ? '-rm' : ''}.png`;
-              fs.writeFileSync(path.join(outDir, file), Buffer.from(shot.data, 'base64'));
-              entry.frames.push({ file, step, ...result.value });
-            }
-            console.log(`${file_line(prefix, label, reduced)} ${entry.frames.length} frames, ${Date.now() - started} ms`);
-          } catch (cause) {
-            failures += 1;
-            entry.failure = cause.message;
-            console.error(`FAILED ${prefix} ${label}${reduced ? ' (reduced motion)' : ''}: ${cause.message}`);
-            // A page that stopped answering keeps its tab wedged, and the next capture would
-            // fail in it too: close that tab and give the next capture a fresh one.
-            await cdp.send('Target.closeTarget', { targetId }).catch(() => {});
-            ({ targetId, sessionId } = await openTab(cdp));
-          }
-          manifest.captures.push(entry);
-        }
-      }
-    }
+    return await fn(browser);
   } finally {
     cdp?.close();
     child.kill();
@@ -418,6 +410,57 @@ async function captureAll(opts, chrome) {
     guarded.dispose();
     removeProfile(profileDir);
   }
+}
+
+async function captureAll(opts, chrome) {
+  const outDir = path.resolve(opts.out);
+  fs.mkdirSync(outDir, { recursive: true });
+  const manifest = { generatedAt: new Date().toISOString(), chrome, steps: opts.steps, captures: [] };
+  let failures = 0;
+
+  await withBrowser(async (browser) => {
+    for (const raw of opts.urls) {
+      const page = resolveUrl(raw);
+      const prefix = opts.name ? path.basename(opts.name, path.extname(opts.name)) : page.name;
+      for (const viewport of opts.viewports) {
+        const passes = opts.reducedMotion ? [false, true] : [false];
+        for (const reduced of passes) {
+          const label = `${viewport.width}x${viewport.height}`;
+          const entry = { url: page.url, viewport: label, reducedMotion: reduced, frames: [], errors: [] };
+          browser.errors = entry.errors;
+          const started = Date.now();
+          try {
+            await browser.load(page.url, viewport, { reducedMotion: reduced, settle: opts.settle });
+            // A missing viewport meta is the page's defect, not the capture's: record it so
+            // the reviewer knows the layout below is not what a phone would show.
+            entry.viewportMeta = await browser.evaluate(
+              'document.querySelector("meta[name=viewport]")?.content ?? null',
+              { strict: false },
+            );
+
+            for (const step of opts.steps) {
+              await browser.evaluate(scrollTo(step), { strict: false });
+              await new Promise((r) => setTimeout(r, opts.settle));
+              const state = await browser.evaluate(READ_STATE, { strict: false });
+              const shot = await browser.screenshot();
+              const file = `${prefix}-${label}-${padPct(step)}${reduced ? '-rm' : ''}.png`;
+              fs.writeFileSync(path.join(outDir, file), shot);
+              entry.frames.push({ file, step, ...state });
+            }
+            console.log(`${file_line(prefix, label, reduced)} ${entry.frames.length} frames, ${Date.now() - started} ms`);
+          } catch (cause) {
+            failures += 1;
+            entry.failure = cause.message;
+            console.error(`FAILED ${prefix} ${label}${reduced ? ' (reduced motion)' : ''}: ${cause.message}`);
+            // A page that stopped answering keeps its tab wedged, and the next capture would
+            // fail in it too: give the next capture a fresh one.
+            await browser.replaceTab();
+          }
+          manifest.captures.push(entry);
+        }
+      }
+    }
+  }, { chrome, timeout: opts.timeout });
 
   fs.writeFileSync(path.join(outDir, 'frames.json'), `${JSON.stringify(manifest, null, 2)}\n`);
   console.log(`Wrote ${manifest.captures.reduce((n, c) => n + c.frames.length, 0)} frames to ${outDir}`);
