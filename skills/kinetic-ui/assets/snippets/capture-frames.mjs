@@ -22,6 +22,7 @@ const USAGE = `Usage: node scripts/capture-frames.mjs --out <dir> --url <page> [
   --viewport <WxH>     Repeatable; default 360x800 and 1440x900
   --steps <csv>        Scroll fractions 0..1; default 0,0.25,0.5,0.75,1
   --settle <ms>        Wait after each scroll before the shot; default 400
+  --timeout <ms>       Longest wait for one browser call before that capture fails; default 30000
   --reduced-motion     Also capture a prefers-reduced-motion: reduce pass
   --name <prefix>      File prefix; default the page file name without extension`;
 
@@ -30,7 +31,7 @@ const EXIT_FAILED = 1;
 
 /** Parse argv into the option bag this script understands. */
 function parseArgs(argv) {
-  const opts = { urls: [], viewports: [], steps: null, settle: 400, reducedMotion: false };
+  const opts = { urls: [], viewports: [], steps: null, settle: 400, timeout: 30000, reducedMotion: false };
   for (let i = 2; i < argv.length; i++) {
     const flag = argv[i];
     const value = () => {
@@ -45,6 +46,7 @@ function parseArgs(argv) {
     else if (flag === '--viewport') opts.viewports.push(...value().split(',').map(parseViewport));
     else if (flag === '--steps') opts.steps = value().split(',').map(Number);
     else if (flag === '--settle') opts.settle = Number(value());
+    else if (flag === '--timeout') opts.timeout = Number(value());
     else if (flag === '--reduced-motion') opts.reducedMotion = true;
     else if (flag === '--help' || flag === '-h') {
       console.log(USAGE);
@@ -59,6 +61,7 @@ function parseArgs(argv) {
     if (!Number.isFinite(step) || step < 0 || step > 1) fail(`--steps values must be 0..1, got ${step}`);
   }
   if (!Number.isFinite(opts.settle) || opts.settle < 0) fail('--settle must be a positive number of ms');
+  if (!Number.isFinite(opts.timeout) || opts.timeout <= 0) fail('--timeout must be a positive number of ms');
   return opts;
 }
 
@@ -110,8 +113,12 @@ function resolveUrl(raw) {
   return { url: pathToFileURL(abs).href, name: path.basename(abs, path.extname(abs)) };
 }
 
-/** Open a WebSocket and give back a request/response helper plus the events it saw. */
-async function connect(wsUrl) {
+/**
+ * Open a WebSocket and give back a request/response helper plus the events it saw.
+ * Each call rejects after timeoutMs, so a page that stops answering fails its capture
+ * instead of stalling every capture after it.
+ */
+async function connect(wsUrl, timeoutMs) {
   const ws = new WebSocket(wsUrl);
   await new Promise((resolve, reject) => {
     ws.addEventListener('open', resolve, { once: true });
@@ -123,7 +130,8 @@ async function connect(wsUrl) {
   ws.addEventListener('message', (event) => {
     const msg = JSON.parse(event.data);
     if (msg.id && pending.has(msg.id)) {
-      const { resolve, reject } = pending.get(msg.id);
+      const { resolve, reject, timer } = pending.get(msg.id);
+      clearTimeout(timer);
       pending.delete(msg.id);
       if (msg.error) reject(new Error(msg.error.message));
       else resolve(msg.result ?? {});
@@ -135,7 +143,11 @@ async function connect(wsUrl) {
     send(method, params = {}, sessionId) {
       return new Promise((resolve, reject) => {
         const id = ++nextId;
-        pending.set(id, { resolve, reject });
+        const timer = setTimeout(() => {
+          pending.delete(id);
+          reject(new Error(`${method} did not answer within ${timeoutMs} ms`));
+        }, timeoutMs);
+        pending.set(id, { resolve, reject, timer });
         ws.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }));
       });
     },
@@ -221,10 +233,16 @@ const scrollTo = (step) => `(async () => {
   return true;
 })()`;
 
-/** Wait for fonts and decoded images, so a frame is not captured mid-swap. */
-const READY = `(async () => {
-  await document.fonts.ready;
-  await Promise.allSettled([...document.images].map((img) => img.decode()));
+/**
+ * Wait for fonts and decoded images, so a frame is not captured mid-swap. A lazy image
+ * outside the load distance never starts loading, so its decode() never settles: skip
+ * those, and bound both waits so one stuck promise cannot stall the capture.
+ */
+const ready = (boundMs) => `(async () => {
+  const within = (p) => Promise.race([p, new Promise((r) => setTimeout(r, ${boundMs}))]);
+  await within(document.fonts.ready);
+  const started = [...document.images].filter((img) => img.complete || img.loading !== 'lazy');
+  await within(Promise.allSettled(started.map((img) => img.decode())));
   return true;
 })()`;
 
@@ -236,7 +254,7 @@ async function captureAll(opts, chrome) {
   const profileDir = path.join(os.tmpdir(), `kui-capture-${process.pid}`);
   const manifest = { generatedAt: new Date().toISOString(), chrome, steps: opts.steps, captures: [] };
   const { child, endpoint } = await launch(chrome, profileDir);
-  const cdp = await connect(endpoint);
+  const cdp = await connect(endpoint, opts.timeout);
   let failures = 0;
 
   try {
@@ -285,7 +303,10 @@ async function captureAll(opts, chrome) {
             const loaded = cdp.waitFor('Page.loadEventFired', sessionId);
             await cdp.send('Page.navigate', { url: page.url }, sessionId);
             await loaded;
-            await cdp.send('Runtime.evaluate', { expression: READY, awaitPromise: true }, sessionId);
+            await cdp.send('Runtime.evaluate', {
+              expression: ready(Math.min(5000, Math.floor(opts.timeout / 2))),
+              awaitPromise: true,
+            }, sessionId);
             await new Promise((r) => setTimeout(r, opts.settle));
             // A missing viewport meta is the page's defect, not the capture's: record it so
             // the reviewer knows the layout below is not what a phone would show.

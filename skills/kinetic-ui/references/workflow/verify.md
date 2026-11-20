@@ -69,7 +69,7 @@ Copy `assets/snippets/capture-frames.mjs` into the project (Node 22+, no depende
 node capture-frames.mjs --out frames/ --url page.html --reduced-motion
 ```
 
-It writes one PNG per viewport and scroll fraction plus a `frames.json` holding the scroll position, the `--kui-*` values and every page error. Capture the stops the brief names — the start, the hold and the end of a scene — at 360 and 1440 CSS px, and once more with reduced motion. Read the frames against the brief, not against your memory of the code.
+It writes one PNG per viewport and scroll fraction plus a `frames.json` holding the scroll position, the `--kui-*` values and every page error. Capture the stops the brief names — the start, the hold and the end of a scene — at 360 and 1440 CSS px, and once more with reduced motion. Read the frames against the brief, not against your memory of the code. A capture whose page stops answering fails with `did not answer within N ms` instead of hanging; later captures in the same run share its browser tab and can fail the same way. A frozen main thread is a page defect to fix, so raise `--timeout` (default 30000) only for a page that is slow but finishes.
 
 | What a frame shows | Means | Fix |
 | --- | --- | --- |

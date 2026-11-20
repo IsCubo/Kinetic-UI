@@ -174,7 +174,11 @@ node scripts/capture-frames.mjs --out frames --url demo.html \
 
 Each capture records the scroll position, the scroll maximum, the `--kui-*`
 custom properties, the viewport meta, and every JS exception and console error,
-so a blank or frozen frame can be explained instead of guessed at.
+so a blank or frozen frame can be explained instead of guessed at. A browser
+call that does not answer within `--timeout` ms (default 30000) fails that
+capture with a message instead of hanging; later captures in the same run share
+its browser tab, so a frozen page can fail them too. A lazy image that never
+starts loading below the fold is not waited for.
 
 The browser comes from `--chrome`, then `CHROME_PATH`, then the usual install
 locations, including the Playwright cache. Under WSL a Linux Chromium may be
