@@ -56,6 +56,8 @@ The Avoid list needs at least three entries: at least one from the generic-defau
 
 Fix the focal subject last: what owns the first frame, whether a scene, a product or a piece. It is full-bleed and at least half the viewport tall at 1440 px, with the copy set on it, never on a plate. No card, border or inset frame holds it, and the headline does not outweigh it. On portrait the subject takes the top of the frame and the copy the bottom; they never overlap. On a decision page (pricing, a plan picker, checkout) the decision is the subject: at 1440x900 the first screen holds a short headline, the period switch and every option with its action. A hero band with its own call to action above the options spends the first screen twice; drop it or fold it into the headline.
 
+Give each hue one job before choosing any. The primary fill marks the one primary action and nothing else: a selected segment, tab or toggle is a raised surface or an outline, never that fill, because a dark fill jumping between segments reads as abrupt and competes with the action. Badges and labels ("most chosen", a discount) take a tint of the primary or neutral ink, never a second saturated hue; red is for errors and destructive actions.
+
 ## Step 3 — Motion thesis
 
 A thesis is one sentence of choreography for the whole surface, built from four decisions. A generic fade-and-rise or scroll reveal is not a thesis unless the brief asks for it ("things settle slowly"), and then the thesis states its pace. Otherwise, if the focal moment could be pasted into a different product with only a color changed, it is decoration — tie it to this subject's data, content, or the defining action instead.
