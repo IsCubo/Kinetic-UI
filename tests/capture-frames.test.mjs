@@ -109,6 +109,47 @@ test('a page that stops answering fails its capture with a clear message instead
   });
 });
 
+test('a frozen page does not fail the captures that come after it', (t) => {
+  withTemp((dir) => {
+    const busy = writePage(dir, 'busy.html',
+      '<p>busy</p><script>addEventListener("load", () => setTimeout(() => { for (;;) {} }, 0));</script>');
+    const plain = writePage(dir, 'plain.html', `<h1>Plain</h1><img src="${svg('#353')}" alt="" width="320" height="180">`);
+    const out = path.join(dir, 'frames');
+    const r = capture(['--out', out, '--url', busy, '--url', plain, '--viewport', '360x800', '--steps', '0',
+      '--settle', '50', '--timeout', '3000'], 60000);
+    if (NO_BROWSER.test(r.out)) return t.skip('no working browser');
+
+    assert.equal(r.code, 1, `exit ${r.code} after ${r.ms} ms\n${r.out}`);
+    assert.match(r.stderr, /FAILED busy 360x800: .+ did not answer within 3000 ms/);
+    assert.doesNotMatch(r.stderr, /FAILED plain/);
+    assert.match(r.stdout, /plain\s+360x800\s+1 frames/);
+    assert.match(r.stdout, /Wrote 1 frames/);
+    assert.ok(fs.existsSync(path.join(out, 'plain-360x800-000.png')));
+    const [first, second] = readManifest(out).captures;
+    assert.match(first.failure, /did not answer within 3000 ms/);
+    assert.equal(second.failure, undefined);
+    assert.equal(second.frames.length, 1);
+  });
+});
+
+test('errors from a frozen page stay in its own capture entry', (t) => {
+  withTemp((dir) => {
+    const frozen = writePage(dir, 'frozen.html',
+      '<script>console.error("before-freeze"); addEventListener("load", () => setTimeout(() => { for (;;) {} }, 0));</script>');
+    const healthy = writePage(dir, 'healthy.html', '<h1>ok</h1>');
+    const out = path.join(dir, 'frames');
+    const r = capture(['--out', out, '--url', frozen, '--url', healthy, '--viewport', '360x800', '--steps', '0',
+      '--settle', '50', '--timeout', '3000'], 60000);
+    if (NO_BROWSER.test(r.out)) return t.skip('no working browser');
+
+    assert.equal(r.code, 1, `exit ${r.code} after ${r.ms} ms\n${r.out}`);
+    const [first, second] = readManifest(out).captures;
+    assert.ok(first.errors.some((e) => e.text === 'before-freeze'), JSON.stringify(first.errors));
+    assert.deepEqual(second.errors, []);
+    assert.equal(second.frames.length, 1);
+  });
+});
+
 test('--timeout rejects values that are not a positive number of ms', () => {
   for (const bad of ['0', '-5', 'soon']) {
     const r = capture(['--out', 'unused', '--url', 'unused.html', '--timeout', bad]);

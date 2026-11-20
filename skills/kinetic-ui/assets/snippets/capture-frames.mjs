@@ -248,6 +248,16 @@ const ready = (boundMs) => `(async () => {
 
 const padPct = (step) => String(Math.round(step * 100)).padStart(3, '0');
 
+/** Open a blank tab, attach to it, and enable the domains a capture reads. */
+async function openTab(cdp) {
+  const { targetId } = await cdp.send('Target.createTarget', { url: 'about:blank' });
+  const { sessionId } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
+  await cdp.send('Page.enable', {}, sessionId);
+  await cdp.send('Runtime.enable', {}, sessionId);
+  await cdp.send('Log.enable', {}, sessionId);
+  return { targetId, sessionId };
+}
+
 async function captureAll(opts, chrome) {
   const outDir = path.resolve(opts.out);
   fs.mkdirSync(outDir, { recursive: true });
@@ -258,11 +268,7 @@ async function captureAll(opts, chrome) {
   let failures = 0;
 
   try {
-    const { targetId } = await cdp.send('Target.createTarget', { url: 'about:blank' });
-    const { sessionId } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
-    await cdp.send('Page.enable', {}, sessionId);
-    await cdp.send('Runtime.enable', {}, sessionId);
-    await cdp.send('Log.enable', {}, sessionId);
+    let { targetId, sessionId } = await openTab(cdp);
 
     // Everything the page complained about, newest last. Recorded, never fatal.
     let errors = [];
@@ -337,6 +343,10 @@ async function captureAll(opts, chrome) {
             failures += 1;
             entry.failure = cause.message;
             console.error(`FAILED ${prefix} ${label}${reduced ? ' (reduced motion)' : ''}: ${cause.message}`);
+            // A page that stopped answering keeps its tab wedged, and the next capture would
+            // fail in it too: close that tab and give the next capture a fresh one.
+            await cdp.send('Target.closeTarget', { targetId }).catch(() => {});
+            ({ targetId, sessionId } = await openTab(cdp));
           }
           manifest.captures.push(entry);
         }
