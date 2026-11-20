@@ -9,6 +9,10 @@
 // Needs a Chrome or Chromium binary: pass --chrome, set CHROME_PATH, or let it search
 // the usual install locations. Exit codes: 0 frames written, 1 a capture failed, 2 usage.
 // Interrupting the run (Ctrl-C) stops Chrome and removes its temporary profile.
+//
+// As a module: `await withBrowser(async (browser) => { await browser.load(url, { width, height });
+// return browser.evaluate('document.title'); })` measures a page with the same launch,
+// per-call timeout and cleanup as a capture.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

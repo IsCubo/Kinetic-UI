@@ -117,9 +117,10 @@ baseline is not clean enough for a delta.
 
 ## Assertions
 
-Assertions live in `evals/evals.json` and run over every text file in
+Assertions live in `evals/evals.json`. Text checks run over every text file in
 `outputs/` (`.md`, `.txt`, `.html`, `.css`, `.js`, `.ts`, `.tsx`, `.jsx`,
-`.json`, `.svg`). Four check types:
+`.json`, `.svg`); render checks open the run's HTML page in headless Chrome and
+measure it. Five check types:
 
 | Type | Fields | Passes when |
 | --- | --- | --- |
@@ -127,6 +128,22 @@ Assertions live in `evals/evals.json` and run over every text file in
 | `contains` | `value` | The text contains the value, case-insensitive. |
 | `notContains` | `value` | The text does not contain the value. |
 | `fileExists` | `pattern` | At least one output filename matches the pattern. |
+| `render` | `probe`, `expect`, optional `viewport` (default `1440x900`), `page` (default `\.html?$`), `settle` (ms, default 600) | Every metric in `expect` is within its `min`/`max`. |
+
+Render probes live in `scripts/eval-probes.mjs` and report the measured values
+in the evidence:
+
+| Probe | Metrics | Measures |
+| --- | --- | --- |
+| `filledActions` | `filled` | The most filled actions in any one view: fills of 3:1 or more against what is behind them, the size of a control, lying on an interactive element (selected segments and `::before` indicators included). |
+| `saturatedHues` | `hues` | The most distinct hues in any one view: OKLCH chroma 0.05 or more, grouped within 40°, across backgrounds, text and thick borders. |
+| `optionsAboveFold` | `found`, `outside` | Priced option cards (the smallest blocks holding a price and an action) and how many end below the first screen. |
+| `switchLatency` | `pricesChangedMs`, `motionMs` | After a click on the other billing period: when the visible prices change, and when the animations the click started end. |
+| `horizontalEntrances` | `maxShiftPx` | The largest sideways move of any block while it scrolls into view. |
+
+A render check with no HTML output or no working browser fails, and its
+evidence says why; grading never treats a missing measurement as a pass. The
+browser comes from the capturer's `withBrowser`, with its timeouts and cleanup.
 
 Each assertion has a stable `id` and a human-readable `text`. Add cases and
 assertions to `evals.json`, not to the runner.
@@ -306,7 +323,7 @@ blind verdict: the user preferred `with_skill`.
 
 ## Limits
 
-- Eight cases and 71 assertions are a smoke test, not a benchmark. Each cell is a
+- Eight cases and 74 assertions are a smoke test, not a benchmark. Each cell is a
   single run, so variance is unmeasured.
 - Post hoc, iteration 8: `metre-scale` in `piece-from-description` only accepted
   literal metre values such as `0.058`, and missed an answer that builds in
@@ -324,6 +341,31 @@ blind verdict: the user preferred `with_skill`.
   the side slides still fails it. Three of the seven assertions in this case have
   now needed a post hoc fix, so its protocol score is weak evidence; the human
   blind verdict is the gate.
+- Post hoc, iteration 16 (render checks): in `motion-by-feel`,
+  `instant-toggle` and `replaces-side-slide` stopped reading words.
+  `instant-toggle` clicks the other billing period and passes when the shown
+  prices change within 50 ms and the motion the click starts ends within
+  250 ms. `replaces-side-slide` scrolls the page and passes when no block moves
+  sideways more than 24 px while it enters. Three render checks were added from
+  the three judges' feedback: `one-filled-action`, `one-accent-hue` and
+  `plans-above-fold`, so the case grows from 7 to 10 assertions.
+  - Before the change: 7/7 vs 6/7 in iterations 8 to 15, and 4/7 vs 6/7 in 16.
+  - After: `with_skill` scores 8, 8, 8, 9, 7, 9, 8, 10 and 8 out of 10 in
+    iterations 8 to 16. The baseline, the reused iteration-8 page, scores 8/10
+    everywhere and fails `one-filled-action` with two filled "Start free".
+  - Iteration 15, the page the user preferred blind, is the only 10/10.
+    Iteration 12, which three judges faulted for competing fills and a red
+    "Save 33%" chip, fails `one-filled-action`, `one-accent-hue` and
+    `plans-above-fold`.
+- The probe thresholds were set before measuring. Regrading pages whose
+  verdict was already known exposed probe defects, each now fixed and covered by
+  a fixture test:
+  - Fills and hues were counted only in the first screen; the rule is per view.
+  - A muted brand green (OKLCH chroma about 0.07) fell under a 0.08 floor and
+    did not count as a hue; the floor is now 0.05.
+  - The fill count could not see a `::before` indicator.
+  - The switch probe read the hidden prices of a CSS-only switch, and missed
+    "Yearly" when a badge followed it with no space.
 - Assertions changed after seeing iteration 1 must be logged as post hoc. The
   `3d-fallback` pattern was widened from "3D/WebGL" to the effect ("tilt"),
   because a valid CSS-tilt answer was penalized; the baseline result for that

@@ -596,10 +596,19 @@
         },
         {
           "id": "instant-toggle",
-          "text": "Keeps the billing switch at 200 ms or less",
+          "text": "The billing switch shows the new prices within 50 ms of the click, and the motion it starts ends within 250 ms",
           "check": {
-            "type": "regex",
-            "pattern": "\\b(toggle|switch|billing|monthly|yearly)\\b[\\s\\S]{0,240}?(\\b([5-9]\\d|1\\d\\d|200)\\s?ms\\b|\\b0?\\.(0[5-9]|1\\d?|2)\\s?s\\b)|\\b(toggle|switch|billing|monthly|yearly)\\b[\\s\\S]{0,240}?(transition:\\s*none|\\b0\\s?ms\\b|same frame|synchronous(ly)?|no animation)"
+            "type": "render",
+            "probe": "switchLatency",
+            "viewport": "1440x900",
+            "expect": {
+              "pricesChangedMs": {
+                "max": 50
+              },
+              "motionMs": {
+                "max": 250
+              }
+            }
           }
         },
         {
@@ -612,10 +621,16 @@
         },
         {
           "id": "replaces-side-slide",
-          "text": "Replaces the side slide-ins instead of keeping them",
+          "text": "Nothing enters from the side: no block moves sideways more than 24 px while it scrolls into view",
           "check": {
-            "type": "regex",
-            "pattern": "\\b(no|never|instead of|replac\\w*|drop\\w*|remov\\w*|avoid\\w*)\\b[^\\n]{0,80}\\b(slid\\w*|translateX|from the side|sideways|horizontal(ly)?)"
+            "type": "render",
+            "probe": "horizontalEntrances",
+            "viewport": "1440x900",
+            "expect": {
+              "maxShiftPx": {
+                "max": 24
+              }
+            }
           }
         },
         {
@@ -632,6 +647,51 @@
           "check": {
             "type": "regex",
             "pattern": "prefers-reduced-motion|reduced motion"
+          }
+        },
+        {
+          "id": "one-filled-action",
+          "text": "The first screen has at most one filled action, so the eye knows where to go",
+          "check": {
+            "type": "render",
+            "probe": "filledActions",
+            "viewport": "1440x900",
+            "expect": {
+              "filled": {
+                "max": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "one-accent-hue",
+          "text": "The first screen uses at most one saturated hue, so colour ranks one thing",
+          "check": {
+            "type": "render",
+            "probe": "saturatedHues",
+            "viewport": "1440x900",
+            "expect": {
+              "hues": {
+                "max": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "plans-above-fold",
+          "text": "Every plan and its action fit in the first 1440x900 screen",
+          "check": {
+            "type": "render",
+            "probe": "optionsAboveFold",
+            "viewport": "1440x900",
+            "expect": {
+              "found": {
+                "min": 2
+              },
+              "outside": {
+                "max": 0
+              }
+            }
           }
         },
         {
