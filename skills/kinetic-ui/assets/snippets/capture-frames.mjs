@@ -8,6 +8,7 @@
 //
 // Needs a Chrome or Chromium binary: pass --chrome, set CHROME_PATH, or let it search
 // the usual install locations. Exit codes: 0 frames written, 1 a capture failed, 2 usage.
+// Interrupting the run (Ctrl-C) stops Chrome and removes its temporary profile.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -170,6 +171,49 @@ async function connect(wsUrl, timeoutMs) {
   };
 }
 
+const SIGNALS = ['SIGINT', 'SIGTERM', 'SIGHUP'];
+
+/**
+ * Remove Chrome's profile. Its child processes can still write into it for a moment after
+ * the browser exits, and rmSync's own retries only retry the final rmdir, so one late write
+ * leaves the folder for good: repeat the whole removal, every 200 ms for up to 5 s.
+ */
+function removeProfile(profileDir) {
+  for (let attempt = 0; attempt < 25; attempt++) {
+    try {
+      fs.rmSync(profileDir, { recursive: true, force: true });
+      return;
+    } catch {
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200);
+    }
+  }
+  // Still held (Windows can lock it): leave it for the OS temp cleaner.
+}
+
+/**
+ * Stop Chrome and drop its profile if the run ends early. A signal or a process.exit()
+ * skips `finally`, so without this guard Chrome and its profile outlive the run.
+ */
+function guard(child, profileDir) {
+  const release = () => {
+    if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+    removeProfile(profileDir);
+  };
+  const onSignal = (signal) => {
+    release();
+    process.exit(128 + os.constants.signals[signal]);
+  };
+  process.on('exit', release);
+  for (const signal of SIGNALS) process.on(signal, onSignal);
+  return {
+    release,
+    dispose() {
+      process.off('exit', release);
+      for (const signal of SIGNALS) process.off(signal, onSignal);
+    },
+  };
+}
+
 /** Launch the browser and return it with the DevTools endpoint it printed. */
 async function launch(chrome, profileDir) {
   const args = [
@@ -186,6 +230,7 @@ async function launch(chrome, profileDir) {
   ];
   if (process.getuid?.() === 0) args.unshift('--no-sandbox');
   const child = spawn(chrome, args, { stdio: ['ignore', 'ignore', 'pipe'] });
+  const guarded = guard(child, profileDir);
   const endpoint = await new Promise((resolve, reject) => {
     let buffer = '';
     const timer = setTimeout(() => reject(new Error(`browser printed no DevTools endpoint\n${buffer}`)), 20000);
@@ -206,8 +251,12 @@ async function launch(chrome, profileDir) {
         'If the loader complains about shared libraries, install them or point --chrome at a working browser.',
       ));
     });
+  }).catch((cause) => {
+    guarded.release();
+    guarded.dispose();
+    throw cause;
   });
-  return { child, endpoint };
+  return { child, endpoint, guarded };
 }
 
 /** Read the page state a reviewer needs next to the pixels. */
@@ -263,11 +312,12 @@ async function captureAll(opts, chrome) {
   fs.mkdirSync(outDir, { recursive: true });
   const profileDir = path.join(os.tmpdir(), `kui-capture-${process.pid}`);
   const manifest = { generatedAt: new Date().toISOString(), chrome, steps: opts.steps, captures: [] };
-  const { child, endpoint } = await launch(chrome, profileDir);
-  const cdp = await connect(endpoint, opts.timeout);
+  const { child, endpoint, guarded } = await launch(chrome, profileDir);
+  let cdp;
   let failures = 0;
 
   try {
+    cdp = await connect(endpoint, opts.timeout);
     let { targetId, sessionId } = await openTab(cdp);
 
     // Everything the page complained about, newest last. Recorded, never fatal.
@@ -353,19 +403,20 @@ async function captureAll(opts, chrome) {
       }
     }
   } finally {
-    cdp.close();
+    cdp?.close();
     child.kill();
-    await new Promise((resolve) => {
-      child.once('exit', resolve);
-      setTimeout(resolve, 3000);
+    const exited = await new Promise((resolve) => {
+      if (child.exitCode !== null || child.signalCode !== null) return resolve(true);
+      const timer = setTimeout(() => resolve(false), 3000);
+      child.once('exit', () => {
+        clearTimeout(timer);
+        resolve(true);
+      });
     });
-    // Windows can still hold the profile right after the kill; failing to delete it is
-    // not a capture failure, and it only lives in the temp directory.
-    try {
-      fs.rmSync(profileDir, { recursive: true, force: true, maxRetries: 3 });
-    } catch {
-      /* leave the profile for the OS temp cleaner */
-    }
+    // A Chrome that ignores the polite stop for 3 s is stopped hard, so it never outlives the run.
+    if (!exited) child.kill('SIGKILL');
+    guarded.dispose();
+    removeProfile(profileDir);
   }
 
   fs.writeFileSync(path.join(outDir, 'frames.json'), `${JSON.stringify(manifest, null, 2)}\n`);

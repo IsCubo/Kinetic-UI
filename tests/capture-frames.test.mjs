@@ -2,7 +2,7 @@
 // Browser-backed tests skip when no working Chrome or Chromium is available.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -21,6 +21,7 @@ function capture(args, timeout = 60000) {
     stderr: result.stderr ?? '',
     out: `${result.stdout ?? ''}${result.stderr ?? ''}`,
     ms: Date.now() - started,
+    pid: result.pid,
   };
 }
 
@@ -106,6 +107,10 @@ test('a page that stops answering fails its capture with a clear message instead
     assert.match(r.stdout, /Wrote 0 frames/);
     const [entry] = readManifest(out).captures;
     assert.match(entry.failure, /did not answer within 3000 ms/);
+    if (process.platform !== 'win32') {
+      assert.equal(chromeProcesses(r.pid), 0, 'Chrome outlived the run');
+      assert.equal(fs.existsSync(profileOf(r.pid)), false, 'the Chrome profile was left behind');
+    }
   });
 });
 
@@ -148,6 +153,73 @@ test('errors from a frozen page stay in its own capture entry', (t) => {
     assert.deepEqual(second.errors, []);
     assert.equal(second.frames.length, 1);
   });
+});
+
+// The capture names its Chrome profile after its own pid; count the browser processes using it.
+function chromeProcesses(pid) {
+  const ps = spawnSync('ps', ['-eo', 'args'], { encoding: 'utf8' });
+  return ps.stdout.split('\n').filter((line) => line.includes(`user-data-dir=${path.join(os.tmpdir(), `kui-capture-${pid}`)}`)).length;
+}
+
+const profileOf = (pid) => path.join(os.tmpdir(), `kui-capture-${pid}`);
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function waitUntil(check, ms) {
+  const deadline = Date.now() + ms;
+  while (Date.now() < deadline) {
+    if (check()) return true;
+    await sleep(100);
+  }
+  return check();
+}
+
+test('an interrupted capture stops Chrome and removes its profile', { skip: process.platform === 'win32' && 'uses ps' }, async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kinetic-ui-capture-'));
+  try {
+    const busy = writePage(dir, 'busy.html',
+      '<p>busy</p><script>addEventListener("load", () => setTimeout(() => { for (;;) {} }, 0));</script>');
+    const child = spawn(process.execPath, [CAPTURE, '--out', path.join(dir, 'frames'), '--url', busy,
+      '--viewport', '360x800', '--steps', '0', '--settle', '50'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    let out = '';
+    child.stdout.on('data', (d) => { out += d; });
+    child.stderr.on('data', (d) => { out += d; });
+    const exited = new Promise((resolve) => child.once('exit', (code, signal) => resolve({ code, signal })));
+
+    const started = await waitUntil(() => chromeProcesses(child.pid) > 0 || child.exitCode !== null, 20000);
+    if (NO_BROWSER.test(out)) return t.skip('no working browser');
+    assert.ok(started && chromeProcesses(child.pid) > 0, `Chrome never started\n${out}`);
+    await sleep(1000);
+
+    child.kill('SIGTERM');
+    const { code } = await exited;
+    assert.equal(code, 143, `exit ${code}\n${out}`);
+    assert.ok(await waitUntil(() => chromeProcesses(child.pid) === 0, 5000),
+      `${chromeProcesses(child.pid)} Chrome processes outlived the capture`);
+    assert.equal(fs.existsSync(profileOf(child.pid)), false, 'the Chrome profile was left behind');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('a missing page stops Chrome and removes its profile after the pages before it', { skip: process.platform === 'win32' && 'uses ps' }, async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kinetic-ui-capture-'));
+  try {
+    const ok = writePage(dir, 'ok.html', '<h1>ok</h1>');
+    const result = spawnSync(process.execPath, [CAPTURE, '--out', path.join(dir, 'frames'), '--url', ok,
+      '--url', path.join(dir, 'missing.html'), '--viewport', '360x800', '--steps', '0', '--settle', '50'],
+    { encoding: 'utf8', timeout: 60000 });
+    const out = `${result.stdout}${result.stderr}`;
+    if (NO_BROWSER.test(out)) return t.skip('no working browser');
+
+    assert.equal(result.status, 2, out);
+    assert.match(result.stderr, /page not found: .*missing\.html/);
+    assert.match(result.stdout, /ok\s+360x800\s+1 frames/);
+    assert.ok(await waitUntil(() => chromeProcesses(result.pid) === 0, 5000),
+      `${chromeProcesses(result.pid)} Chrome processes outlived the capture`);
+    assert.equal(fs.existsSync(profileOf(result.pid)), false, 'the Chrome profile was left behind');
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('--timeout rejects values that are not a positive number of ms', () => {
