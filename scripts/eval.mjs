@@ -10,7 +10,10 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+import { PROBES } from './eval-probes.mjs';
+import { withBrowser } from '../skills/kinetic-ui/assets/snippets/capture-frames.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '..');
@@ -49,6 +52,8 @@ Commands:
   list    Print the eval cases and their assertion counts.
   grade   Grade every outputs/ directory and write grading.json per run plus
           benchmark.json for the iteration. Missing runs are reported, not invented.
+          Render checks open the run's HTML page in headless Chrome; without a
+          browser they fail and the evidence says why.
 
   blind   Copy each case's two outputs to review/<case>/A and B in random order
           and keep the key in blind-key.json, outside review/. See evals/rubric.md.
@@ -106,7 +111,11 @@ function parseArgs(argv) {
 }
 
 export function readEvals() {
-  const data = JSON.parse(fs.readFileSync(EVALS_FILE, 'utf8'));
+  return validateEvals(JSON.parse(fs.readFileSync(EVALS_FILE, 'utf8')));
+}
+
+/** Check an eval pack's shape and every assertion's check, so a typo fails before any grading. */
+export function validateEvals(data) {
   if (!data || !Array.isArray(data.cases) || data.cases.length === 0) {
     throw new Error(`no cases in ${EVALS_FILE}`);
   }
@@ -133,9 +142,40 @@ export function readEvals() {
           throw new Error(`invalid regex in ${testCase.id}/${assertion.id}: ${error.message}`);
         }
       }
+      if (assertion.check.type === 'render') validateRender(assertion.check, `${testCase.id}/${assertion.id}`);
     }
   }
   return data;
+}
+
+function validateRender(check, where) {
+  const probe = PROBES[check.probe];
+  if (!probe) throw new Error(`unknown probe "${check.probe}" in ${where}; known: ${Object.keys(PROBES).join(', ')}`);
+  if (check.viewport !== undefined && !/^\d+x\d+$/.test(check.viewport)) {
+    throw new Error(`render viewport must look like 1440x900 in ${where}, got ${check.viewport}`);
+  }
+  if (check.settle !== undefined && !(Number.isFinite(check.settle) && check.settle >= 0)) {
+    throw new Error(`render settle must be a number of ms in ${where}`);
+  }
+  if (check.page !== undefined) {
+    try {
+      new RegExp(check.page, 'i');
+    } catch (error) {
+      throw new Error(`invalid page pattern in ${where}: ${error.message}`);
+    }
+  }
+  const expect = check.expect;
+  if (!expect || typeof expect !== 'object' || Object.keys(expect).length === 0) {
+    throw new Error(`render check needs expect in ${where}`);
+  }
+  for (const [metric, bound] of Object.entries(expect)) {
+    if (!probe.metrics.includes(metric)) {
+      throw new Error(`${check.probe} has no metric "${metric}" in ${where}; it measures ${probe.metrics.join(', ')}`);
+    }
+    if (!bound || (typeof bound.min !== 'number' && typeof bound.max !== 'number')) {
+      throw new Error(`expect.${metric} needs a numeric min or max in ${where}`);
+    }
+  }
 }
 
 function iterationDir(opts) {
@@ -195,6 +235,8 @@ function matchCheck(check, text, files) {
         evidence: matched.length > 0 ? `matched file(s): ${matched.join(', ')}` : `no output file matches ${re}`,
       };
     }
+    case 'render':
+      return { passed: false, evidence: 'render checks need a browser session; grade with gradeOutputs' };
     default:
       throw new Error(`unknown check type: ${check.type}`);
   }
@@ -210,6 +252,54 @@ export function gradeText(testCase, text, files) {
       evidence: result.evidence,
     };
   });
+}
+
+/**
+ * Grade one outputs/ directory: text checks against its collected text, render checks
+ * against its HTML page in session.browser (a withBrowser session). Without a browser,
+ * session.unavailable says why, and every render check fails with that reason.
+ */
+export async function gradeOutputs(testCase, outputsDir, session = {}) {
+  const { text, files } = collectText(outputsDir);
+  const results = [];
+  for (const assertion of testCase.assertions) {
+    const result = assertion.check.type === 'render'
+      ? await renderCheck(assertion.check, path.resolve(outputsDir), files, session)
+      : matchCheck(assertion.check, text, files);
+    results.push({ id: assertion.id, text: assertion.text, passed: result.passed, evidence: result.evidence });
+  }
+  return results;
+}
+
+const showMetric = (value) => (Number.isFinite(value) ? String(value) : 'n/a');
+
+async function renderCheck(check, dir, files, session) {
+  const re = new RegExp(check.page ?? '\\.html?$', 'i');
+  const page = files.find((file) => re.test(file));
+  if (!page) return { passed: false, evidence: `no HTML output matches ${re}` };
+  if (!session.browser) return { passed: false, evidence: `render unavailable: ${session.unavailable ?? 'no browser session'}` };
+  const viewport = check.viewport ?? '1440x900';
+  const [width, height] = viewport.split('x').map(Number);
+  try {
+    await session.browser.load(pathToFileURL(path.join(dir, page)).href, { width, height }, { settle: check.settle ?? 600 });
+    const { metrics, detail } = await PROBES[check.probe].run(session.browser);
+    const parts = Object.entries(check.expect).map(([name, bound]) => {
+      const value = metrics?.[name];
+      const ok = Number.isFinite(value) &&
+        (bound.min === undefined || value >= bound.min) && (bound.max === undefined || value <= bound.max);
+      const limits = [bound.min !== undefined && `min ${bound.min}`, bound.max !== undefined && `max ${bound.max}`]
+        .filter(Boolean).join(', ');
+      return { ok, text: `${name}=${showMetric(value)} (${limits})` };
+    });
+    return {
+      passed: parts.every((part) => part.ok),
+      evidence: `${page} at ${viewport}: ${parts.map((part) => part.text).join('; ')}${detail ? ` — ${detail}` : ''}`,
+    };
+  } catch (error) {
+    // A page that stopped answering wedges its tab; the next check gets a fresh one.
+    await session.browser.replaceTab().catch(() => {});
+    return { passed: false, evidence: `render failed on ${page}: ${error.message}` };
+  }
 }
 
 export function summarize(results) {
@@ -317,7 +407,7 @@ function cmdList() {
   }
 }
 
-function cmdGrade(opts) {
+async function cmdGrade(opts) {
   const data = readEvals();
   const iter = iterationDir(opts);
   if (!fs.existsSync(iter)) fail(`no iteration at ${iter}\nRun init first.`);
@@ -335,6 +425,7 @@ function cmdGrade(opts) {
   };
   const rows = [];
 
+  const gradeAll = async (session) => {
   for (const testCase of data.cases) {
     const row = { id: testCase.id };
     benchmark.cases[testCase.id] = {};
@@ -345,11 +436,11 @@ function cmdGrade(opts) {
       if (!fs.existsSync(outputs)) {
         record = { status: 'missing', passed: 0, total: testCase.assertions.length, pass_rate: 0, results: [] };
       } else {
-        const { text, files } = collectText(outputs);
+        const { files } = collectText(outputs);
         if (files.length === 0) {
           record = { status: 'empty', passed: 0, total: testCase.assertions.length, pass_rate: 0, results: [] };
         } else {
-          const results = gradeText(testCase, text, files);
+          const results = await gradeOutputs(testCase, outputs, session);
           record = { status: 'graded', ...summarize(results), results };
           totals[variant].passed += record.passed;
           totals[variant].total += record.total;
@@ -365,6 +456,28 @@ function cmdGrade(opts) {
       row[variant] = record.status === 'graded' ? `${record.passed}/${record.total}` : record.status;
     }
     rows.push(row);
+  }
+  };
+
+  const needsBrowser = data.cases.some((testCase) =>
+    testCase.assertions.some((assertion) => assertion.check.type === 'render') &&
+    VARIANTS.some((variant) => hasOutputs(iter, testCase.id, variant)));
+  let renderNote = '';
+  if (!needsBrowser) {
+    await gradeAll({ unavailable: 'no render checks to run' });
+  } else {
+    let entered = false;
+    try {
+      await withBrowser(async (browser) => {
+        entered = true;
+        await gradeAll({ browser });
+      });
+    } catch (error) {
+      // Only a browser that never started is a grading condition; anything else is a bug.
+      if (entered) throw error;
+      renderNote = `Render checks failed: ${error.message}`;
+      await gradeAll({ unavailable: error.message });
+    }
   }
 
   const withSkill = totals.with_skill;
@@ -405,6 +518,7 @@ function cmdGrade(opts) {
     console.log(`delta:         ${delta >= 0 ? '+' : ''}${delta} percentage points`);
   }
   console.log('');
+  if (renderNote) console.log(renderNote);
   console.log(`Wrote ${path.join(iter, 'benchmark.json')}`);
 }
 
@@ -634,9 +748,7 @@ function main() {
 const isMain =
   process.argv[1] !== undefined && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
-  try {
-    main();
-  } catch (error) {
-    fail(`error: ${error.message}`);
-  }
+  Promise.resolve()
+    .then(main)
+    .catch((error) => fail(`error: ${error.message}`));
 }
