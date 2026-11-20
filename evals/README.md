@@ -277,8 +277,17 @@ more playful buttons and look; the skill's motion rules were changed for the
 first three, and iteration 12 still lost. One visible difference remains: at
 1440x900 the baseline fits the headline, switch and all three plans in one
 screen, while the skill's page pushes the plans below the fold. That is an
-observation, not a confirmed cause. On this case the skill does not beat the
-baseline for a human judge.
+observation, not a confirmed cause.
+
+Three people then judged the pages and named what lost: the button motion, the
+focus hierarchy, a billing switch that looked abrupt, and a red-tinted "-33%"
+chip that broke the colour hierarchy. Each traced to a skill rule ("instant"
+meant zero, the segmented snippet filled the checked segment with the primary,
+the release was squeezed into a 200 ms budget, active states took the primary
+fill, badges could take a second hue). After those rules were fixed, and the
+hue and first-screen rules moved into `direction.md` because a build does not
+always open the files that held them, iteration 15 (seed 151) won the human
+blind verdict: the user preferred `with_skill`.
 
 ## Interpreting the result
 
