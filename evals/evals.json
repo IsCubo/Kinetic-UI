@@ -615,7 +615,7 @@
           "text": "Replaces the side slide-ins instead of keeping them",
           "check": {
             "type": "regex",
-            "pattern": "\\b(no|never|instead of|replac\\w*|drop\\w*|remov\\w*|avoid\\w*)\\b[^\\n]{0,80}\\b(slid\\w*|translateX|from the side)"
+            "pattern": "\\b(no|never|instead of|replac\\w*|drop\\w*|remov\\w*|avoid\\w*)\\b[^\\n]{0,80}\\b(slid\\w*|translateX|from the side|sideways|horizontal(ly)?)"
           }
         },
         {

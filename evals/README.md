@@ -304,6 +304,13 @@ baseline for a human judge.
   switch truly instant with no transition at all. It now also accepts
   `transition: none`, `0ms`, "same frame", "synchronous" or "no animation" near
   the switch. A generic `transition: all 0.3s` toggle still fails it.
+- Post hoc, iteration 13: `replaces-side-slide` in `motion-by-feel` only
+  recognised "slide", `translateX` or "from the side", and failed an answer that
+  says "No sideways entrances" and "nothing here moves horizontally". It now also
+  accepts "sideways" and "horizontal(ly)" after a negation. An answer that keeps
+  the side slides still fails it. Three of the seven assertions in this case have
+  now needed a post hoc fix, so its protocol score is weak evidence; the human
+  blind verdict is the gate.
 - Assertions changed after seeing iteration 1 must be logged as post hoc. The
   `3d-fallback` pattern was widened from "3D/WebGL" to the effect ("tilt"),
   because a valid CSS-tilt answer was penalized; the baseline result for that
