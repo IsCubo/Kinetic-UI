@@ -268,7 +268,17 @@ framing rule fixed it in iteration 10 (hierarchy 2 vs 3 became 3 vs 2).
 on why: the iteration 9 reviewer found the 16% spring too bouncy for "nothing
 bounces", the iteration 10 reviewer found the 1.5% gentle spring too faint for
 "a little playful", and both named a 4-6% overshoot as the answer. Still
-frames cannot show timing, so the feel of that case goes to a human judge.
+frames cannot show timing, so the feel of that case went to a human judge.
+
+Human blind verdicts on `motion-by-feel`, judged live in Chrome: iteration 11
+(seed 113) and iteration 12 (seed 127) both preferred `without_skill`. After
+iteration 11 the judge named the baseline's scroll settling, slower cascade,
+more playful buttons and look; the skill's motion rules were changed for the
+first three, and iteration 12 still lost. One visible difference remains: at
+1440x900 the baseline fits the headline, switch and all three plans in one
+screen, while the skill's page pushes the plans below the fold. That is an
+observation, not a confirmed cause. On this case the skill does not beat the
+baseline for a human judge.
 
 ## Interpreting the result
 
