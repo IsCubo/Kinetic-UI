@@ -599,7 +599,7 @@
           "text": "Keeps the billing switch at 200 ms or less",
           "check": {
             "type": "regex",
-            "pattern": "\\b(toggle|switch|billing|monthly|yearly)\\b[\\s\\S]{0,240}?(\\b([5-9]\\d|1\\d\\d|200)\\s?ms\\b|\\b0?\\.(0[5-9]|1\\d?|2)\\s?s\\b)"
+            "pattern": "\\b(toggle|switch|billing|monthly|yearly)\\b[\\s\\S]{0,240}?(\\b([5-9]\\d|1\\d\\d|200)\\s?ms\\b|\\b0?\\.(0[5-9]|1\\d?|2)\\s?s\\b)|\\b(toggle|switch|billing|monthly|yearly)\\b[\\s\\S]{0,240}?(transition:\\s*none|\\b0\\s?ms\\b|same frame|synchronous(ly)?|no animation)"
           }
         },
         {

@@ -289,6 +289,11 @@ frames cannot show timing, so the feel of that case goes to a human judge.
   literal metre values such as `0.058`, and missed an answer that builds in
   metres through `const MM = 0.001`. It now also accepts a millimetre-to-metre
   constant. The answer that works in millimetres still fails it.
+- Post hoc, iteration 12: `instant-toggle` in `motion-by-feel` required a
+  50-200 ms duration near the switch, so it failed an answer that makes the
+  switch truly instant with no transition at all. It now also accepts
+  `transition: none`, `0ms`, "same frame", "synchronous" or "no animation" near
+  the switch. A generic `transition: all 0.3s` toggle still fails it.
 - Assertions changed after seeing iteration 1 must be logged as post hoc. The
   `3d-fallback` pattern was widened from "3D/WebGL" to the effect ("tilt"),
   because a valid CSS-tilt answer was penalized; the baseline result for that
