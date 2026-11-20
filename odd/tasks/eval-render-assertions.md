@@ -19,7 +19,7 @@ Objective: let the eval runner measure the rendered page instead of searching th
 
 - T1 — the capturer exposes a reusable browser session (`withBrowser`) and `captureAll` runs on it (S1). Route: inline. Status: done (`34f41c9`); RED: withBrowser not exported; GREEN 9/9; differential identical in normal, reduced-motion and frozen runs.
 - T2 — `render` check type, the probe library and fixture tests, one passing and one failing page per probe (S1–S5). Route: inline. Status: done (`191d315`); RED: gradeOutputs not exported; GREEN 15/15, twice; suite 73/73; with the text-only pack, grading of iterations 15 and 16 is identical to main (34/34 JSON files, stdout, exit codes).
-- T3 — migrate `motion-by-feel`, add the S2–S4 checks, regrade, write the post hoc log and the docs (S5–S7). Route: inline. Status: done (commit below); probe corrections found by the regrade in `d92b134` (T2 reopened and closed with them); suite 79/79.
+- T3 — migrate `motion-by-feel`, add the S2–S4 checks, regrade, write the post hoc log and the docs (S5–S7). Route: inline. Status: done (`8c3b700`); probe corrections found by the regrade in `d92b134` (T2 reopened and closed with them); suite 79/79.
 - T4 — independent verification, then merge to `main`. Route: delegated verifier. Status: pending.
 
 Route evidence: T1 to T3 depend on each other (T2 needs T1's API, and T3 needs T2's probes), so no writer trigger applies.
